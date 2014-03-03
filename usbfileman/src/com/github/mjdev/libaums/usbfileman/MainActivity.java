@@ -202,7 +202,10 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				param.from = entry;
 				File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/usbfileman/cache");
 				f.mkdirs();
-				param.to = File.createTempFile(entry.getName().split("\\.")[0], "." + entry.getName().split("\\.")[1], f);
+				int index = entry.getName().lastIndexOf(".");
+				String prefix = entry.getName().substring(0, index);
+				String ext = entry.getName().substring(index);
+				param.to = File.createTempFile(prefix, ext, f);
 				new CopyTask().execute(param);
 			}
 		} catch (IOException e) {

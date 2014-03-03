@@ -22,7 +22,16 @@ public class MyListAdapter extends ArrayAdapter<UsbFile> {
 
 		@Override
 		public int compare(UsbFile lhs, UsbFile rhs) {
-			return lhs.getName().compareTo(rhs.getName());
+			
+			if(lhs.isDirectory() && !rhs.isDirectory()) {
+				return -1;
+			} 
+			
+			if(rhs.isDirectory() && !lhs.isDirectory()) {
+				return 1;
+			}
+			
+			return lhs.getName().compareToIgnoreCase(rhs.getName());
 		}
 	};
 	
