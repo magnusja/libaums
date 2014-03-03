@@ -153,7 +153,11 @@ public class FatDirectoryEntry {
 	}
 	
 	public long getFileSize() {
-		return data.getInt(FILE_SIZE_OFF);
+		final long size1 = data.get(FILE_SIZE_OFF) & 0xFF;
+		final long size2 = data.get(FILE_SIZE_OFF + 1) & 0xFF;
+		final long size3 = data.get(FILE_SIZE_OFF + 2) & 0xFF;
+		final long size4 = data.get(FILE_SIZE_OFF + 3) & 0xFF;
+		return (size4 << 24) | (size3 << 16) | (size2 << 8) | size1;
 	}
 	
 }

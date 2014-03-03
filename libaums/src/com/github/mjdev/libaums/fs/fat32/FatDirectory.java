@@ -43,7 +43,6 @@ public class FatDirectory implements UsbFile {
 	public static FatDirectory create(FatLfnDirectoryEntry entry, BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector) throws IOException {
 		FatDirectory result = new FatDirectory(blockDevice, fat, bootSector);
 		result.entry = entry;
-		result.chain = new ClusterChain(entry.getStartCluster(), blockDevice, fat, bootSector);
 		return result;
 	}
 

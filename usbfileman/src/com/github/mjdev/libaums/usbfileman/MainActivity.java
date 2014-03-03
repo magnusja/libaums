@@ -12,6 +12,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -28,6 +29,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.github.mjdev.libaums.UsbMassStorageDevice;
 import com.github.mjdev.libaums.fs.FileSystem;
@@ -89,11 +91,11 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			long length = params[0].from.getLength();
 			try {
 				FileOutputStream out = new FileOutputStream(params[0].to);
-				for(int i = 0; i < length; i += buffer.limit()) {
+				for(long i = 0; i < length; i += buffer.limit()) {
 					buffer.limit((int) Math.min(buffer.capacity(), length - i));
 					params[0].from.read(i, buffer);
 					out.write(buffer.array(), 0, buffer.limit());
-					publishProgress(i);
+					publishProgress((int)i);
 					buffer.clear();
 				}
 				out.close();
@@ -114,7 +116,11 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
 			String mimetype = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
 			myIntent.setDataAndType(Uri.fromFile(file), mimetype);
-			startActivity(myIntent);
+			try {
+				startActivity(myIntent);
+			} catch(ActivityNotFoundException e) {
+				Toast.makeText(MainActivity.this, "Could no find an app for that file!", Toast.LENGTH_LONG).show();
+			}
 		}
 
 		@Override
@@ -155,7 +161,6 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
 		registerReceiver(usbReceiver, filter);
 		usbManager.requestPermission(device.getUsbDevice(), permissionIntent);
-
 	}
 	
 	private void setupDevice() {
