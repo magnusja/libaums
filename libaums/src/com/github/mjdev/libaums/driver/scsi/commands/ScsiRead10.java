@@ -46,7 +46,7 @@ public class ScsiRead10 extends CommandBlockWrapper {
 	public String toString() {
 		return "ScsiRead10 [blockAddress=" + blockAddress + ", transferBytes="
 				+ transferBytes + ", blockSize=" + blockSize
-				+ ", transerBlocks=" + transferBlocks
+				+ ", transferBlocks=" + transferBlocks
 				+ ", getdCbwDataTransferLength()="
 				+ getdCbwDataTransferLength() + "]";
 	}

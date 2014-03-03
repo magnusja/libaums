@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import android.util.Log;
 
-import com.github.mjdev.libaums.UsbMassStorageDevice;
+import com.github.mjdev.libaums.UsbCommunication;
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper;
 import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper.Direction;
@@ -22,14 +22,14 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 
 	private static final String TAG = ScsiBlockDevice.class.getSimpleName();
 	
-	private UsbMassStorageDevice massStorageDevice;
+	private UsbCommunication usbCommunication;
 	private ByteBuffer outBuffer;
 	
 	private int blockSize;
 	private int lastBlockAddress;
 	
-	public ScsiBlockDevice(UsbMassStorageDevice massStorageDevice) {
-		this.massStorageDevice = massStorageDevice;
+	public ScsiBlockDevice(UsbCommunication usbCommunication) {
+		this.usbCommunication = usbCommunication;
 		outBuffer = ByteBuffer.allocate(31);
 	}
 	
@@ -64,7 +64,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		Arrays.fill(outArray, (byte) 0);
 		
 		command.serialize(outBuffer);
-		int written = massStorageDevice.bulkOutTransfer(outArray, outArray.length);
+		int written = usbCommunication.bulkOutTransfer(outArray, outArray.length);
 		if(written != outArray.length) {
 			Log.e(TAG, "Writing all bytes on command " + command + " failed!");
 		}
@@ -78,7 +78,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 
 			if(command.getDirection() == Direction.IN) {
 				do {
-					int tmp = massStorageDevice.bulkInTransfer(inArray, read + inBuffer.position(), inBuffer.limit() - inBuffer.position() - read);
+					int tmp = usbCommunication.bulkInTransfer(inArray, read + inBuffer.position(), inBuffer.limit() - inBuffer.position() - read);
 					if(tmp == -1) {
 						Log.e(TAG, "reading failed!");
 						break;
@@ -92,7 +92,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 			} else {
 				written = 0;
 				do {
-					int tmp = massStorageDevice.bulkOutTransfer(inArray, written + inBuffer.position(), inBuffer.limit() - inBuffer.position() - written);
+					int tmp = usbCommunication.bulkOutTransfer(inArray, written + inBuffer.position(), inBuffer.limit() - inBuffer.position() - written);
 					if(tmp == -1) {
 						Log.e(TAG, "writing failed!");
 						break;
@@ -109,7 +109,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		
 		// expecting csw now
 		byte[] cswBuffer = new byte[CommandStatusWrapper.SIZE];
-		read = massStorageDevice.bulkInTransfer(cswBuffer, cswBuffer.length);
+		read = usbCommunication.bulkInTransfer(cswBuffer, cswBuffer.length);
 		if(read != CommandStatusWrapper.SIZE) {
 			Log.e(TAG, "Unexpected command size while expecting csw");
 		}

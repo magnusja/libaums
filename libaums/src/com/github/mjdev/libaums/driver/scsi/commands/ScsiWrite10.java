@@ -44,6 +44,7 @@ public class ScsiWrite10 extends CommandBlockWrapper {
 	public String toString() {
 		return "ScsiWrite10 [blockAddress=" + blockAddress + ", transferBytes="
 				+ transferBytes + ", blockSize=" + blockSize
+				+ ", transferBlocks=" + transferBlocks
 				+ ", getdCbwDataTransferLength()="
 				+ getdCbwDataTransferLength() + "]";
 	}

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
@@ -12,6 +13,7 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
+import android.os.Build;
 import android.util.Log;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
@@ -22,14 +24,78 @@ import com.github.mjdev.libaums.partition.PartitionTableEntry;
 import com.github.mjdev.libaums.partition.PartitionTableFactory;
 
 public class UsbMassStorageDevice {
+	
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+	private class JellyBeanMr2Communication implements UsbCommunication {
+		@Override
+		public int bulkOutTransfer(byte[] buffer, int length) {
+			return deviceConnection.bulkTransfer(outEndpoint, buffer, length, TRANSFER_TIMEOUT);
+		}
+		
+		@Override
+		public int bulkOutTransfer(byte[] buffer, int offset, int length) {
+			return deviceConnection.bulkTransfer(outEndpoint, buffer, offset, length, TRANSFER_TIMEOUT);
+		}
 
+		@Override
+		public int bulkInTransfer(byte[] buffer, int length) {
+			return deviceConnection.bulkTransfer(inEndpoint, buffer, length, TRANSFER_TIMEOUT);
+		}
+
+		@Override
+		public int bulkInTransfer(byte[] buffer, int offset, int length) {
+			return deviceConnection.bulkTransfer(inEndpoint, buffer, offset, length, TRANSFER_TIMEOUT);
+		}
+	}
+	
+	/**
+	 * On Android API level lower 18 (Jelly Bean MR2) we cannot specify a start offset in the source/destination
+	 * array. Because of that we have to use this workaround, where we have to copy the data every time offset is non zero.
+	 * 
+	 */
+	private class HoneyCombMr1Communication implements UsbCommunication {
+		@Override
+		public int bulkOutTransfer(byte[] buffer, int length) {
+			return deviceConnection.bulkTransfer(outEndpoint, buffer, length, TRANSFER_TIMEOUT);
+		}
+		
+		@Override
+		public int bulkOutTransfer(byte[] buffer, int offset, int length) {
+			if(offset == 0)
+				return deviceConnection.bulkTransfer(outEndpoint, buffer, length, TRANSFER_TIMEOUT);
+			
+			byte[] tmpBuffer = new byte[length];
+			int result = deviceConnection.bulkTransfer(outEndpoint, tmpBuffer, length, TRANSFER_TIMEOUT);
+			System.arraycopy(tmpBuffer, 0, buffer, offset, length);
+			return result;
+		}
+
+		@Override
+		public int bulkInTransfer(byte[] buffer, int length) {
+			return deviceConnection.bulkTransfer(inEndpoint, buffer, length, TRANSFER_TIMEOUT);
+		}
+
+		@Override
+		public int bulkInTransfer(byte[] buffer, int offset, int length) {
+			if(offset == 0)
+				return deviceConnection.bulkTransfer(inEndpoint, buffer, length, TRANSFER_TIMEOUT);
+			
+			byte[] tmpBuffer = new byte[length];
+			int result = deviceConnection.bulkTransfer(inEndpoint, tmpBuffer, length, TRANSFER_TIMEOUT);
+			System.arraycopy(tmpBuffer, 0, buffer, offset, length);
+			return result;
+		}
+	}
+	
+	private static final String TAG = UsbMassStorageDevice.class.getSimpleName();
+	
 	// subclass 6 means that the usb mass storage device implements the
 	// SCSI transparent command set
 	private static final int INTERFACE_SUBCLASS = 6;
 	// protocol 80 means the communication happens only via bulk transfers
 	private static final int INTERFACE_PROTOCOL = 80;
 	
-	private static final String TAG = UsbMassStorageDevice.class.getSimpleName();
+	private static int TRANSFER_TIMEOUT = 21000;
 	
 	private UsbManager usbManager;
 	private UsbDeviceConnection deviceConnection;
@@ -124,7 +190,15 @@ public class UsbMassStorageDevice {
 			return;
 		}
 		
-		blockDevice = BlockDeviceDriverFactory.createBlockDevice(this);
+		UsbCommunication communication;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+			communication = new JellyBeanMr2Communication();
+		} else {
+			Log.i(TAG, "using workaround usb communication");
+			communication = new HoneyCombMr1Communication();
+		}
+		
+		blockDevice = BlockDeviceDriverFactory.createBlockDevice(communication);
 		blockDevice.init();
 		partitionTable = PartitionTableFactory.createPartitionTable(blockDevice);
 		initPartitions();
@@ -148,23 +222,6 @@ public class UsbMassStorageDevice {
 			Log.e(TAG, "could not release interface!");
 		}
 		deviceConnection.close();
-	}
-	
-	// TODO maybe remove this methods and instead give a block device direct access to endpoints?
-	public int bulkOutTransfer(byte[] buffer, int length) {
-		return deviceConnection.bulkTransfer(outEndpoint, buffer, length, 21000);
-	}
-	
-	public int bulkOutTransfer(byte[] buffer, int offset, int length) {
-		return deviceConnection.bulkTransfer(outEndpoint, buffer, offset, length, 21000);
-	}
-	
-	public int bulkInTransfer(byte[] buffer, int length) {
-		return deviceConnection.bulkTransfer(inEndpoint, buffer, length, 21000);
-	}
-	
-	public int bulkInTransfer(byte[] buffer, int offset, int length) {
-		return deviceConnection.bulkTransfer(inEndpoint, buffer, offset, length, 21000);
 	}
 	
 	public List<Partition> getPartitions() {
