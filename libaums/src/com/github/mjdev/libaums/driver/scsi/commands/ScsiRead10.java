@@ -3,11 +3,9 @@ package com.github.mjdev.libaums.driver.scsi.commands;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import android.util.Log;
-
 public class ScsiRead10 extends CommandBlockWrapper {
 	
-	private static final String TAG = ScsiRead10.class.getSimpleName();
+	//private static final String TAG = ScsiRead10.class.getSimpleName();
 	private static final byte LENGTH = 0x10;
 	private static final byte OPCODE = 0x28;
 
@@ -16,8 +14,6 @@ public class ScsiRead10 extends CommandBlockWrapper {
 	private int blockSize;
 	private short transferBlocks;
 	
-	// TODO check if we can read 1 sector but with transfer length < blockSize
-	// -- works --
 	public ScsiRead10(int blockAddress, int transferBytes, int blockSize) {
 		super(transferBytes, Direction.IN, (byte) 0, LENGTH);
 		this.blockAddress = blockAddress;
@@ -25,8 +21,7 @@ public class ScsiRead10 extends CommandBlockWrapper {
 		this.blockSize = blockSize;
 		short transferBlocks = (short) (transferBytes / blockSize);
 		if(transferBytes % blockSize != 0) {
-			Log.w(TAG, "transfer bytes is not a multiple of block size");
-			if(transferBlocks == 0) transferBlocks = 1;
+			throw new IllegalArgumentException("transfer bytes is not a multiple of block size");
 		}
 		this.transferBlocks = transferBlocks;
 	}

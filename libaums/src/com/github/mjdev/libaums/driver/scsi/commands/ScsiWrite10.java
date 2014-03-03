@@ -3,11 +3,9 @@ package com.github.mjdev.libaums.driver.scsi.commands;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import android.util.Log;
-
 public class ScsiWrite10 extends CommandBlockWrapper {
 	
-	private static final String TAG = ScsiRead10.class.getSimpleName();
+	//private static final String TAG = ScsiWrite10.class.getSimpleName();
 	private static final byte LENGTH = 0x10;
 	private static final byte OPCODE = 0x2a;
 
@@ -23,8 +21,7 @@ public class ScsiWrite10 extends CommandBlockWrapper {
 		this.blockSize = blockSize;
 		short transferBlocks = (short) (transferBytes / blockSize);
 		if(transferBytes % blockSize != 0) {
-			Log.w(TAG, "transfer bytes is not a multiple of block size");
-			if(transferBlocks == 0) transferBlocks = 1;
+			throw new IllegalArgumentException("transfer bytes is not a multiple of block size");
 		}
 		this.transferBlocks = transferBlocks;
 	}

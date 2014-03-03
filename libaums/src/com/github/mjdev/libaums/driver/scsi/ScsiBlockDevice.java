@@ -24,6 +24,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	
 	private UsbCommunication usbCommunication;
 	private ByteBuffer outBuffer;
+	private byte[] cswBuffer;
 	
 	private int blockSize;
 	private int lastBlockAddress;
@@ -31,6 +32,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	public ScsiBlockDevice(UsbCommunication usbCommunication) {
 		this.usbCommunication = usbCommunication;
 		outBuffer = ByteBuffer.allocate(31);
+		cswBuffer = new byte[CommandStatusWrapper.SIZE];
 	}
 	
 	@Override
@@ -87,7 +89,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 				} while(read < transferLength);
 				
 				if(read != transferLength) {
-					Log.e(TAG, "Unexpected command size on response to " + command);
+					Log.e(TAG, "Unexpected command size (" + read + ") on response to " + command);
 				}
 			} else {
 				written = 0;
@@ -108,7 +110,6 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		
 		
 		// expecting csw now
-		byte[] cswBuffer = new byte[CommandStatusWrapper.SIZE];
 		read = usbCommunication.bulkInTransfer(cswBuffer, cswBuffer.length);
 		if(read != CommandStatusWrapper.SIZE) {
 			Log.e(TAG, "Unexpected command size while expecting csw");
