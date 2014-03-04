@@ -12,6 +12,7 @@ import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper;
 import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper.Direction;
 import com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper;
 import com.github.mjdev.libaums.driver.scsi.commands.ScsiInquiry;
+import com.github.mjdev.libaums.driver.scsi.commands.ScsiInquiryResponse;
 import com.github.mjdev.libaums.driver.scsi.commands.ScsiRead10;
 import com.github.mjdev.libaums.driver.scsi.commands.ScsiReadCapacity;
 import com.github.mjdev.libaums.driver.scsi.commands.ScsiReadCapacityResponse;
@@ -40,10 +41,12 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		ByteBuffer inBuffer = ByteBuffer.allocate(36);
 		ScsiInquiry inquiry = new ScsiInquiry();
 		transferCommand(inquiry, inBuffer);
-		//ScsiInquiryResponse inquiryResponse = ScsiInquiryResponse.read(inBuffer);
+		ScsiInquiryResponse inquiryResponse = ScsiInquiryResponse.read(inBuffer);
+		Log.d(TAG, "inquiry response: " + inquiryResponse);
+		
 		ScsiTestUnitReady testUnit = new ScsiTestUnitReady();
 		if(!transferCommand(testUnit, null)) {
-			Log.e(TAG, "unit not ready!");
+			Log.w(TAG, "unit not ready!");
 		}
 		
 		ScsiReadCapacity readCapacity = new ScsiReadCapacity();
@@ -54,10 +57,6 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		
 		Log.i(TAG, "Block size: " + blockSize);
 		Log.i(TAG, "Last block address: " + lastBlockAddress);
-		
-		ByteBuffer buffer = ByteBuffer.allocate(512);
-		ScsiRead10 read = new ScsiRead10(0, buffer.capacity(), blockSize);
-		transferCommand(read, buffer);
 	}
 	
 	private boolean transferCommand(CommandBlockWrapper command, ByteBuffer inBuffer) {
@@ -75,8 +74,6 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		int read = 0;
 		if(transferLength > 0) {
 			byte[] inArray = inBuffer.array();
-			//inBuffer.clear();
-			//Arrays.fill(inArray, (byte) 0);
 
 			if(command.getDirection() == Direction.IN) {
 				do {
@@ -146,7 +143,6 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		
 		if((dest.limit() - dest.position()) % blockSize != 0) {
 			System.arraycopy(buffer.array(), 0, dest.array(), dest.position(), dest.limit() - dest.position());
-			//dest = ByteBuffer.wrap(buffer.array(), 0, dest.capacity());
 		}
 		
 		dest.position(dest.limit());

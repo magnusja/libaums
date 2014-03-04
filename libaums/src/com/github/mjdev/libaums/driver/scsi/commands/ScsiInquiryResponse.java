@@ -46,4 +46,13 @@ public class ScsiInquiryResponse {
 	public byte getResponseDataFormat() {
 		return responseDataFormat;
 	}
+
+	@Override
+	public String toString() {
+		return "ScsiInquiryResponse [peripheralQualifier="
+				+ peripheralQualifier + ", peripheralDeviceType="
+				+ peripheralDeviceType + ", removableMedia=" + removableMedia
+				+ ", spcVersion=" + spcVersion + ", responseDataFormat="
+				+ responseDataFormat + "]";
+	}
 }

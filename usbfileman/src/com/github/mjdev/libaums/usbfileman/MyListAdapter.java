@@ -38,7 +38,7 @@ public class MyListAdapter extends ArrayAdapter<UsbFile> {
 	private List<UsbFile> files;
 	private UsbFile currentDir;
 	
-	LayoutInflater inflater;
+	private LayoutInflater inflater;
 	
 	public MyListAdapter(Context context, UsbFile dir) throws IOException {
 		super(context, R.layout.list_item);
