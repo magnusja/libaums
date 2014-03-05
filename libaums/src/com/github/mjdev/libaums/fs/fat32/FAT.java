@@ -152,6 +152,11 @@ public class FAT {
 		buffer.clear();
 		blockDevice.write(offset, buffer);
 
+		// refresh the info structure
+		fsInfoStructure.setLastAllocatedClusterHint(currentCluster);
+		fsInfoStructure.decreaseClusterCount(numberOfClusters);
+		fsInfoStructure.write();
+		
 		Log.i(TAG, "allocating clusters finished");
 		
 		return result.toArray(new Long[0]);

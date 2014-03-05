@@ -59,6 +59,13 @@ public class FsInfoStructure {
 	public long getLastAllocatedClusterHint() {
 		return buffer.getInt(NEXT_FREE_OFFSET);
 	}
+
+	public void decreaseClusterCount(long numberOfClusters) {
+		long freeClusterCount = getFreeClusterCount();
+		if(freeClusterCount != FsInfoStructure.INVALID_VALUE) {
+			setFreeClusterCount(freeClusterCount - numberOfClusters);
+		}
+	}
 	
 	public void write() throws IOException {
 		Log.d(TAG, "writing to device");
