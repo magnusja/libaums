@@ -52,6 +52,26 @@ public class ClusterChain {
 		return dataAreaOffset + clusterOffset + (cluster - 2) * clusterSize;
 	}
 	
+	public void setClusters(int newNumberOfClusters) throws IOException {
+		int oldNumberOfClusters = getClusters();
+		if(newNumberOfClusters == oldNumberOfClusters) return;
+		
+		if(newNumberOfClusters > oldNumberOfClusters) {
+			chain = fat.alloc(chain, newNumberOfClusters - oldNumberOfClusters);
+		} else {
+			chain = fat.free(chain, oldNumberOfClusters - newNumberOfClusters);
+		}
+	}
+	
+	public int getClusters() {
+		return chain.length;
+	}
+	
+	public void setLength(long newLength) throws IOException {
+		final long newNumberOfClusters = ((newLength + clusterSize - 1) / clusterSize);
+		setClusters((int)newNumberOfClusters);
+	}
+	
 	public long getLength() {
 		return chain.length * clusterSize;
 	}

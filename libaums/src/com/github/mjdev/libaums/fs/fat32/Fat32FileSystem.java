@@ -8,16 +8,13 @@ import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.UsbFile;
 
 public class Fat32FileSystem implements FileSystem {
-	
-	private BlockDeviceDriver blockDevice;
-	
+		
 	private Fat32BootSector bootSector;
 	private FAT fat;
 	private FsInfoStructure fsInfoStructure;
 	private FatDirectory rootDirectory;
 	
 	private Fat32FileSystem(BlockDeviceDriver blockDevice) throws IOException {
-		this.blockDevice = blockDevice;
 		ByteBuffer buffer = ByteBuffer.allocate(512);
 		blockDevice.read(0, buffer);
 		bootSector = Fat32BootSector.read(buffer);

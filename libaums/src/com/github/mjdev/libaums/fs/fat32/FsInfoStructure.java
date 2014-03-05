@@ -36,7 +36,7 @@ public class FsInfoStructure {
 		if(buffer.getInt(LEAD_SIGNATURE_OFF) != LEAD_SIGNATURE ||
 				buffer.getInt(STRUCT_SIGNATURE_OFF) != STRUCT_SIGNATURE ||
 				buffer.getInt(TRAIL_SIGNATURE_OFF) != TRAIL_SIGNATURE) {
-			Log.e(TAG, "invalid fs info structure!");
+			throw new IOException("invalid fs info structure!");
 		}
 	}
 	

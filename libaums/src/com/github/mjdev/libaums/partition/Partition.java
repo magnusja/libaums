@@ -45,6 +45,15 @@ public class Partition implements BlockDeviceDriver {
 	public FileSystem getFileSystem() {
 		return fileSystem;
 	}
+	
+	public String getVolumeLabel() {
+		return fileSystem.getVolumeLabel();
+	}
+	
+	@Override
+	public void init() {
+		
+	}
 
 	@Override
 	public void read(long devOffset, ByteBuffer dest) throws IOException {
@@ -60,11 +69,6 @@ public class Partition implements BlockDeviceDriver {
 			Log.e(TAG, "device offset not a multiple of block size");
 		}
 		blockDevice.write(devOffset / blockSize + logicalBlockAddress, src);
-	}
-
-	@Override
-	public void init() {
-		
 	}
 
 	@Override
