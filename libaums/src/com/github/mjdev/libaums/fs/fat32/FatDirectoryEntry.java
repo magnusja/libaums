@@ -22,10 +22,12 @@ public class FatDirectoryEntry {
     public static final int ENTRY_DELETED = 0xe5;
     
     ByteBuffer data;
+    private ShortName shortName;
     
     private FatDirectoryEntry(ByteBuffer data) {
     	this.data = data;
     	data.order(ByteOrder.LITTLE_ENDIAN);
+    	shortName = ShortName.parse(data);
     }
     
     public static FatDirectoryEntry read(ByteBuffer data) {
@@ -87,27 +89,8 @@ public class FatDirectoryEntry {
 		if(data.get(0) == 0)
 			return null;
 		else {
-			return parseShortName();
+			return shortName.getString();
 		}
-	}
-	
-	public String parseShortName() {
-		final char[] name = new char[8];
-		final char[] ext = new char[3];
-		
-		for(int i = 0; i < 8; i++) {
-			name[i] = (char) (data.get(i) & 0xFF);
-		}
-		
-		if(data.get(0) == 0x05) {
-			name[0] = (char) 0xe5;
-		}
-		
-		for(int i = 0; i < 3; i++) {
-			ext[i] = (char) (data.getChar(i + 8) & 0xFF);
-		}
-		
-		return new String(name).trim() + "." + new String(ext).trim();
 	}
 	
 	public void extractLfnPart(StringBuilder builder) {
