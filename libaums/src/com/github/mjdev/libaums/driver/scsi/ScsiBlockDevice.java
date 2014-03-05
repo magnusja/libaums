@@ -77,7 +77,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 
 			if(command.getDirection() == Direction.IN) {
 				do {
-					int tmp = usbCommunication.bulkInTransfer(inArray, read + inBuffer.position(), inBuffer.limit() - inBuffer.position() - read);
+					int tmp = usbCommunication.bulkInTransfer(inArray, read + inBuffer.position(), inBuffer.remaining() - read);
 					if(tmp == -1) {
 						Log.e(TAG, "reading failed!");
 						break;
@@ -91,7 +91,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 			} else {
 				written = 0;
 				do {
-					int tmp = usbCommunication.bulkOutTransfer(inArray, written + inBuffer.position(), inBuffer.limit() - inBuffer.position() - written);
+					int tmp = usbCommunication.bulkOutTransfer(inArray, written + inBuffer.position(), inBuffer.remaining() - written);
 					if(tmp == -1) {
 						Log.e(TAG, "writing failed!");
 						break;
@@ -128,21 +128,21 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	public void read(long devOffset, ByteBuffer dest) throws IOException {
 		long time = System.currentTimeMillis();
 		ByteBuffer buffer;
-		if((dest.limit() - dest.position()) % blockSize != 0) {
+		if(dest.remaining() % blockSize != 0) {
 			Log.i(TAG, "we have to round up size to next block sector");
-			int rounded = blockSize - (dest.limit() - dest.position()) % blockSize + dest.limit() - dest.position();
+			int rounded = blockSize - dest.remaining() % blockSize + dest.remaining();
 			buffer = ByteBuffer.allocate(rounded);
 			buffer.limit(rounded);
 		} else {
 			buffer = dest;
 		}
 		
-		ScsiRead10 read = new ScsiRead10((int) devOffset, buffer.limit() - buffer.position(), blockSize);
+		ScsiRead10 read = new ScsiRead10((int) devOffset, dest.remaining(), blockSize);
 		Log.d(TAG, "reading: " + read);
 		transferCommand(read, buffer);
 		
-		if((dest.limit() - dest.position()) % blockSize != 0) {
-			System.arraycopy(buffer.array(), 0, dest.array(), dest.position(), dest.limit() - dest.position());
+		if(dest.remaining() % blockSize != 0) {
+			System.arraycopy(buffer.array(), 0, dest.array(), dest.position(), dest.remaining());
 		}
 		
 		dest.position(dest.limit());
@@ -154,17 +154,17 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	public void write(long devOffset, ByteBuffer src) throws IOException {
 		long time = System.currentTimeMillis();
 		ByteBuffer buffer;
-		if((src.limit() - src.position()) % blockSize != 0) {
+		if(src.remaining() % blockSize != 0) {
 			Log.i(TAG, "we have to round up size to next block sector");
-			int rounded = blockSize - (src.limit() - src.position()) % blockSize + src.limit() - src.position();
+			int rounded = blockSize - src.remaining() % blockSize + src.remaining();
 			buffer = ByteBuffer.allocate(rounded);
 			buffer.limit(rounded);
-			System.arraycopy(src.array(), src.position(), buffer.array(), 0, src.limit() - src.position());
+			System.arraycopy(src.array(), src.position(), buffer.array(), 0, src.remaining());
 		} else {
 			buffer = src;
 		}
 		
-		ScsiWrite10 write = new ScsiWrite10((int) devOffset, buffer.limit() - buffer.position(), blockSize);
+		ScsiWrite10 write = new ScsiWrite10((int) devOffset, src.remaining(), blockSize);
 		Log.d(TAG, "writing: " + write);
 		transferCommand(write, buffer);
 		

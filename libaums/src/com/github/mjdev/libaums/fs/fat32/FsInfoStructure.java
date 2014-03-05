@@ -10,6 +10,8 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 
 public class FsInfoStructure {
 	
+	public static int INVALID_VALUE = 0xFFFFFFFF;
+	
 	private static int LEAD_SIGNATURE_OFF = 0;
 	private static int STRUCT_SIGNATURE_OFF = 484;
 	private static int TRAIL_SIGNATURE_OFF = 508;
@@ -42,11 +44,24 @@ public class FsInfoStructure {
 		return new FsInfoStructure(blockDevice, offset);
 	}
 	
+	public void setFreeClusterCount(long value) {
+		buffer.putInt(FREE_COUNT_OFF, (int) value);
+	}
+	
 	public long getFreeClusterCount() {
 		return buffer.getInt(FREE_COUNT_OFF);
 	}
 	
+	public void setLastAllocatedClusterHint(long value) {
+		buffer.putInt(NEXT_FREE_OFFSET, (int) value);
+	}
+	
 	public long getLastAllocatedClusterHint() {
 		return buffer.getInt(NEXT_FREE_OFFSET);
+	}
+	
+	public void write() throws IOException {
+		Log.d(TAG, "writing to device");
+		blockDevice.write(offset, buffer);
 	}
 }

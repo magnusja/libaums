@@ -3,8 +3,6 @@ package com.github.mjdev.libaums.fs.fat32;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import android.util.Log;
-
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.UsbFile;
@@ -24,8 +22,7 @@ public class Fat32FileSystem implements FileSystem {
 		blockDevice.read(0, buffer);
 		bootSector = Fat32BootSector.read(buffer);
 		fsInfoStructure = FsInfoStructure.read(blockDevice, bootSector.getFsInfoStartSector() * bootSector.getBytesPerSector());
-		Log.d("asdasd", fsInfoStructure.getLastAllocatedClusterHint() + " " + fsInfoStructure.getFreeClusterCount());
-		fat = new FAT(blockDevice, bootSector, 0);
+		fat = new FAT(blockDevice, bootSector, fsInfoStructure);
 		rootDirectory = FatDirectory.readRoot(blockDevice, fat, bootSector);
 	}
 	
