@@ -137,7 +137,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 			buffer = dest;
 		}
 		
-		ScsiRead10 read = new ScsiRead10((int) devOffset, dest.remaining(), blockSize);
+		ScsiRead10 read = new ScsiRead10((int) devOffset, buffer.remaining(), blockSize);
 		Log.d(TAG, "reading: " + read);
 		transferCommand(read, buffer);
 		
@@ -164,7 +164,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 			buffer = src;
 		}
 		
-		ScsiWrite10 write = new ScsiWrite10((int) devOffset, src.remaining(), blockSize);
+		ScsiWrite10 write = new ScsiWrite10((int) devOffset, buffer.remaining(), blockSize);
 		Log.d(TAG, "writing: " + write);
 		transferCommand(write, buffer);
 		
