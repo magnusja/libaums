@@ -2,6 +2,7 @@ package com.github.mjdev.libaums.fs.fat32;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Calendar;
 
 public class FatDirectoryEntry {
 	
@@ -11,6 +12,11 @@ public class FatDirectoryEntry {
     private static final int FILE_SIZE_OFF = 0x1c;
     private static final int MSB_CLUSTER_OFF = 0x14;
     private static final int LSB_CLUSTER_OFF = 0x1a;
+    private static final int CREATED_DATE_OFF = 0x10;
+    private static final int CREATED_TIME_OFF = 0x0e;
+    private static final int LAST_WRITE_DATE_OFF = 0x18;
+    private static final int LAST_WRITE_TIME_OFF = 0x16;
+    private static final int LAST_ACCESSED_DATE_OFF = 0x12;
     
     private static final int FLAG_READONLY = 0x01;
     private static final int FLAG_HIDDEN = 0x02;
@@ -82,7 +88,19 @@ public class FatDirectoryEntry {
 	}
 	
 	public boolean isDeleted() {
-		return (data.get(0) & 0xFF) == ENTRY_DELETED;
+		return getUnsignedInt8(ENTRY_DELETED) == ENTRY_DELETED;
+	}
+	
+	public long getCreatedDateTime() {
+		return decodeDateTime(getUnsignedInt16(CREATED_DATE_OFF), getUnsignedInt16(CREATED_TIME_OFF));
+	}
+	
+	public long getLastAccessedDateTime() {
+		return decodeDateTime(getUnsignedInt16(LAST_WRITE_DATE_OFF), getUnsignedInt16(LAST_WRITE_TIME_OFF));
+	}
+	
+	public long getLastModifiedDateTime() {
+		return decodeDateTime(getUnsignedInt16(LAST_ACCESSED_DATE_OFF), 0);
 	}
 	
 	public String getShortName() {
@@ -128,19 +146,61 @@ public class FatDirectoryEntry {
 	}
 	
 	public long getStartCluster() {
-		final int unsignedMsb1 = data.get(MSB_CLUSTER_OFF) & 0xFF;
-		final int unsignedMsb2 = data.get(MSB_CLUSTER_OFF + 1) & 0xFF;
-		final int unsignedLsb1 = data.get(LSB_CLUSTER_OFF) & 0xFF;
-		final int unsignedLsb2 = data.get(LSB_CLUSTER_OFF + 1) & 0xFF;
-		return (((unsignedMsb2 << 8) | unsignedMsb1) << 16) | (((unsignedLsb2 << 8) | unsignedLsb1));
+		final int msb = getUnsignedInt16(MSB_CLUSTER_OFF);
+		final int lsb = getUnsignedInt16(LSB_CLUSTER_OFF);
+		return (msb << 16) | lsb;
 	}
 	
 	public long getFileSize() {
-		final long size1 = data.get(FILE_SIZE_OFF) & 0xFF;
-		final long size2 = data.get(FILE_SIZE_OFF + 1) & 0xFF;
-		final long size3 = data.get(FILE_SIZE_OFF + 2) & 0xFF;
-		final long size4 = data.get(FILE_SIZE_OFF + 3) & 0xFF;
-		return (size4 << 24) | (size3 << 16) | (size2 << 8) | size1;
+		return getUnsignedInt32(FILE_SIZE_OFF);
+	}
+
+	private int getUnsignedInt8(int offset) {
+		return data.get(offset) & 0xff;
 	}
 	
+	private int getUnsignedInt16(int offset) {
+		final int i1 = data.get(offset) & 0xff;
+		final int i2 = data.get(offset + 1) & 0xff;
+		return (i2 << 8) | i1;
+	}
+	
+	private int getUnsignedInt32(int offset) {
+		final int i1 = data.get(offset) & 0xff;
+		final int i2 = data.get(offset + 1) & 0xff;
+		final int i3 = data.get(offset + 2) & 0xff;
+		final int i4 = data.get(offset + 3) & 0xff;
+		return (i4 << 24) | (i3 << 16) | (i2 << 8) | i1;
+	}
+	
+	private static long decodeDateTime(int date, int time) {
+		final Calendar calendar = Calendar.getInstance();
+		
+		calendar.set(Calendar.YEAR, 1980 + (date >> 9));
+		calendar.set(Calendar.MONTH, ((date >> 5) & 0x0f) - 1);
+		calendar.set(Calendar.DAY_OF_MONTH, date & 0x0f);
+		calendar.set(Calendar.HOUR_OF_DAY, time >> 11);
+		calendar.set(Calendar.MINUTE, (time >> 5) & 0x3f);
+		calendar.set(Calendar.SECOND, (time & 0x1f) * 2);
+		
+		return calendar.getTimeInMillis();
+	}
+	
+	private static int encodeDate(long timeInMillis) {
+		final Calendar calendar = Calendar.getInstance();
+		
+		calendar.setTimeInMillis(timeInMillis);
+		
+		return ((calendar.get(Calendar.YEAR) - 1980) << 9) + ((calendar.get(Calendar.MONTH) + 1) << 5) + calendar.get(Calendar.DAY_OF_MONTH);
+		
+	}
+	
+	private static int encodeTime(long timeInMillis) {
+		final Calendar calendar = Calendar.getInstance();
+		
+		calendar.setTimeInMillis(timeInMillis);
+		
+		return (calendar.get(Calendar.HOUR_OF_DAY) << 11) + (calendar.get(Calendar.MINUTE) << 5) + calendar.get(Calendar.SECOND) / 2;
+		
+	}
 }
