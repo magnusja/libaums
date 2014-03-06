@@ -30,6 +30,10 @@ public class FatDirectoryEntry {
     ByteBuffer data;
     private ShortName shortName;
     
+    private FatDirectoryEntry() {
+    	
+    }
+    
     private FatDirectoryEntry(ByteBuffer data) {
     	this.data = data;
     	data.order(ByteOrder.LITTLE_ENDIAN);
@@ -44,6 +48,10 @@ public class FatDirectoryEntry {
     	data.get(buffer);
     	
     	return new FatDirectoryEntry(ByteBuffer.wrap(buffer));
+    }
+    
+    public void serialize(ByteBuffer buffer) {
+    	buffer.put(data);
     }
     
     private int getFlags() {
@@ -95,20 +103,109 @@ public class FatDirectoryEntry {
 		return decodeDateTime(getUnsignedInt16(CREATED_DATE_OFF), getUnsignedInt16(CREATED_TIME_OFF));
 	}
 	
+	public void setCreatedDateTime(long dateTime) {
+		setUnsignedInt16(CREATED_DATE_OFF, encodeDate(dateTime));
+		setUnsignedInt16(CREATED_TIME_OFF, encodeTime(dateTime));
+	}
+	
 	public long getLastAccessedDateTime() {
 		return decodeDateTime(getUnsignedInt16(LAST_WRITE_DATE_OFF), getUnsignedInt16(LAST_WRITE_TIME_OFF));
+	}
+
+	public void setLastAccessedDateTime(long dateTime) {
+		setUnsignedInt16(LAST_WRITE_DATE_OFF, encodeDate(dateTime));
+		setUnsignedInt16(LAST_WRITE_TIME_OFF, encodeTime(dateTime));
 	}
 	
 	public long getLastModifiedDateTime() {
 		return decodeDateTime(getUnsignedInt16(LAST_ACCESSED_DATE_OFF), 0);
 	}
+
+	public void setLastModifiedDateTime(long dateTime) {
+		setUnsignedInt16(LAST_ACCESSED_DATE_OFF, encodeDate(dateTime));
+	}
 	
-	public String getShortName() {
+	public ShortName getShortName() {
 		if(data.get(0) == 0)
 			return null;
 		else {
-			return shortName.getString();
+			return shortName;
 		}
+	}
+	
+	public void setShortName(ShortName shortName) {
+		this.shortName = shortName;
+		shortName.serialize(data);
+	}
+	
+	public String getVolumeLabel() {
+		StringBuilder builder = new StringBuilder();
+		
+		for(int i = 0; i < 11; i++) {
+			byte b = data.get(i);
+			if(b == 0) break;
+			builder.append((char) b);
+		}
+		
+		return builder.toString();
+	}
+	
+	public long getStartCluster() {
+		final int msb = getUnsignedInt16(MSB_CLUSTER_OFF);
+		final int lsb = getUnsignedInt16(LSB_CLUSTER_OFF);
+		return (msb << 16) | lsb;
+	}
+	
+	public void setStartCluster(long newStartCluster) {
+		setUnsignedInt16(MSB_CLUSTER_OFF, (int)((newStartCluster << 16) & 0xffff));
+		setUnsignedInt16(LSB_CLUSTER_OFF, (int)(newStartCluster & 0xffff));
+	}
+	
+	public long getFileSize() {
+		return getUnsignedInt32(FILE_SIZE_OFF);
+	}
+	
+	public void setFileSize(long newSize) {
+		setUnsignedInt32(FILE_SIZE_OFF, newSize);
+	}
+	
+	public static FatDirectoryEntry createLfnPart(char[] unicode, int offset, byte checksum, int index, boolean isLast) {
+		FatDirectoryEntry result = new FatDirectoryEntry();
+		
+		if(isLast) {
+			int diff = unicode.length - offset;
+			if(diff < 13) {
+				char[] tmp = new char[13];
+				System.arraycopy(unicode, offset, tmp,0 , diff);
+				offset = 0;
+				unicode = tmp;
+			}
+		}
+		
+		ByteBuffer buffer = ByteBuffer.allocate(SIZE);
+		
+		buffer.put((byte) (isLast ? index + (1 << 6) : index));
+		buffer.putShort(1, (short) unicode[0]);
+		buffer.putShort(3, (short) unicode[1]);
+		buffer.putShort(5, (short) unicode[2]);
+		buffer.putShort(7, (short) unicode[3]);
+		buffer.putShort(9, (short) unicode[4]);
+		buffer.put(11, (byte) (FLAG_HIDDEN | FLAG_VOLUME_ID | FLAG_READONLY | FLAG_SYSTEM));
+		buffer.put(12, (byte) 0);
+		buffer.put(13, checksum);
+		buffer.putShort(14, (short) unicode[5]);
+		buffer.putShort(16, (short) unicode[6]);
+		buffer.putShort(18, (short) unicode[7]);
+		buffer.putShort(20, (short) unicode[8]);
+		buffer.putShort(22, (short) unicode[9]);
+		buffer.putShort(24, (short) unicode[10]);
+		buffer.putShort(26, (short) 0);
+		buffer.putShort(28, (short) unicode[11]);
+		buffer.putShort(30, (short) unicode[12]);
+		
+		result.data = buffer;
+		
+		return result;
 	}
 	
 	public void extractLfnPart(StringBuilder builder) {
@@ -132,28 +229,6 @@ public class FatDirectoryEntry {
 
 		builder.append(name, 0, len);
 	}
-	
-	public String getVolumeLabel() {
-		StringBuilder builder = new StringBuilder();
-		
-		for(int i = 0; i < 11; i++) {
-			byte b = data.get(i);
-			if(b == 0) break;
-			builder.append((char) b);
-		}
-		
-		return builder.toString();
-	}
-	
-	public long getStartCluster() {
-		final int msb = getUnsignedInt16(MSB_CLUSTER_OFF);
-		final int lsb = getUnsignedInt16(LSB_CLUSTER_OFF);
-		return (msb << 16) | lsb;
-	}
-	
-	public long getFileSize() {
-		return getUnsignedInt32(FILE_SIZE_OFF);
-	}
 
 	private int getUnsignedInt8(int offset) {
 		return data.get(offset) & 0xff;
@@ -171,6 +246,18 @@ public class FatDirectoryEntry {
 		final int i3 = data.get(offset + 2) & 0xff;
 		final int i4 = data.get(offset + 3) & 0xff;
 		return (i4 << 24) | (i3 << 16) | (i2 << 8) | i1;
+	}
+	
+	private void setUnsignedInt16(int offset, int value) {
+		data.put(offset, (byte) (value & 0xff));
+		data.put(offset + 1, (byte) ((value >>> 8) & 0xff));
+	}
+	
+	private void setUnsignedInt32(int offset, long value) {
+		data.put(offset, (byte) (value & 0xff));
+		data.put(offset + 1, (byte) ((value >>> 8) & 0xff));
+		data.put(offset + 2, (byte) ((value >>> 16) & 0xff));
+		data.put(offset + 3, (byte) ((value >>> 24) & 0xff));
 	}
 	
 	private static long decodeDateTime(int date, int time) {

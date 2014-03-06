@@ -28,7 +28,7 @@ public class FatLfnDirectoryEntry {
 	
 	public String getName() {
 		if(lfnName != null) return lfnName;
-		return actualEntry.getShortName();
+		return actualEntry.getShortName().getString();
 	}
 	
 	public long getFileSize() {

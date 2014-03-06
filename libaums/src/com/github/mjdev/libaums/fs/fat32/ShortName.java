@@ -11,7 +11,9 @@ public class ShortName {
 	}
 	
 	public static ShortName parse(ByteBuffer data) {
-		return new ShortName(data);
+		byte[] tmp = new byte[13];
+		data.get(tmp);
+		return new ShortName(ByteBuffer.wrap(tmp));
 	}
 	
 	public String getString() {
@@ -34,5 +36,19 @@ public class ShortName {
 		String strExt =  new String(ext).trim();
 		
 		return strExt.isEmpty() ? strName : strName + "." + strExt;
+	}
+
+	public void serialize(ByteBuffer buffer) {
+		buffer.put(data.array(), 0, 13);
+	}
+	
+	public byte calculateCheckSum() {
+		int sum = 0;
+		
+		for(int i = 0; i < 11; i++) {
+			sum = ((sum & 1) == 1 ? 0x80 : 0) + ((sum & 0xff) >> 1) + data.get(i);
+		}
+		
+		return (byte) (sum & 0xff);
 	}
 }
