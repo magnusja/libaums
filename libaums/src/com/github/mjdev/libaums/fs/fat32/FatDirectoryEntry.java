@@ -2,6 +2,7 @@ package com.github.mjdev.libaums.fs.fat32;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.Charset;
 import java.util.Calendar;
 
 public class FatDirectoryEntry {
@@ -38,6 +39,8 @@ public class FatDirectoryEntry {
     	this.data = data;
     	data.order(ByteOrder.LITTLE_ENDIAN);
     	shortName = ShortName.parse(data);
+    	// clear buffer because short name took 13 bytes
+    	data.clear();
     }
     
     public static FatDirectoryEntry read(ByteBuffer data) {
@@ -56,6 +59,11 @@ public class FatDirectoryEntry {
     
     private int getFlags() {
     	return data.get(ATTR_OFF);
+    }
+    
+    private void setFlag(int flag) {
+    	int flags = getFlags();
+    	data.put(ATTR_OFF, (byte) (flag | flags));
     }
     
     private boolean isFlagSet(int flag) {
@@ -96,7 +104,7 @@ public class FatDirectoryEntry {
 	}
 	
 	public boolean isDeleted() {
-		return getUnsignedInt8(ENTRY_DELETED) == ENTRY_DELETED;
+		return getUnsignedInt8(0) == ENTRY_DELETED;
 	}
 	
 	public long getCreatedDateTime() {
@@ -138,6 +146,19 @@ public class FatDirectoryEntry {
 		shortName.serialize(data);
 	}
 	
+	public static FatDirectoryEntry createVolumeLabel(String volumeLabel) {
+		FatDirectoryEntry result = new FatDirectoryEntry();
+		ByteBuffer buffer = ByteBuffer.allocate(SIZE);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
+		
+		System.arraycopy(volumeLabel.getBytes(Charset.forName("ASCII")), 0, buffer.array(), 0, volumeLabel.length());
+		
+		result.data = buffer;
+		result.setFlag(FLAG_VOLUME_ID);
+		
+		return result;
+	}
+	
 	public String getVolumeLabel() {
 		StringBuilder builder = new StringBuilder();
 		
@@ -169,39 +190,48 @@ public class FatDirectoryEntry {
 		setUnsignedInt32(FILE_SIZE_OFF, newSize);
 	}
 	
-	public static FatDirectoryEntry createLfnPart(char[] unicode, int offset, byte checksum, int index, boolean isLast) {
+	public static FatDirectoryEntry createLfnPart(String unicode, int offset, byte checksum, int index, boolean isLast) {
 		FatDirectoryEntry result = new FatDirectoryEntry();
 		
 		if(isLast) {
-			int diff = unicode.length - offset;
+			int diff = unicode.length() - offset;
 			if(diff < 13) {
-				char[] tmp = new char[13];
-				System.arraycopy(unicode, offset, tmp,0 , diff);
+				StringBuilder builder = new StringBuilder(13);
+				builder.append(unicode, offset, unicode.length());
+				// end mark
+				builder.append('\0');
+				
+				// fill with 0xffff
+				for(int i = 0; i < 13 - diff; i++) {
+					builder.append((char) 0xffff);
+				}
+				
 				offset = 0;
-				unicode = tmp;
+				unicode = builder.toString();
 			}
 		}
 		
 		ByteBuffer buffer = ByteBuffer.allocate(SIZE);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
-		buffer.put((byte) (isLast ? index + (1 << 6) : index));
-		buffer.putShort(1, (short) unicode[0]);
-		buffer.putShort(3, (short) unicode[1]);
-		buffer.putShort(5, (short) unicode[2]);
-		buffer.putShort(7, (short) unicode[3]);
-		buffer.putShort(9, (short) unicode[4]);
+		buffer.put(0, (byte) (isLast ? index + (1 << 6) : index));
+		buffer.putShort(1, (short) unicode.charAt(offset));
+		buffer.putShort(3, (short) unicode.charAt(offset + 1));
+		buffer.putShort(5, (short) unicode.charAt(offset + 2));
+		buffer.putShort(7, (short) unicode.charAt(offset + 3));
+		buffer.putShort(9, (short) unicode.charAt(offset + 4));
 		buffer.put(11, (byte) (FLAG_HIDDEN | FLAG_VOLUME_ID | FLAG_READONLY | FLAG_SYSTEM));
 		buffer.put(12, (byte) 0);
 		buffer.put(13, checksum);
-		buffer.putShort(14, (short) unicode[5]);
-		buffer.putShort(16, (short) unicode[6]);
-		buffer.putShort(18, (short) unicode[7]);
-		buffer.putShort(20, (short) unicode[8]);
-		buffer.putShort(22, (short) unicode[9]);
-		buffer.putShort(24, (short) unicode[10]);
+		buffer.putShort(14, (short) unicode.charAt(offset + 5));
+		buffer.putShort(16, (short) unicode.charAt(offset + 6));
+		buffer.putShort(18, (short) unicode.charAt(offset + 7));
+		buffer.putShort(20, (short) unicode.charAt(offset + 8));
+		buffer.putShort(22, (short) unicode.charAt(offset + 9));
+		buffer.putShort(24, (short) unicode.charAt(offset + 10));
 		buffer.putShort(26, (short) 0);
-		buffer.putShort(28, (short) unicode[11]);
-		buffer.putShort(30, (short) unicode[12]);
+		buffer.putShort(28, (short) unicode.charAt(offset + 11));
+		buffer.putShort(30, (short) unicode.charAt(offset + 12));
 		
 		result.data = buffer;
 		
@@ -289,5 +319,10 @@ public class FatDirectoryEntry {
 		
 		return (calendar.get(Calendar.HOUR_OF_DAY) << 11) + (calendar.get(Calendar.MINUTE) << 5) + calendar.get(Calendar.SECOND) / 2;
 		
+	}
+	
+	@Override
+	public String toString() {
+		return "[FatDirectoryEntry shortName=" + shortName.getString() + "]";
 	}
 }

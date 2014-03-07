@@ -99,7 +99,7 @@ public class Fat32BootSector {
 		return validFat;
 	}
 	
-	public int getBytesperCluster() {
+	public int getBytesPerCluster() {
 		return sectorsPerCluster * bytesPerSector;
 	}
 	

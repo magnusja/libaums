@@ -2,6 +2,7 @@ package com.github.mjdev.libaums.fs.fat32;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,7 +71,7 @@ public class FatDirectory implements UsbFile {
 			}
 			
 			if(e.isVolumeLabel()) {
-				if(entry != null) {
+				if(!isRoot()) {
 					Log.w(TAG, "volume label in non root dir!");
 				}
 				volumeLabel = e.getVolumeLabel();
@@ -87,6 +88,43 @@ public class FatDirectory implements UsbFile {
 			entries.add(lfnEntry);
 			list.clear();
 		}
+	}
+	
+	private void write() throws IOException {
+		final boolean writeVolumeLabel = isRoot() && volumeLabel != null;
+		// first lookup the total entries needed
+		int totalEntryCount = 0;
+		for(FatLfnDirectoryEntry entry : entries) {
+			totalEntryCount += entry.getEntryCount();
+		}
+		
+		if(writeVolumeLabel)
+			totalEntryCount++;
+		
+		long totalBytes = totalEntryCount * FatDirectoryEntry.SIZE;
+		chain.setLength(totalBytes);
+		
+		ByteBuffer buffer = ByteBuffer.allocate((int)chain.getLength());
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
+		
+		if(writeVolumeLabel)
+			FatDirectoryEntry.createVolumeLabel(volumeLabel).serialize(buffer);
+		
+		for(FatLfnDirectoryEntry entry : entries) {
+			entry.serialize(buffer);
+		}
+		
+		if(totalBytes % bootSector.getBytesPerCluster() != 0) {
+			// add dummy entry filled with zeros to mark end of entries
+			buffer.put(new byte[32]);
+		}
+		
+		buffer.flip();
+		chain.write(0, buffer);
+	}
+	
+	private boolean isRoot() {
+		return entry == null;
 	}
 	
 	/* package */ String getVolumeLabel() {

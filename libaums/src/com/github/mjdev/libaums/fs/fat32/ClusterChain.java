@@ -3,9 +3,13 @@ package com.github.mjdev.libaums.fs.fat32;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import android.util.Log;
+
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 
 public class ClusterChain {
+	
+	private static final String TAG = ClusterChain.class.getSimpleName();
 	
 	private BlockDeviceDriver blockDevice;
 	private FAT fat;
@@ -17,7 +21,7 @@ public class ClusterChain {
 		this.fat = fat;
 		this.blockDevice = blockDevice;
 		chain = fat.getChain(startCluster);
-		clusterSize = bootSector.getBytesperCluster();
+		clusterSize = bootSector.getBytesPerCluster();
 		dataAreaOffset = bootSector.getDataAreaOffset();
 	}
 	
@@ -25,26 +29,51 @@ public class ClusterChain {
 		int len = dest.remaining();
 
         int chainIndex = (int) (offset / clusterSize);
-        
-        if (offset % clusterSize != 0) {
+        if(offset % clusterSize != 0) {
             int clusterOffset = (int) (offset % clusterSize);
-            int size = Math.min(len, (int) (clusterSize - (offset % clusterSize)));
+            int size = Math.min(len, (int) (clusterSize - clusterOffset));
             dest.limit(dest.position() + size);
 
             blockDevice.read(getDeviceOffset(chain[chainIndex], clusterOffset), dest);
-            
-            len -= size;
+
             chainIndex++;
+            len -= size;
         }
 
-        while (len > 0) {
+        while(len > 0) {
             int size = (int) Math.min(clusterSize, len);
             dest.limit(dest.position() + size);
 
             blockDevice.read(getDeviceOffset(chain[chainIndex], 0), dest);
 
-            len -= size;
             chainIndex++;
+            len -= size;
+        }
+	}
+	
+	public void write(long offset, ByteBuffer source) throws IOException {
+		int len = source.remaining();
+
+        int chainIndex = (int) (offset / clusterSize);
+        if(offset % clusterSize != 0) {
+            int clusterOffset = (int) (offset % clusterSize);
+            int size = Math.min(len, (int) (clusterSize - clusterOffset));
+            source.limit(source.position() + size);
+
+            blockDevice.write(getDeviceOffset(chain[chainIndex], clusterOffset), source);
+
+            chainIndex++;
+            len -= size;
+        }
+
+        while(len > 0) {
+            int size = (int) Math.min(clusterSize, len);
+            source.limit(source.position() + size);
+
+            blockDevice.write(getDeviceOffset(chain[chainIndex], 0), source);
+
+            chainIndex++;
+            len -= size;
         }
 	}
 	
@@ -57,8 +86,10 @@ public class ClusterChain {
 		if(newNumberOfClusters == oldNumberOfClusters) return;
 		
 		if(newNumberOfClusters > oldNumberOfClusters) {
+			Log.d(TAG, "grow chain");
 			chain = fat.alloc(chain, newNumberOfClusters - oldNumberOfClusters);
 		} else {
+			Log.d(TAG, "shrink chain");
 			chain = fat.free(chain, oldNumberOfClusters - newNumberOfClusters);
 		}
 	}
