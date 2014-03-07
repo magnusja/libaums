@@ -190,9 +190,10 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		if(device != null)
+		if(device != null) {
 			device.close();
-		unregisterReceiver(usbReceiver);
+			unregisterReceiver(usbReceiver);
+		}
 	}
 	
 	@Override

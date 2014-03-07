@@ -43,6 +43,18 @@ public class FatDirectoryEntry {
     	data.clear();
     }
     
+    public static FatDirectoryEntry createNew() {
+    	FatDirectoryEntry result = new FatDirectoryEntry();
+    	result.data = ByteBuffer.allocate(SIZE);
+    	
+    	long now = System.currentTimeMillis();
+    	result.setCreatedDateTime(now);
+    	result.setLastAccessedDateTime(now);
+    	result.setLastModifiedDateTime(now);
+    	
+    	return result;
+    }
+    
     public static FatDirectoryEntry read(ByteBuffer data) {
     	byte[] buffer = new byte[SIZE];
     	
@@ -54,7 +66,7 @@ public class FatDirectoryEntry {
     }
     
     public void serialize(ByteBuffer buffer) {
-    	buffer.put(data);
+    	buffer.put(data.array());
     }
     
     private int getFlags() {
@@ -76,6 +88,10 @@ public class FatDirectoryEntry {
 	
 	public boolean isDirectory() {
         return ((getFlags() & (FLAG_DIRECTORY | FLAG_VOLUME_ID)) == FLAG_DIRECTORY);
+	}
+	
+	public void setDirectory() {
+		setFlag(FLAG_DIRECTORY);
 	}
 	
 	public boolean isVolumeLabel() {
@@ -144,6 +160,8 @@ public class FatDirectoryEntry {
 	public void setShortName(ShortName shortName) {
 		this.shortName = shortName;
 		shortName.serialize(data);
+    	// clear buffer because short name put 13 bytes
+    	data.clear();
 	}
 	
 	public static FatDirectoryEntry createVolumeLabel(String volumeLabel) {
@@ -178,7 +196,7 @@ public class FatDirectoryEntry {
 	}
 	
 	public void setStartCluster(long newStartCluster) {
-		setUnsignedInt16(MSB_CLUSTER_OFF, (int)((newStartCluster << 16) & 0xffff));
+		setUnsignedInt16(MSB_CLUSTER_OFF, (int)((newStartCluster >> 16) & 0xffff));
 		setUnsignedInt16(LSB_CLUSTER_OFF, (int)(newStartCluster & 0xffff));
 	}
 	

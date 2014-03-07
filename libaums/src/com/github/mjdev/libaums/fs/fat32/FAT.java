@@ -77,7 +77,12 @@ public class FAT {
 		final int bufferSize = blockDevice.getBlockSize();
 		final ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
-		final long cluster = chain[chain.length - 1];
+		
+		final long cluster;
+		if(chain.length != 0)
+			cluster = chain[chain.length - 1];
+		else
+			cluster = -1;
 		
 		long lastAllocated = fsInfoStructure.getLastAllocatedClusterHint();
 		if(lastAllocated == FsInfoStructure.INVALID_VALUE) {
@@ -109,16 +114,18 @@ public class FAT {
 			}
 		}
 		
-		// now it is time to write the partial cluster chain
-		// start with the last cluster in the existing chain
-		offset = ((fatOffset[0] + cluster * 4) / bufferSize) * bufferSize;
-		offsetInBlock = ((fatOffset[0] + cluster * 4) % bufferSize);
-		if(lastOffset != offset) {
-			buffer.clear();
-			blockDevice.read(offset, buffer);
-			lastOffset = offset;
+		if(cluster != -1) {
+			// now it is time to write the partial cluster chain
+			// start with the last cluster in the existing chain
+			offset = ((fatOffset[0] + cluster * 4) / bufferSize) * bufferSize;
+			offsetInBlock = ((fatOffset[0] + cluster * 4) % bufferSize);
+			if(lastOffset != offset) {
+				buffer.clear();
+				blockDevice.read(offset, buffer);
+				lastOffset = offset;
+			}
+			buffer.putInt((int)offsetInBlock, (int)result.get(chain.length).longValue());
 		}
-		buffer.putInt((int)offsetInBlock, (int)result.get(chain.length).longValue());
 		
 		// write the new allocated clusters now
 		for(int i = chain.length; i < result.size() - 1; i++) {

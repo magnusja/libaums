@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.util.Log;
 
@@ -20,6 +22,8 @@ public class FatDirectory implements UsbFile {
 	private FAT fat;
 	private Fat32BootSector bootSector;
 	private List<FatLfnDirectoryEntry> entries;
+	private Map<String, FatLfnDirectoryEntry> lfnMap;
+	private Map<ShortName, FatDirectoryEntry> shortNameMap;
 	private FatLfnDirectoryEntry entry;
 	
 	private String volumeLabel;
@@ -30,6 +34,8 @@ public class FatDirectory implements UsbFile {
 		this.fat = fat;
 		this.bootSector = bootSector;
 		entries = new ArrayList<FatLfnDirectoryEntry>();
+		lfnMap = new HashMap<String, FatLfnDirectoryEntry>();
+		shortNameMap = new HashMap<ShortName, FatDirectoryEntry>();
 	}
 	
 	private void init() throws IOException {
@@ -86,6 +92,8 @@ public class FatDirectory implements UsbFile {
 			
 			FatLfnDirectoryEntry lfnEntry = FatLfnDirectoryEntry.read(e, list);
 			entries.add(lfnEntry);
+			lfnMap.put(lfnEntry.getName(), lfnEntry);
+			shortNameMap.put(e.getShortName(), e);
 			list.clear();
 		}
 	}
@@ -131,6 +139,25 @@ public class FatDirectory implements UsbFile {
 		return volumeLabel;
 	}
 
+	public UsbFile createFile(String name) throws IOException {
+		ShortName shortName = ShortNameGenerator.generateShortName(name, shortNameMap.keySet());
+		
+		FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.createNew(name, shortName);
+		long newStartCluster = fat.alloc(new Long[0], 1)[0];
+		entry.setStartCluster(newStartCluster);
+		
+		Log.d(TAG, "adding entry: " + entry + " with short name: " + shortName);
+		entries.add(entry);
+		write();
+		
+		return FatFile.create(entry, blockDevice, fat, bootSector);
+	}
+	
+	@Override
+	public void setLength(long newLength) {
+		throw new UnsupportedOperationException("This is a directory!");
+	}
+	
 	@Override
 	public long getLength() {
 		throw new UnsupportedOperationException("This is a directory!");

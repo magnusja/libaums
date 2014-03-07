@@ -29,9 +29,12 @@ public class FsInfoStructure {
 	private ByteBuffer buffer;
 	
 	private FsInfoStructure(BlockDeviceDriver blockDevice, int offset) throws IOException {
+		this.blockDevice = blockDevice;
+		this.offset = offset;
 		buffer = ByteBuffer.allocate(512);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		blockDevice.read(offset, buffer);
+		buffer.clear();
 		
 		if(buffer.getInt(LEAD_SIGNATURE_OFF) != LEAD_SIGNATURE ||
 				buffer.getInt(STRUCT_SIGNATURE_OFF) != STRUCT_SIGNATURE ||
@@ -70,5 +73,6 @@ public class FsInfoStructure {
 	public void write() throws IOException {
 		Log.d(TAG, "writing to device");
 		blockDevice.write(offset, buffer);
+		buffer.clear();
 	}
 }

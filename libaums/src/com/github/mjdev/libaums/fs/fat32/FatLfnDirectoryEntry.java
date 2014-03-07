@@ -8,9 +8,23 @@ public class FatLfnDirectoryEntry {
 	private FatDirectoryEntry actualEntry;
 	private String lfnName;
 	
+	private FatLfnDirectoryEntry() {
+		
+	}
+	
 	private FatLfnDirectoryEntry(FatDirectoryEntry actualEntry, String lfnName) {
 		this.actualEntry = actualEntry; 
 		this.lfnName = lfnName; 
+	}
+	
+	public static FatLfnDirectoryEntry createNew(String name, ShortName shortName) {
+		FatLfnDirectoryEntry result = new FatLfnDirectoryEntry();
+		
+		result.lfnName = name;
+		result.actualEntry = FatDirectoryEntry.createNew();
+		result.actualEntry.setShortName(shortName);
+		
+		return result;
 	}
 	
 	public static FatLfnDirectoryEntry read(FatDirectoryEntry actualEntry, List<FatDirectoryEntry> lfnParts) {
@@ -70,8 +84,16 @@ public class FatLfnDirectoryEntry {
 		return actualEntry.getFileSize();
 	}
 	
+	public void setFileSize(long newSize) {
+		actualEntry.setFileSize(newSize);
+	}
+	
 	public long getStartCluster() {
 		return actualEntry.getStartCluster();
+	}
+	
+	public void setStartCluster(long newStartCluster) {
+		actualEntry.setStartCluster(newStartCluster);
 	}
 	
 	public boolean isDirectory() {

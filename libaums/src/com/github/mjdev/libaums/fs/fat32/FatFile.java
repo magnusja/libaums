@@ -58,6 +58,12 @@ public class FatFile implements UsbFile {
 	public long getLength() {
 		return entry.getFileSize();
 	}
+	
+	@Override
+	public void setLength(long newLength) throws IOException {
+		chain.setLength(newLength);
+		entry.setFileSize(newLength);
+	}
 
 	@Override
 	public void read(long offset, ByteBuffer destination) throws IOException {
@@ -68,6 +74,9 @@ public class FatFile implements UsbFile {
 	@Override
 	public void write(long offset, ByteBuffer source) throws IOException {
 		initChain();
+		long length = offset + source.remaining();
+		if(length > getLength())
+			setLength(length);
 		chain.write(offset, source);
 	}
 
