@@ -65,4 +65,10 @@ public class FatFile implements UsbFile {
 		chain.read(offset, destination);
 	}
 
+	@Override
+	public void write(long offset, ByteBuffer source) throws IOException {
+		initChain();
+		chain.write(offset, source);
+	}
+
 }

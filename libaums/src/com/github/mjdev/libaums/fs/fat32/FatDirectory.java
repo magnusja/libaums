@@ -174,4 +174,9 @@ public class FatDirectory implements UsbFile {
 	public void read(long offset, ByteBuffer destination) throws IOException {
 		throw new UnsupportedOperationException("This is a directory!");
 	}
+
+	@Override
+	public void write(long offset, ByteBuffer source) throws IOException {
+		throw new UnsupportedOperationException("This is a directory!");
+	}
 }

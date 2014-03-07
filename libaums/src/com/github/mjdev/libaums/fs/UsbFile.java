@@ -10,4 +10,5 @@ public interface UsbFile {
 	public UsbFile[] listFiles() throws IOException;
 	public long getLength();
 	public void read(long offset, ByteBuffer destination) throws IOException;
+	public void write(long offset, ByteBuffer source) throws IOException;
 }
