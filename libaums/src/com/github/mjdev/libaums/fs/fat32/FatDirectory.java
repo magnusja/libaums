@@ -24,15 +24,17 @@ public class FatDirectory implements UsbFile {
 	private List<FatLfnDirectoryEntry> entries;
 	private Map<String, FatLfnDirectoryEntry> lfnMap;
 	private Map<ShortName, FatDirectoryEntry> shortNameMap;
+	private FatDirectory parent;
 	private FatLfnDirectoryEntry entry;
 	
 	private String volumeLabel;
 	
 	private FatDirectory(BlockDeviceDriver blockDevice, FAT fat,
-			Fat32BootSector bootSector) {
+			Fat32BootSector bootSector, FatDirectory parent) {
 		this.blockDevice = blockDevice;
 		this.fat = fat;
 		this.bootSector = bootSector;
+		this.parent = parent;
 		entries = new ArrayList<FatLfnDirectoryEntry>();
 		lfnMap = new HashMap<String, FatLfnDirectoryEntry>();
 		shortNameMap = new HashMap<ShortName, FatDirectoryEntry>();
@@ -47,14 +49,14 @@ public class FatDirectory implements UsbFile {
 			readEntries();
 	}
 	
-	public static FatDirectory create(FatLfnDirectoryEntry entry, BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector) throws IOException {
-		FatDirectory result = new FatDirectory(blockDevice, fat, bootSector);
+	/* package */ static FatDirectory create(FatLfnDirectoryEntry entry, BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector, FatDirectory parent) throws IOException {
+		FatDirectory result = new FatDirectory(blockDevice, fat, bootSector, parent);
 		result.entry = entry;
 		return result;
 	}
 
-	public static FatDirectory readRoot(BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector) throws IOException {
-		FatDirectory result = new FatDirectory(blockDevice, fat, bootSector);
+	/* package */ static FatDirectory readRoot(BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector) throws IOException {
+		FatDirectory result = new FatDirectory(blockDevice, fat, bootSector, null);
 		result.chain = new ClusterChain(bootSector.getRootDirStartCluster(), blockDevice, fat, bootSector);
 		result.init();
 		return result;
@@ -98,7 +100,7 @@ public class FatDirectory implements UsbFile {
 		}
 	}
 	
-	private void write() throws IOException {
+	/* package */ void write() throws IOException {
 		final boolean writeVolumeLabel = isRoot() && volumeLabel != null;
 		// first lookup the total entries needed
 		int totalEntryCount = 0;
@@ -140,6 +142,8 @@ public class FatDirectory implements UsbFile {
 	}
 
 	public UsbFile createFile(String name) throws IOException {
+		if(lfnMap.containsKey(name)) throw new IOException("Item already exists!");
+		
 		ShortName shortName = ShortNameGenerator.generateShortName(name, shortNameMap.keySet());
 		
 		FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.createNew(name, shortName);
@@ -148,9 +152,11 @@ public class FatDirectory implements UsbFile {
 		
 		Log.d(TAG, "adding entry: " + entry + " with short name: " + shortName);
 		entries.add(entry);
+		lfnMap.put(name, entry);
+		shortNameMap.put(shortName, entry.getActualEntry());
 		write();
 		
-		return FatFile.create(entry, blockDevice, fat, bootSector);
+		return FatFile.create(entry, blockDevice, fat, bootSector, this);
 	}
 	
 	@Override
@@ -174,6 +180,11 @@ public class FatDirectory implements UsbFile {
 	}
 
 	@Override
+	public UsbFile getParent() {
+		return parent;
+	}
+
+	@Override
 	public String[] list() throws IOException {
 		init();
 		String[] list = new String[entries.size()];
@@ -189,9 +200,9 @@ public class FatDirectory implements UsbFile {
 		for(int i = 0; i < entries.size(); i++) {
 			FatLfnDirectoryEntry entry = entries.get(i);
 			if(entry.isDirectory()) {
-				list[i] = FatDirectory.create(entry, blockDevice, fat, bootSector);
+				list[i] = FatDirectory.create(entry, blockDevice, fat, bootSector, parent);
 			} else {
-				list[i] = FatFile.create(entry, blockDevice, fat, bootSector);
+				list[i] = FatFile.create(entry, blockDevice, fat, bootSector, this);
 			}
 		}
 		return list;
@@ -204,6 +215,16 @@ public class FatDirectory implements UsbFile {
 
 	@Override
 	public void write(long offset, ByteBuffer source) throws IOException {
+		throw new UnsupportedOperationException("This is a directory!");
+	}
+
+	@Override
+	public void flush() throws IOException {
+		throw new UnsupportedOperationException("This is a directory!");
+	}
+
+	@Override
+	public void close() throws IOException {
 		throw new UnsupportedOperationException("This is a directory!");
 	}
 }

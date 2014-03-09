@@ -5,13 +5,13 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-public class ShortName {
+/* package */ class ShortName {
 	
 	private static int SIZE = 11;
 	
 	private ByteBuffer data;
 	
-	public ShortName(String name, String extension) {
+	/* package */ ShortName(String name, String extension) {
 		byte[] tmp = new byte[SIZE];
 		// fill with spaces
 		Arrays.fill(tmp, (byte) 0x20);
@@ -28,13 +28,13 @@ public class ShortName {
 		this.data = data;
 	}
 	
-	public static ShortName parse(ByteBuffer data) {
+	/* package */ static ShortName parse(ByteBuffer data) {
 		byte[] tmp = new byte[SIZE];
 		data.get(tmp);
 		return new ShortName(ByteBuffer.wrap(tmp));
 	}
 	
-	public String getString() {
+	/* package */ String getString() {
 		final char[] name = new char[8];
 		final char[] extension = new char[3];
 		
@@ -56,11 +56,11 @@ public class ShortName {
 		return strExt.isEmpty() ? strName : strName + "." + strExt;
 	}
 
-	public void serialize(ByteBuffer buffer) {
+	/* package */ void serialize(ByteBuffer buffer) {
 		buffer.put(data.array(), 0, SIZE);
 	}
 	
-	public byte calculateCheckSum() {
+	/* package */ byte calculateCheckSum() {
 		int sum = 0;
 		
 		for(int i = 0; i < SIZE; i++) {

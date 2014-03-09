@@ -17,7 +17,7 @@ public class ClusterChain {
 	private long clusterSize;
 	private long dataAreaOffset;
 	
-	public ClusterChain(long startCluster, BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector) throws IOException {
+	/* package */ ClusterChain(long startCluster, BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector) throws IOException {
 		this.fat = fat;
 		this.blockDevice = blockDevice;
 		chain = fat.getChain(startCluster);
@@ -25,7 +25,7 @@ public class ClusterChain {
 		dataAreaOffset = bootSector.getDataAreaOffset();
 	}
 	
-	public void read(long offset, ByteBuffer dest) throws IOException {
+	/* package */ void read(long offset, ByteBuffer dest) throws IOException {
 		int len = dest.remaining();
 
         int chainIndex = (int) (offset / clusterSize);
@@ -51,7 +51,7 @@ public class ClusterChain {
         }
 	}
 	
-	public void write(long offset, ByteBuffer source) throws IOException {
+	/* package */ void write(long offset, ByteBuffer source) throws IOException {
 		int len = source.remaining();
 
         int chainIndex = (int) (offset / clusterSize);
@@ -81,7 +81,7 @@ public class ClusterChain {
 		return dataAreaOffset + clusterOffset + (cluster - 2) * clusterSize;
 	}
 	
-	public void setClusters(int newNumberOfClusters) throws IOException {
+	/* package */ void setClusters(int newNumberOfClusters) throws IOException {
 		int oldNumberOfClusters = getClusters();
 		if(newNumberOfClusters == oldNumberOfClusters) return;
 		
@@ -94,16 +94,16 @@ public class ClusterChain {
 		}
 	}
 	
-	public int getClusters() {
+	/* package */ int getClusters() {
 		return chain.length;
 	}
 	
-	public void setLength(long newLength) throws IOException {
+	/* package */ void setLength(long newLength) throws IOException {
 		final long newNumberOfClusters = ((newLength + clusterSize - 1) / clusterSize);
 		setClusters((int)newNumberOfClusters);
 	}
 	
-	public long getLength() {
+	/* package */ long getLength() {
 		return chain.length * clusterSize;
 	}
 }

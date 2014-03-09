@@ -3,7 +3,7 @@ package com.github.mjdev.libaums.fs.fat32;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-public class FatLfnDirectoryEntry {
+/* package */ class FatLfnDirectoryEntry {
 
 	private FatDirectoryEntry actualEntry;
 	private String lfnName;
@@ -17,7 +17,7 @@ public class FatLfnDirectoryEntry {
 		this.lfnName = lfnName; 
 	}
 	
-	public static FatLfnDirectoryEntry createNew(String name, ShortName shortName) {
+	/* package */ static FatLfnDirectoryEntry createNew(String name, ShortName shortName) {
 		FatLfnDirectoryEntry result = new FatLfnDirectoryEntry();
 		
 		result.lfnName = name;
@@ -27,7 +27,7 @@ public class FatLfnDirectoryEntry {
 		return result;
 	}
 	
-	public static FatLfnDirectoryEntry read(FatDirectoryEntry actualEntry, List<FatDirectoryEntry> lfnParts) {
+	/* package */ static FatLfnDirectoryEntry read(FatDirectoryEntry actualEntry, List<FatDirectoryEntry> lfnParts) {
 		StringBuilder builder = new StringBuilder(13 * lfnParts.size());
 		
 		if(lfnParts.size() > 0) {
@@ -41,7 +41,7 @@ public class FatLfnDirectoryEntry {
 		return new FatLfnDirectoryEntry(actualEntry, null);
 	}
 	
-	public void serialize(ByteBuffer buffer) {
+	/* package */ void serialize(ByteBuffer buffer) {
 		if(lfnName != null) {
 			byte checksum = actualEntry.getShortName().calculateCheckSum();
 			int entrySize = getEntryCount();
@@ -61,7 +61,7 @@ public class FatLfnDirectoryEntry {
 		actualEntry.serialize(buffer);
 	}
 	
-	public int getEntryCount() {
+	/* package */ int getEntryCount() {
 		// we always have the actual entry
 		int result = 1;
 		
@@ -75,34 +75,45 @@ public class FatLfnDirectoryEntry {
 		return result;
 	}
 	
-	public String getName() {
+	/* package */ String getName() {
 		if(lfnName != null) return lfnName;
 		return actualEntry.getShortName().getString();
 	}
 	
-	public long getFileSize() {
+	/* package */ long getFileSize() {
 		return actualEntry.getFileSize();
 	}
 	
-	public void setFileSize(long newSize) {
+	/* package */ void setFileSize(long newSize) {
 		actualEntry.setFileSize(newSize);
 	}
 	
-	public long getStartCluster() {
+	/* package */ long getStartCluster() {
 		return actualEntry.getStartCluster();
 	}
 	
-	public void setStartCluster(long newStartCluster) {
+	/* package */ void setStartCluster(long newStartCluster) {
 		actualEntry.setStartCluster(newStartCluster);
 	}
 	
-	public boolean isDirectory() {
+	/* package */ void setLastAccessedTimeToNow() {
+		actualEntry.setLastAccessedDateTime(System.currentTimeMillis());
+	}
+	
+	/* package */ void setLastModifiedTimeToNow() {
+		actualEntry.setLastModifiedDateTime(System.currentTimeMillis());
+	}
+	
+	/* package */ boolean isDirectory() {
 		return actualEntry.isDirectory();
+	}
+
+	/* package */ FatDirectoryEntry getActualEntry() {
+		return actualEntry;
 	}
 	
 	@Override
 	public String toString() {
 		return "[FatLfnDirectoryEntry getName()=" + getName() + "]";
 	}
-	
 }

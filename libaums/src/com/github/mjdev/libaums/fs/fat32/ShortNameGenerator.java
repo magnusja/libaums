@@ -4,7 +4,7 @@ package com.github.mjdev.libaums.fs.fat32;
 import java.util.Collection;
 import java.util.Locale;
 
-public class ShortNameGenerator {
+/* package */ class ShortNameGenerator {
 	
 	/**
 	 * See fatgen103.pdf from microsoft for allowed characters
@@ -43,7 +43,7 @@ public class ShortNameGenerator {
 		return builder.toString();
 	}
 	
-	public static ShortName generateShortName(String lfnName, Collection<ShortName> existingShortNames) {
+	/* package */ static ShortName generateShortName(String lfnName, Collection<ShortName> existingShortNames) {
 		lfnName = lfnName.toUpperCase(Locale.ROOT).trim();
 		
 		// remove leading periods

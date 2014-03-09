@@ -12,19 +12,22 @@ public class FatFile implements UsbFile {
 	private FAT fat;
 	private Fat32BootSector bootSector;
 	
+	private FatDirectory parent;
 	private ClusterChain chain;
 	private FatLfnDirectoryEntry entry;
 	
 	private FatFile(BlockDeviceDriver blockDevice, FAT fat,
-			Fat32BootSector bootSector, FatLfnDirectoryEntry entry) {
+			Fat32BootSector bootSector, FatLfnDirectoryEntry entry,
+			FatDirectory parent) {
 		this.blockDevice = blockDevice;
 		this.fat = fat;
 		this.bootSector = bootSector;
 		this.entry = entry;
+		this.parent = parent;
 	}
 	
-	public static FatFile create(FatLfnDirectoryEntry entry, BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector) throws IOException {
-		FatFile result = new FatFile(blockDevice, fat, bootSector, entry);
+	public static FatFile create(FatLfnDirectoryEntry entry, BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector, FatDirectory parent) throws IOException {
+		FatFile result = new FatFile(blockDevice, fat, bootSector, entry, parent);
 		return result;
 	}
 	
@@ -42,6 +45,11 @@ public class FatFile implements UsbFile {
 	@Override
 	public String getName() {
 		return entry.getName();
+	}
+
+	@Override
+	public UsbFile getParent() {
+		return parent;
 	}
 
 	@Override
@@ -68,6 +76,7 @@ public class FatFile implements UsbFile {
 	@Override
 	public void read(long offset, ByteBuffer destination) throws IOException {
 		initChain();
+		entry.setLastAccessedTimeToNow();
 		chain.read(offset, destination);
 	}
 
@@ -77,7 +86,21 @@ public class FatFile implements UsbFile {
 		long length = offset + source.remaining();
 		if(length > getLength())
 			setLength(length);
+		entry.setLastModifiedTimeToNow();
 		chain.write(offset, source);
+	}
+
+	@Override
+	public void flush() throws IOException {
+		// we only have to update the parent because we are always writing everything
+		// immediately to the device
+		// parent updates things like length and dates
+		parent.write();
+	}
+
+	@Override
+	public void close() throws IOException {
+		flush();
 	}
 
 }

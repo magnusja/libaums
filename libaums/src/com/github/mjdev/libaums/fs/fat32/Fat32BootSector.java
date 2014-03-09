@@ -3,7 +3,7 @@ package com.github.mjdev.libaums.fs.fat32;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class Fat32BootSector {
+/* package */ class Fat32BootSector {
 	private static final int BYTES_PER_SECTOR_OFF = 11;
 	private static final int SECTORS_PER_CLUSTER_OFF = 13;
 	private static final int RESERVED_COUNT_OFF = 14;
@@ -31,7 +31,7 @@ public class Fat32BootSector {
 		
 	}
 	
-	public static Fat32BootSector read(ByteBuffer buffer) {
+	/* package */ static Fat32BootSector read(ByteBuffer buffer) {
 		Fat32BootSector result = new Fat32BootSector();
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		result.bytesPerSector = buffer.getShort(BYTES_PER_SECTOR_OFF);
@@ -59,59 +59,59 @@ public class Fat32BootSector {
 		return result;
 	}
 
-	public short getBytesPerSector() {
+	/* package */ short getBytesPerSector() {
 		return bytesPerSector;
 	}
 
-	public byte getSectorsPerCluster() {
+	/* package */ byte getSectorsPerCluster() {
 		return sectorsPerCluster;
 	}
 
-	public short getReservedSectors() {
+	/* package */ short getReservedSectors() {
 		return reservedSectors;
 	}
 
-	public byte getFatCount() {
+	/* package */ byte getFatCount() {
 		return fatCount;
 	}
 
-	public long getTotalNumberOfSectors() {
+	/* package */ long getTotalNumberOfSectors() {
 		return totalNumberOfSectors;
 	}
 
-	public long getSectorsPerFat() {
+	/* package */ long getSectorsPerFat() {
 		return sectorsPerFat;
 	}
 
-	public long getRootDirStartCluster() {
+	/* package */ long getRootDirStartCluster() {
 		return rootDirStartCluster;
 	}
 
-	public short getFsInfoStartSector() {
+	/* package */ short getFsInfoStartSector() {
 		return fsInfoStartSector;
 	}
 
-	public boolean isFatMirrored() {
+	/* package */ boolean isFatMirrored() {
 		return fatMirrored;
 	}
 
-	public byte getValidFat() {
+	/* package */ byte getValidFat() {
 		return validFat;
 	}
 	
-	public int getBytesPerCluster() {
+	/* package */ int getBytesPerCluster() {
 		return sectorsPerCluster * bytesPerSector;
 	}
 	
-	public long getFatOffset(int fatNumber) {
+	/* package */ long getFatOffset(int fatNumber) {
 		return getBytesPerSector() * (getReservedSectors() + fatNumber * getSectorsPerFat());
 	}
 	
-	public long getDataAreaOffset() {
+	/* package */ long getDataAreaOffset() {
 		return getFatOffset(0) + getFatCount() * getSectorsPerFat() * getBytesPerSector();
 	}
 	
-	public String getVolumeLabel() {
+	/* package */ String getVolumeLabel() {
 		return volumeLabel;
 	}
 }

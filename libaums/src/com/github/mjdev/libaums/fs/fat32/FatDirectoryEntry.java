@@ -5,9 +5,9 @@ import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.Calendar;
 
-public class FatDirectoryEntry {
+/* package */ class FatDirectoryEntry {
 	
-    public final static int SIZE = 32;
+    /* package */ final static int SIZE = 32;
 
     private static final int ATTR_OFF = 0x0b;
     private static final int FILE_SIZE_OFF = 0x1c;
@@ -26,7 +26,7 @@ public class FatDirectoryEntry {
     private static final int FLAG_DIRECTORY = 0x10;
     private static final int FLAG_ARCHIVE = 0x20;
 
-    public static final int ENTRY_DELETED = 0xe5;
+    /* package */ static final int ENTRY_DELETED = 0xe5;
     
     ByteBuffer data;
     private ShortName shortName;
@@ -43,7 +43,7 @@ public class FatDirectoryEntry {
     	data.clear();
     }
     
-    public static FatDirectoryEntry createNew() {
+    /* package */ static FatDirectoryEntry createNew() {
     	FatDirectoryEntry result = new FatDirectoryEntry();
     	result.data = ByteBuffer.allocate(SIZE);
     	
@@ -55,7 +55,7 @@ public class FatDirectoryEntry {
     	return result;
     }
     
-    public static FatDirectoryEntry read(ByteBuffer data) {
+    /* package */ static FatDirectoryEntry read(ByteBuffer data) {
     	byte[] buffer = new byte[SIZE];
     	
     	if(data.get(data.position()) == 0) return null;
@@ -65,7 +65,7 @@ public class FatDirectoryEntry {
     	return new FatDirectoryEntry(ByteBuffer.wrap(buffer));
     }
     
-    public void serialize(ByteBuffer buffer) {
+    /* package */ void serialize(ByteBuffer buffer) {
     	buffer.put(data.array());
     }
     
@@ -82,74 +82,74 @@ public class FatDirectoryEntry {
     	return (getFlags() & flag) != 0;
     }
 
-	public boolean isLfnEntry() {
+	/* package */ boolean isLfnEntry() {
 		return isHidden() && isVolume() && isReadOnly() && isSystem();
 	}
 	
-	public boolean isDirectory() {
+	/* package */ boolean isDirectory() {
         return ((getFlags() & (FLAG_DIRECTORY | FLAG_VOLUME_ID)) == FLAG_DIRECTORY);
 	}
 	
-	public void setDirectory() {
+	/* package */ void setDirectory() {
 		setFlag(FLAG_DIRECTORY);
 	}
 	
-	public boolean isVolumeLabel() {
+	/* package */ boolean isVolumeLabel() {
         if (isLfnEntry()) return false;
         else return ((getFlags() & (FLAG_DIRECTORY | FLAG_VOLUME_ID)) == FLAG_VOLUME_ID);
 	}
 	
-	public boolean isSystem() {
+	/* package */ boolean isSystem() {
 		return isFlagSet(FLAG_SYSTEM);
 	}
 	
-	public boolean isHidden() {
+	/* package */ boolean isHidden() {
 		return isFlagSet(FLAG_HIDDEN);		
 	}
 	
-	public boolean isArchive() {
+	/* package */ boolean isArchive() {
 		return isFlagSet(FLAG_ARCHIVE);		
 	}
 	
-	public boolean isReadOnly() {
+	/* package */ boolean isReadOnly() {
 		return isFlagSet(FLAG_READONLY);		
 	}
 	
-	public boolean isVolume() {
+	/* package */ boolean isVolume() {
 		return isFlagSet(FLAG_VOLUME_ID);		
 	}
 	
-	public boolean isDeleted() {
+	/* package */ boolean isDeleted() {
 		return getUnsignedInt8(0) == ENTRY_DELETED;
 	}
 	
-	public long getCreatedDateTime() {
+	/* package */ long getCreatedDateTime() {
 		return decodeDateTime(getUnsignedInt16(CREATED_DATE_OFF), getUnsignedInt16(CREATED_TIME_OFF));
 	}
 	
-	public void setCreatedDateTime(long dateTime) {
+	/* package */ void setCreatedDateTime(long dateTime) {
 		setUnsignedInt16(CREATED_DATE_OFF, encodeDate(dateTime));
 		setUnsignedInt16(CREATED_TIME_OFF, encodeTime(dateTime));
 	}
 	
-	public long getLastAccessedDateTime() {
+	/* package */ long getLastAccessedDateTime() {
 		return decodeDateTime(getUnsignedInt16(LAST_WRITE_DATE_OFF), getUnsignedInt16(LAST_WRITE_TIME_OFF));
 	}
 
-	public void setLastAccessedDateTime(long dateTime) {
+	/* package */ void setLastAccessedDateTime(long dateTime) {
 		setUnsignedInt16(LAST_WRITE_DATE_OFF, encodeDate(dateTime));
 		setUnsignedInt16(LAST_WRITE_TIME_OFF, encodeTime(dateTime));
 	}
 	
-	public long getLastModifiedDateTime() {
+	/* package */ long getLastModifiedDateTime() {
 		return decodeDateTime(getUnsignedInt16(LAST_ACCESSED_DATE_OFF), 0);
 	}
 
-	public void setLastModifiedDateTime(long dateTime) {
+	/* package */ void setLastModifiedDateTime(long dateTime) {
 		setUnsignedInt16(LAST_ACCESSED_DATE_OFF, encodeDate(dateTime));
 	}
 	
-	public ShortName getShortName() {
+	/* package */ ShortName getShortName() {
 		if(data.get(0) == 0)
 			return null;
 		else {
@@ -157,14 +157,14 @@ public class FatDirectoryEntry {
 		}
 	}
 	
-	public void setShortName(ShortName shortName) {
+	/* package */ void setShortName(ShortName shortName) {
 		this.shortName = shortName;
 		shortName.serialize(data);
     	// clear buffer because short name put 13 bytes
     	data.clear();
 	}
 	
-	public static FatDirectoryEntry createVolumeLabel(String volumeLabel) {
+	/* package */ static FatDirectoryEntry createVolumeLabel(String volumeLabel) {
 		FatDirectoryEntry result = new FatDirectoryEntry();
 		ByteBuffer buffer = ByteBuffer.allocate(SIZE);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -177,7 +177,7 @@ public class FatDirectoryEntry {
 		return result;
 	}
 	
-	public String getVolumeLabel() {
+	/* package */ String getVolumeLabel() {
 		StringBuilder builder = new StringBuilder();
 		
 		for(int i = 0; i < 11; i++) {
@@ -189,26 +189,26 @@ public class FatDirectoryEntry {
 		return builder.toString();
 	}
 	
-	public long getStartCluster() {
+	/* package */ long getStartCluster() {
 		final int msb = getUnsignedInt16(MSB_CLUSTER_OFF);
 		final int lsb = getUnsignedInt16(LSB_CLUSTER_OFF);
 		return (msb << 16) | lsb;
 	}
 	
-	public void setStartCluster(long newStartCluster) {
+	/* package */ void setStartCluster(long newStartCluster) {
 		setUnsignedInt16(MSB_CLUSTER_OFF, (int)((newStartCluster >> 16) & 0xffff));
 		setUnsignedInt16(LSB_CLUSTER_OFF, (int)(newStartCluster & 0xffff));
 	}
 	
-	public long getFileSize() {
+	/* package */ long getFileSize() {
 		return getUnsignedInt32(FILE_SIZE_OFF);
 	}
 	
-	public void setFileSize(long newSize) {
+	/* package */ void setFileSize(long newSize) {
 		setUnsignedInt32(FILE_SIZE_OFF, newSize);
 	}
 	
-	public static FatDirectoryEntry createLfnPart(String unicode, int offset, byte checksum, int index, boolean isLast) {
+	/* package */ static FatDirectoryEntry createLfnPart(String unicode, int offset, byte checksum, int index, boolean isLast) {
 		FatDirectoryEntry result = new FatDirectoryEntry();
 		
 		if(isLast) {
@@ -256,7 +256,7 @@ public class FatDirectoryEntry {
 		return result;
 	}
 	
-	public void extractLfnPart(StringBuilder builder) {
+	/* package */ void extractLfnPart(StringBuilder builder) {
 		final char[] name = new char[13];
 		name[0] = (char) data.getShort(1);
 		name[1] = (char) data.getShort(3);

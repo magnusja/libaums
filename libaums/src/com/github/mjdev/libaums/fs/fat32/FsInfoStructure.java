@@ -8,9 +8,9 @@ import android.util.Log;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 
-public class FsInfoStructure {
+/* package */ class FsInfoStructure {
 	
-	public static int INVALID_VALUE = 0xFFFFFFFF;
+	/* package */ static int INVALID_VALUE = 0xFFFFFFFF;
 	
 	private static int LEAD_SIGNATURE_OFF = 0;
 	private static int STRUCT_SIGNATURE_OFF = 484;
@@ -43,34 +43,34 @@ public class FsInfoStructure {
 		}
 	}
 	
-	public static FsInfoStructure read(BlockDeviceDriver blockDevice, int offset) throws IOException {
+	/* package */ static FsInfoStructure read(BlockDeviceDriver blockDevice, int offset) throws IOException {
 		return new FsInfoStructure(blockDevice, offset);
 	}
 	
-	public void setFreeClusterCount(long value) {
+	/* package */ void setFreeClusterCount(long value) {
 		buffer.putInt(FREE_COUNT_OFF, (int) value);
 	}
 	
-	public long getFreeClusterCount() {
+	/* package */ long getFreeClusterCount() {
 		return buffer.getInt(FREE_COUNT_OFF);
 	}
 	
-	public void setLastAllocatedClusterHint(long value) {
+	/* package */ void setLastAllocatedClusterHint(long value) {
 		buffer.putInt(NEXT_FREE_OFFSET, (int) value);
 	}
 	
-	public long getLastAllocatedClusterHint() {
+	/* package */ long getLastAllocatedClusterHint() {
 		return buffer.getInt(NEXT_FREE_OFFSET);
 	}
 
-	public void decreaseClusterCount(long numberOfClusters) {
+	/* package */ void decreaseClusterCount(long numberOfClusters) {
 		long freeClusterCount = getFreeClusterCount();
 		if(freeClusterCount != FsInfoStructure.INVALID_VALUE) {
 			setFreeClusterCount(freeClusterCount - numberOfClusters);
 		}
 	}
 	
-	public void write() throws IOException {
+	/* package */ void write() throws IOException {
 		Log.d(TAG, "writing to device");
 		blockDevice.write(offset, buffer);
 		buffer.clear();

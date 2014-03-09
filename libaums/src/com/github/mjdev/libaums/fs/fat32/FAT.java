@@ -21,7 +21,7 @@ public class FAT {
 	private int fatNumbers[];
 	private FsInfoStructure fsInfoStructure;
 	
-	public FAT(BlockDeviceDriver blockDevice, Fat32BootSector bootSector, FsInfoStructure fsInfoStructure) {
+	/* package */ FAT(BlockDeviceDriver blockDevice, Fat32BootSector bootSector, FsInfoStructure fsInfoStructure) {
 		this.blockDevice = blockDevice;
 		this.fsInfoStructure = fsInfoStructure;
 		if(!bootSector.isFatMirrored()) {
@@ -43,7 +43,7 @@ public class FAT {
 		}
 	}
 	
-	public Long[] getChain(long startCluster) throws IOException {
+	/* package */ Long[] getChain(long startCluster) throws IOException {
 		final ArrayList<Long> result = new ArrayList<Long>();
 		final int bufferSize = blockDevice.getBlockSize() * 2;
 		final ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
@@ -71,7 +71,7 @@ public class FAT {
 		return result.toArray(new Long[0]);
 	}
 	
-	public Long[] alloc(Long[] chain, int numberOfClusters) throws IOException {
+	/* package */ Long[] alloc(Long[] chain, int numberOfClusters) throws IOException {
 		final ArrayList<Long> result = new ArrayList<Long>(chain.length + numberOfClusters);
 		result.addAll(Arrays.asList(chain));
 		final int bufferSize = blockDevice.getBlockSize();
@@ -169,7 +169,7 @@ public class FAT {
 		return result.toArray(new Long[0]);
 	}
 	
-	public Long[] free(Long[] chain, int numberOfClusters) throws IOException {
+	/* package */ Long[] free(Long[] chain, int numberOfClusters) throws IOException {
 		final int offsetInChain = chain.length - numberOfClusters;
 		final int bufferSize = blockDevice.getBlockSize();
 		final ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
