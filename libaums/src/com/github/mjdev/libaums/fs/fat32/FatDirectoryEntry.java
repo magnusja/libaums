@@ -128,6 +128,7 @@ import java.util.Calendar;
 	}
 	
 	/* package */ void setCreatedDateTime(long dateTime) {
+		// TODO entry has also field which holds 10th seconds created
 		setUnsignedInt16(CREATED_DATE_OFF, encodeDate(dateTime));
 		setUnsignedInt16(CREATED_TIME_OFF, encodeTime(dateTime));
 	}

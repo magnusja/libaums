@@ -114,6 +114,7 @@ public class FAT {
 			}
 		}
 		
+		// TODO we should write in in all FATs when they are mirrored!
 		if(cluster != -1) {
 			// now it is time to write the partial cluster chain
 			// start with the last cluster in the existing chain
@@ -204,6 +205,7 @@ public class FAT {
 			buffer.putInt((int)offsetInBlock, 0);
 		}
 		
+		// TODO we should write in in all FATs when they are mirrored!
 		if(offsetInChain > 0) {
 			// write the end mark to last cluster in the new chain
 			currentCluster = chain[offsetInChain - 1];

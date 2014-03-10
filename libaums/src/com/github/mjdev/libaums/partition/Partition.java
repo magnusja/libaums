@@ -56,19 +56,47 @@ public class Partition implements BlockDeviceDriver {
 	}
 
 	@Override
-	public void read(long devOffset, ByteBuffer dest) throws IOException {
-		if(devOffset % blockSize != 0) {
-			Log.e(TAG, "device offset not a multiple of block size");
+	public void read(long offset, ByteBuffer dest) throws IOException {
+		long devOffset = offset / blockSize + logicalBlockAddress;
+		// TODO try to make this more efficient by for example making tmp buffer global
+		if(offset % blockSize != 0) {
+			Log.w(TAG, "device offset not a multiple of block size");
+			ByteBuffer tmp = ByteBuffer.allocate(blockSize);
+			
+			blockDevice.read(devOffset, tmp);
+			tmp.clear();
+			tmp.position((int) (offset % blockSize));
+			dest.put(tmp);
+			
+			devOffset++;
 		}
-		blockDevice.read(devOffset / blockSize + logicalBlockAddress, dest);
+		
+		if(dest.remaining() > 0)
+			blockDevice.read(devOffset, dest);
 	}
 
 	@Override
-	public void write(long devOffset, ByteBuffer src) throws IOException {
-		if(devOffset % blockSize != 0) {
-			Log.e(TAG, "device offset not a multiple of block size");
+	public void write(long offset, ByteBuffer src) throws IOException {
+		long devOffset = offset / blockSize + logicalBlockAddress;
+		// TODO try to make this more efficient by for example making tmp buffer global
+		if(offset % blockSize != 0) {
+			Log.w(TAG, "device offset not a multiple of block size");
+			ByteBuffer tmp = ByteBuffer.allocate(blockSize);
+			
+			blockDevice.read(devOffset, tmp);
+			tmp.clear();
+			tmp.position((int) (offset % blockSize));
+			int remaining = Math.min(tmp.remaining(), src.remaining());
+			tmp.put(src.array(), src.position(), remaining);
+			src.position(src.position() + remaining);
+			tmp.clear();
+			blockDevice.write(devOffset, tmp);
+			
+			devOffset++;
 		}
-		blockDevice.write(devOffset / blockSize + logicalBlockAddress, src);
+		
+		if(src.remaining() > 0)
+			blockDevice.write(devOffset, src);
 	}
 
 	@Override

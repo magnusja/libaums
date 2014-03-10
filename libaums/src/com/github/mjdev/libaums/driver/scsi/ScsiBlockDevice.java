@@ -41,6 +41,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		ByteBuffer inBuffer = ByteBuffer.allocate(36);
 		ScsiInquiry inquiry = new ScsiInquiry();
 		transferCommand(inquiry, inBuffer);
+		// TODO support multiple luns!
 		ScsiInquiryResponse inquiryResponse = ScsiInquiryResponse.read(inBuffer);
 		Log.d(TAG, "inquiry response: " + inquiryResponse);
 		
@@ -131,6 +132,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	@Override
 	public void read(long devOffset, ByteBuffer dest) throws IOException {
 		long time = System.currentTimeMillis();
+		// TODO try to make this more efficient by for example only allocating blockSize and making it global
 		ByteBuffer buffer;
 		if(dest.remaining() % blockSize != 0) {
 			Log.i(TAG, "we have to round up size to next block sector");
@@ -157,6 +159,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	@Override
 	public void write(long devOffset, ByteBuffer src) throws IOException {
 		long time = System.currentTimeMillis();
+		// TODO try to make this more efficient by for example only allocating blockSize and making it global
 		ByteBuffer buffer;
 		if(src.remaining() % blockSize != 0) {
 			Log.i(TAG, "we have to round up size to next block sector");

@@ -414,7 +414,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		UsbFile dir = adapter.getCurrentDir();
 		UsbFile file;
 		try {
-			file = dir.createFile("big_file_test");
+			file = dir.createFile("big_file_test.txt");
 			file.write(0, ByteBuffer.wrap("START\n".getBytes()));
 			int i;
 			
