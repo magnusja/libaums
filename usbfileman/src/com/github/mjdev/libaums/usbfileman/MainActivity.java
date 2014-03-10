@@ -91,8 +91,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 								dir.createDirectory(input.getText().toString());
 								activity.adapter.refresh();
 							} catch (Exception e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								Log.e(TAG, "error creating dir!", e);
 							}
 						}
 
@@ -147,8 +146,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 								file.close();
 								activity.adapter.refresh();
 							} catch (Exception e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								Log.e(TAG, "error creating file!", e);
 							}
 						}
 
@@ -208,8 +206,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				}
 				out.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Log.e(TAG, "error copying!", e);
 			}
 			Log.d(TAG, "copy time: " + (System.currentTimeMillis() - time));
 			return null;
@@ -306,6 +303,9 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	        case R.id.create_dir:
 	        	new NewDirDialog().show(getFragmentManager(), "NEW_DIR");
 	            return true;
+	        case R.id.create_big_file:
+	        	createBigFile();
+	            return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
@@ -323,16 +323,48 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 	    AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-		UsbFile entry = adapter.getItem((int)info.id);
+		final UsbFile entry = adapter.getItem((int)info.id);
 	    switch (item.getItemId()) {
 	        case R.id.delete_item:
-			try {
-				entry.delete();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+				try {
+					entry.delete();
+				} catch (IOException e) {
+					Log.e(TAG, "error deleting!", e);
+				}
 	            return true;
+	        case R.id.rename_item:
+	        	AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle("Rename");
+				builder.setMessage("Please enter a name for renaming");
+				final EditText input = new EditText(this);
+				input.setText(entry.getName());
+				builder.setView(input);
+
+				builder.setPositiveButton("Ok",
+						new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog,
+									int whichButton) {
+								try {
+									entry.setName(input.getText().toString());
+								} catch (IOException e) {
+									Log.e(TAG, "error renaming!", e);
+								}
+							}
+
+						});
+
+				builder.setNegativeButton("Cancel",
+						new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog,
+									int whichButton) {
+								dialog.dismiss();
+							}
+						});
+				builder.setCancelable(false);
+				builder.create().show();
+	        	return true;
 	        default:
 	            return super.onContextItemSelected(item);
 	    }
@@ -358,8 +390,25 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				new CopyTask().execute(param);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.e(TAG, "error staring to copy!", e);
+		}
+	}
+
+	private void createBigFile() {
+		UsbFile dir = adapter.getCurrentDir();
+		UsbFile file;
+		try {
+			file = dir.createFile("big_file_test");
+			file.write(0, ByteBuffer.wrap("START\n".getBytes()));
+			int i;
+			
+			for(i = 6; i < 9000; i += 5) {
+				file.write(i, ByteBuffer.wrap("TEST\n".getBytes()));
+			}
+
+			file.write(i, ByteBuffer.wrap("END\n".getBytes()));
+		} catch (IOException e) {
+			Log.e(TAG, "error creating big file!", e);
 		}
 	}
 
@@ -371,8 +420,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		} catch(NoSuchElementException e) {
 			super.onBackPressed();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.e(TAG, "error initializing adapter!", e);
 		}
 	}
 

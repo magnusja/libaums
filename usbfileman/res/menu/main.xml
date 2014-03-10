@@ -9,5 +9,9 @@
         android:id="@+id/create_dir"
         android:title="@string/create_dir">
     </item>
+    <item
+        android:id="@+id/create_big_file"
+        android:title="@string/create_big_file">
+    </item>
 
 </menu>

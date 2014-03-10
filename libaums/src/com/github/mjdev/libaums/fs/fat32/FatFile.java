@@ -49,8 +49,7 @@ public class FatFile implements UsbFile {
 
 	@Override
 	public void setName(String newName) throws IOException {
-		// TODO Auto-generated method stub
-		
+		parent.renameEntry(entry, newName);
 	}
 
 

@@ -79,6 +79,11 @@ import java.util.List;
 		if(lfnName != null) return lfnName;
 		return actualEntry.getShortName().getString();
 	}
+
+	/* package */ void setName(String newName, ShortName shortName) {
+		lfnName = newName;
+		actualEntry.setShortName(shortName);
+	}
 	
 	/* package */ long getFileSize() {
 		return actualEntry.getFileSize();

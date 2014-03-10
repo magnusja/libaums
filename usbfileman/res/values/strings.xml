@@ -6,5 +6,7 @@
     <string name="delete">Delete</string>
     <string name="create_file">Create file</string>
     <string name="create_dir">Create directory</string>
+    <string name="create_big_file">Create big file</string>
+    <string name="rename">Rename</string>
 
 </resources>

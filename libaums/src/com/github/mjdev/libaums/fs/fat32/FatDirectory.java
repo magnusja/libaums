@@ -41,15 +41,6 @@ public class FatDirectory implements UsbFile {
 		shortNameMap = new HashMap<ShortName, FatDirectoryEntry>();
 	}
 	
-	private void init() throws IOException {
-		if(chain == null) {
-			chain = new ClusterChain(entry.getStartCluster(), blockDevice, fat, bootSector);
-		}
-
-		if(entries.size() == 0)
-			readEntries();
-	}
-	
 	/* package */ static FatDirectory create(FatLfnDirectoryEntry entry, BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector, FatDirectory parent) throws IOException {
 		FatDirectory result = new FatDirectory(blockDevice, fat, bootSector, parent);
 		result.entry = entry;
@@ -61,6 +52,15 @@ public class FatDirectory implements UsbFile {
 		result.chain = new ClusterChain(bootSector.getRootDirStartCluster(), blockDevice, fat, bootSector);
 		result.init();
 		return result;
+	}
+	
+	private void init() throws IOException {
+		if(chain == null) {
+			chain = new ClusterChain(entry.getStartCluster(), blockDevice, fat, bootSector);
+		}
+
+		if(entries.size() == 0)
+			readEntries();
 	}
 	
 	private void readEntries() throws IOException {
@@ -109,6 +109,15 @@ public class FatDirectory implements UsbFile {
 		entries.remove(lfnEntry);
 		lfnMap.remove(lfnEntry.getName().toLowerCase(Locale.getDefault()));
 		shortNameMap.remove(lfnEntry.getActualEntry().getShortName());
+	}
+	
+	/* package */ void renameEntry(FatLfnDirectoryEntry lfnEntry, String newName) throws IOException {
+		if(lfnEntry.getName().equals(newName)) return;
+		
+		removeEntry(lfnEntry);
+		lfnEntry.setName(newName, ShortNameGenerator.generateShortName(newName, shortNameMap.keySet()));
+		addEntry(lfnEntry, lfnEntry.getActualEntry());
+		write();
 	}
 	
 	/* package */ void write() throws IOException {
@@ -229,8 +238,8 @@ public class FatDirectory implements UsbFile {
 
 	@Override
 	public void setName(String newName) throws IOException {
-		// TODO Auto-generated method stub
-		
+		if(isRoot()) throw new IllegalStateException("Cannot rename root dir!");
+		parent.renameEntry(entry, newName);
 	}
 
 	@Override
