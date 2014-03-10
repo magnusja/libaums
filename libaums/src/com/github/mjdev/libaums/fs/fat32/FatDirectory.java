@@ -105,6 +105,12 @@ public class FatDirectory implements UsbFile {
 		shortNameMap.put(entry.getShortName(), entry);
 	}
 	
+	/* package */  void removeEntry(FatLfnDirectoryEntry lfnEntry) {
+		entries.remove(lfnEntry);
+		lfnMap.remove(lfnEntry.getName().toLowerCase(Locale.getDefault()));
+		shortNameMap.remove(lfnEntry.getActualEntry().getShortName());
+	}
+	
 	/* package */ void write() throws IOException {
 		init();
 		final boolean writeVolumeLabel = isRoot() && volumeLabel != null;
@@ -220,6 +226,12 @@ public class FatDirectory implements UsbFile {
 	}
 
 	@Override
+	public void setName(String newName) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
 	public UsbFile getParent() {
 		return parent;
 	}
@@ -266,5 +278,15 @@ public class FatDirectory implements UsbFile {
 	@Override
 	public void close() throws IOException {
 		throw new UnsupportedOperationException("This is a directory!");
+	}
+
+	@Override
+	public void delete() throws IOException {
+		if(isRoot()) throw new IllegalStateException("Root dir cannot be deleted!");
+		
+		init();
+		parent.removeEntry(entry);
+		parent.write();
+		chain.setLength(0);
 	}
 }

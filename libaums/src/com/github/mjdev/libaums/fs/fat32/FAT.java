@@ -74,7 +74,7 @@ public class FAT {
 	/* package */ Long[] alloc(Long[] chain, int numberOfClusters) throws IOException {
 		final ArrayList<Long> result = new ArrayList<Long>(chain.length + numberOfClusters);
 		result.addAll(Arrays.asList(chain));
-		final int bufferSize = blockDevice.getBlockSize();
+		final int bufferSize = blockDevice.getBlockSize() * 2;
 		final ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
@@ -171,11 +171,11 @@ public class FAT {
 	
 	/* package */ Long[] free(Long[] chain, int numberOfClusters) throws IOException {
 		final int offsetInChain = chain.length - numberOfClusters;
-		final int bufferSize = blockDevice.getBlockSize();
+		final int bufferSize = blockDevice.getBlockSize() * 2;
 		final ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
-		if(offsetInChain <= 0)
+		if(offsetInChain < 0)
 			throw new IllegalStateException("trying to remove more clusters in chain than currently exist!");
 		
 		long currentCluster;
@@ -204,20 +204,25 @@ public class FAT {
 			buffer.putInt((int)offsetInBlock, 0);
 		}
 		
-		// write the end mark to last cluster in the new chain
-		currentCluster = chain[offsetInChain - 1];
-		offset = ((fatOffset[0] + currentCluster * 4) / bufferSize) * bufferSize;
-		offsetInBlock = ((fatOffset[0] + currentCluster * 4) % bufferSize);
-		if(lastOffset != offset) {
+		if(offsetInChain > 0) {
+			// write the end mark to last cluster in the new chain
+			currentCluster = chain[offsetInChain - 1];
+			offset = ((fatOffset[0] + currentCluster * 4) / bufferSize) * bufferSize;
+			offsetInBlock = ((fatOffset[0] + currentCluster * 4) % bufferSize);
+			if(lastOffset != offset) {
+				buffer.clear();
+				blockDevice.write(lastOffset, buffer);
+				buffer.clear();
+				blockDevice.read(offset, buffer);
+				lastOffset = offset;
+			}
+			buffer.putInt((int)offsetInBlock, FAT32_EOF_CLUSTER);
+			buffer.clear();
+			blockDevice.write(offset, buffer);
+		} else {
 			buffer.clear();
 			blockDevice.write(lastOffset, buffer);
-			buffer.clear();
-			blockDevice.read(offset, buffer);
-			lastOffset = offset;
 		}
-		buffer.putInt((int)offsetInBlock, FAT32_EOF_CLUSTER);
-		buffer.clear();
-		blockDevice.write(offset, buffer);
 		
 		Log.i(TAG, "freed " + numberOfClusters + " clusters");
 		

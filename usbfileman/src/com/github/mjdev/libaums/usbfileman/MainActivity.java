@@ -24,9 +24,14 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -144,6 +149,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		listView = (ListView) findViewById(R.id.listview);
 		
 		listView.setOnItemClickListener(this);
+		registerForContextMenu(listView);
 		
 		UsbManager usbManager  = (UsbManager) getSystemService(Context.USB_SERVICE);
 		UsbMassStorageDevice[] devices = UsbMassStorageDevice.getMassStorageDevices(this);
@@ -179,6 +185,14 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		}
 
 	}
+	
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+	                                ContextMenuInfo menuInfo) {
+	    super.onCreateContextMenu(menu, v, menuInfo);
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.context, menu);
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -186,14 +200,23 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-
+	
 	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		if(device != null) {
-			device.close();
-			unregisterReceiver(usbReceiver);
-		}
+	public boolean onContextItemSelected(MenuItem item) {
+	    AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		UsbFile entry = adapter.getItem((int)info.id);
+	    switch (item.getItemId()) {
+	        case R.id.delete_item:
+			try {
+				entry.delete();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	            return true;
+	        default:
+	            return super.onContextItemSelected(item);
+	    }
 	}
 	
 	@Override
@@ -231,6 +254,15 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		if(device != null) {
+			device.close();
+			unregisterReceiver(usbReceiver);
 		}
 	}
 }

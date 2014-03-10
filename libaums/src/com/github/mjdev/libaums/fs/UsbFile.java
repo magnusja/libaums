@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 public interface UsbFile {
 	public boolean isDirectory();
 	public String getName();
+	public void setName(String newName) throws IOException;
 	public UsbFile getParent();
 	public String[] list() throws IOException;
 	public UsbFile[] listFiles() throws IOException;
@@ -15,4 +16,5 @@ public interface UsbFile {
 	public void write(long offset, ByteBuffer source) throws IOException;
 	public void flush() throws IOException;
 	public void close() throws IOException;
+	public void delete() throws IOException;
 }

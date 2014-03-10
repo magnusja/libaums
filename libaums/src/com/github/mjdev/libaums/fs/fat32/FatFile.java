@@ -48,6 +48,13 @@ public class FatFile implements UsbFile {
 	}
 
 	@Override
+	public void setName(String newName) throws IOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
 	public UsbFile getParent() {
 		return parent;
 	}
@@ -101,6 +108,14 @@ public class FatFile implements UsbFile {
 	@Override
 	public void close() throws IOException {
 		flush();
+	}
+	
+	@Override
+	public void delete() throws IOException {
+		initChain();
+		parent.removeEntry(entry);
+		parent.write();
+		chain.setLength(0);
 	}
 
 }
