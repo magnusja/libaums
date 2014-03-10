@@ -107,9 +107,21 @@ import java.util.List;
 	/* package */ boolean isDirectory() {
 		return actualEntry.isDirectory();
 	}
+	
+	/* package */ void setDirectory() {
+		actualEntry.setDirectory();
+	}
 
 	/* package */ FatDirectoryEntry getActualEntry() {
 		return actualEntry;
+	}
+	
+	/* package */ static void copyDateTime(FatLfnDirectoryEntry from, FatLfnDirectoryEntry to) {
+		FatDirectoryEntry actualFrom = from.getActualEntry();
+		FatDirectoryEntry actualTo = from.getActualEntry();
+		actualTo.setCreatedDateTime(actualFrom.getCreatedDateTime());
+		actualTo.setLastAccessedDateTime(actualFrom.getLastAccessedDateTime());
+		actualTo.setLastModifiedDateTime(actualFrom.getLastModifiedDateTime());
 	}
 	
 	@Override

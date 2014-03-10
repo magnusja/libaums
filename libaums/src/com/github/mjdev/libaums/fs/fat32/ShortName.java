@@ -21,6 +21,11 @@ import java.util.Arrays;
         System.arraycopy(name.getBytes(Charset.forName("ASCII")), 0, tmp, 0, length);
         System.arraycopy(extension.getBytes(Charset.forName("ASCII")), 0, tmp, 8, extension.length());
         
+        // 0xe5 means entry deleted, so we have to convert it
+        if(tmp[0] == 0xe5) {
+        	tmp[0] = 0x05;
+        }
+        
         data = ByteBuffer.wrap(tmp);
 	}
 	
@@ -42,6 +47,8 @@ import java.util.Arrays;
 			name[i] = (char) (data.get(i) & 0xFF);
 		}
 		
+		// if first byte is 0x05 it is actually 0xe5 (KANJI lead byte, see Fat32 specification)
+		// this has to be done because 0xe5 is the magic for an delted entry
 		if(data.get(0) == 0x05) {
 			name[0] = (char) 0xe5;
 		}

@@ -6,6 +6,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import android.util.Log;
@@ -93,14 +94,19 @@ public class FatDirectory implements UsbFile {
 			}
 			
 			FatLfnDirectoryEntry lfnEntry = FatLfnDirectoryEntry.read(e, list);
-			entries.add(lfnEntry);
-			lfnMap.put(lfnEntry.getName(), lfnEntry);
-			shortNameMap.put(e.getShortName(), e);
+			addEntry(lfnEntry, e);
 			list.clear();
 		}
 	}
 	
+	private void addEntry(FatLfnDirectoryEntry lfnEntry, FatDirectoryEntry entry) {
+		entries.add(lfnEntry);
+		lfnMap.put(lfnEntry.getName().toLowerCase(Locale.getDefault()), lfnEntry);
+		shortNameMap.put(entry.getShortName(), entry);
+	}
+	
 	/* package */ void write() throws IOException {
+		init();
 		final boolean writeVolumeLabel = isRoot() && volumeLabel != null;
 		// first lookup the total entries needed
 		int totalEntryCount = 0;
@@ -141,8 +147,8 @@ public class FatDirectory implements UsbFile {
 		return volumeLabel;
 	}
 
-	public UsbFile createFile(String name) throws IOException {
-		if(lfnMap.containsKey(name)) throw new IOException("Item already exists!");
+	public FatFile createFile(String name) throws IOException {
+		if(lfnMap.containsKey(name.toLowerCase(Locale.getDefault()))) throw new IOException("Item already exists!");
 		
 		ShortName shortName = ShortNameGenerator.generateShortName(name, shortNameMap.keySet());
 		
@@ -151,12 +157,46 @@ public class FatDirectory implements UsbFile {
 		entry.setStartCluster(newStartCluster);
 		
 		Log.d(TAG, "adding entry: " + entry + " with short name: " + shortName);
-		entries.add(entry);
-		lfnMap.put(name, entry);
-		shortNameMap.put(shortName, entry.getActualEntry());
+		addEntry(entry, entry.getActualEntry());
 		write();
 		
 		return FatFile.create(entry, blockDevice, fat, bootSector, this);
+	}
+	
+	public FatDirectory createDirectory(String name) throws IOException {
+		if(lfnMap.containsKey(name.toLowerCase(Locale.getDefault()))) throw new IOException("Item already exists!");
+
+		ShortName shortName = ShortNameGenerator.generateShortName(name, shortNameMap.keySet());
+		
+		FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.createNew(name, shortName);
+		entry.setDirectory();
+		long newStartCluster = fat.alloc(new Long[0], 1)[0];
+		entry.setStartCluster(newStartCluster);
+		
+		Log.d(TAG, "adding entry: " + entry + " with short name: " + shortName);
+		addEntry(entry, entry.getActualEntry());
+		write();
+		
+		FatDirectory result = FatDirectory.create(entry, blockDevice, fat, bootSector, this);
+		
+		// first create the dot entry which points to the dir just created
+		FatLfnDirectoryEntry dotEntry = FatLfnDirectoryEntry.createNew(null, new ShortName(".", ""));
+		dotEntry.setDirectory();
+		dotEntry.setStartCluster(newStartCluster);
+		FatLfnDirectoryEntry.copyDateTime(entry, dotEntry);
+		result.addEntry(dotEntry, dotEntry.getActualEntry());
+		
+		// Second the dotdot entry which points to the parent directory (this)
+		// if parent is the root dir then set start cluster to zero
+		FatLfnDirectoryEntry dotDotEntry = FatLfnDirectoryEntry.createNew(null, new ShortName("..", ""));
+		dotDotEntry.setDirectory();
+		dotDotEntry.setStartCluster(isRoot() ? 0 : entry.getStartCluster());
+		FatLfnDirectoryEntry.copyDateTime(entry, dotDotEntry);
+		result.addEntry(dotDotEntry, dotDotEntry.getActualEntry());
+		
+		result.write();
+		
+		return result;
 	}
 	
 	@Override
@@ -200,7 +240,7 @@ public class FatDirectory implements UsbFile {
 		for(int i = 0; i < entries.size(); i++) {
 			FatLfnDirectoryEntry entry = entries.get(i);
 			if(entry.isDirectory()) {
-				list[i] = FatDirectory.create(entry, blockDevice, fat, bootSector, parent);
+				list[i] = FatDirectory.create(entry, blockDevice, fat, bootSector, this);
 			} else {
 				list[i] = FatFile.create(entry, blockDevice, fat, bootSector, this);
 			}
