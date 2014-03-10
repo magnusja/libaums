@@ -16,5 +16,7 @@ public interface UsbFile {
 	public void write(long offset, ByteBuffer source) throws IOException;
 	public void flush() throws IOException;
 	public void close() throws IOException;
+	public UsbFile createDirectory(String name) throws IOException;
+	public UsbFile createFile(String name) throws IOException;
 	public void delete() throws IOException;
 }

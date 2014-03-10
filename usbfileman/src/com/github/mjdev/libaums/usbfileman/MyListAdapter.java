@@ -48,9 +48,13 @@ public class MyListAdapter extends ArrayAdapter<UsbFile> {
 		inflater = (LayoutInflater) context
 			        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		
-		files = Arrays.asList(dir.listFiles());
-		
+		refresh();
+	}
+	
+	public void refresh() throws IOException {
+		files = Arrays.asList(currentDir.listFiles());
 		Collections.sort(files, comparator);
+		notifyDataSetChanged();
 	}
 
 	@Override

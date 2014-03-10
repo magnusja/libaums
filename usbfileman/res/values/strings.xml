@@ -2,8 +2,9 @@
 <resources>
 
     <string name="app_name">usbfileman</string>
-    <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="delete">Delete</string>
+    <string name="create_file">Create file</string>
+    <string name="create_dir">Create directory</string>
 
 </resources>

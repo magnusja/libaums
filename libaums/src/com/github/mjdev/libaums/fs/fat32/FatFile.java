@@ -109,6 +109,16 @@ public class FatFile implements UsbFile {
 	public void close() throws IOException {
 		flush();
 	}
+
+	@Override
+	public UsbFile createDirectory(String name) throws IOException {
+		throw new UnsupportedOperationException("This is a file!");
+	}
+
+	@Override
+	public UsbFile createFile(String name) throws IOException {
+		throw new UnsupportedOperationException("This is a file!");
+	}
 	
 	@Override
 	public void delete() throws IOException {

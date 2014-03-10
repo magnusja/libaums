@@ -10,11 +10,15 @@ import java.util.NoSuchElementException;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
@@ -33,7 +37,10 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mjdev.libaums.UsbMassStorageDevice;
@@ -42,8 +49,6 @@ import com.github.mjdev.libaums.fs.UsbFile;
 
 
 public class MainActivity extends Activity implements OnItemClickListener {
-	
-	String str = "asdasqweqwqrsadasd\nasdnusdfnjsidf8923489jinsdfgiudshfguisdhg89q234ruhsdfhsdfg\nsdfhuishuisdf\n\n\nasduasduhioahsdabsdhajsbdahkjbfsdfsdf\nsdfwefsdfsiuhdfjsdjfjsdhufhsdföösfsädfsäfwepiofhdsofuhgdsfg";
 	
 	private static final String ACTION_USB_PERMISSION =
 			"com.github.mjdev.libaums.USB_PERMISSION";
@@ -64,6 +69,104 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			}
 		}
 	};
+	
+	public static class NewDirDialog extends DialogFragment {
+		
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			final MainActivity activity = (MainActivity) getActivity();
+			AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+			builder.setTitle("New Directory");
+			builder.setMessage("Please enter a name for the new directory");
+			final EditText input = new EditText(activity);
+			builder.setView(input);
+
+			builder.setPositiveButton("Ok",
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog,
+								int whichButton) {
+							UsbFile dir = activity.adapter.getCurrentDir();
+							try {
+								dir.createDirectory(input.getText().toString());
+								activity.adapter.refresh();
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+
+					});
+
+			builder.setNegativeButton("Cancel",
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog,
+								int whichButton) {
+							dialog.dismiss();
+						}
+					});
+			builder.setCancelable(false);
+			return builder.create();
+		}
+		
+	}
+	
+	public static class NewFileDialog extends DialogFragment {
+		
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+			final MainActivity activity = (MainActivity) getActivity();
+			AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+			builder.setTitle("New File");
+			builder.setMessage("Please enter a name for the new file and some input");
+			final EditText input = new EditText(activity);
+			final EditText content = new EditText(activity);
+			LinearLayout layout = new LinearLayout(activity);
+			layout.setOrientation(LinearLayout.VERTICAL);
+			TextView textView = new TextView(activity);
+			textView.setText("Name:");
+			layout.addView(textView);
+			layout.addView(input);
+			textView = new TextView(activity);
+			textView.setText("Content:");
+			layout.addView(textView);
+			layout.addView(content);
+			
+			builder.setView(layout);
+
+			builder.setPositiveButton("Ok",
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog,
+								int whichButton) {
+							UsbFile dir = activity.adapter.getCurrentDir();
+							try {
+								UsbFile file = dir.createFile(input.getText().toString());
+								file.write(0, ByteBuffer.wrap(content.getText().toString().getBytes()));
+								file.close();
+								activity.adapter.refresh();
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+
+					});
+
+			builder.setNegativeButton("Cancel",
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog,
+								int whichButton) {
+							dialog.dismiss();
+						}
+					});
+			builder.setCancelable(false);
+			return builder.create();
+		}
+		
+	}
 	
 	private static class CopyTaskParam {
 		UsbFile from;
@@ -185,20 +288,36 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		}
 
 	}
-	
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-	                                ContextMenuInfo menuInfo) {
-	    super.onCreateContextMenu(menu, v, menuInfo);
-	    MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.context, menu);
-	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+	    switch (item.getItemId()) {
+	        case R.id.create_file:
+	        	new NewFileDialog().show(getFragmentManager(), "NEW_FILE");
+	            return true;
+	        case R.id.create_dir:
+	        	new NewDirDialog().show(getFragmentManager(), "NEW_DIR");
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
+
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+	                                ContextMenuInfo menuInfo) {
+	    super.onCreateContextMenu(menu, v, menuInfo);
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.context, menu);
 	}
 	
 	@Override

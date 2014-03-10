@@ -153,6 +153,7 @@ public class FatDirectory implements UsbFile {
 		return volumeLabel;
 	}
 
+	@Override
 	public FatFile createFile(String name) throws IOException {
 		if(lfnMap.containsKey(name.toLowerCase(Locale.getDefault()))) throw new IOException("Item already exists!");
 		
@@ -169,6 +170,7 @@ public class FatDirectory implements UsbFile {
 		return FatFile.create(entry, blockDevice, fat, bootSector, this);
 	}
 	
+	@Override
 	public FatDirectory createDirectory(String name) throws IOException {
 		if(lfnMap.containsKey(name.toLowerCase(Locale.getDefault()))) throw new IOException("Item already exists!");
 
