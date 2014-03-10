@@ -37,12 +37,16 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	}
 	
 	@Override
-	public void init() {
+	public void init() throws IOException {
 		ByteBuffer inBuffer = ByteBuffer.allocate(36);
 		ScsiInquiry inquiry = new ScsiInquiry();
 		transferCommand(inquiry, inBuffer);
 		ScsiInquiryResponse inquiryResponse = ScsiInquiryResponse.read(inBuffer);
 		Log.d(TAG, "inquiry response: " + inquiryResponse);
+		
+		if(inquiryResponse.getPeripheralQualifier() != 0 || inquiryResponse.getPeripheralDeviceType() != 0) {
+			throw new IOException("unsupported PeripheralQualifier or PeripheralDeviceType");
+		}
 		
 		ScsiTestUnitReady testUnit = new ScsiTestUnitReady();
 		if(!transferCommand(testUnit, null)) {
