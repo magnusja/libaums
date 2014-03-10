@@ -292,6 +292,44 @@ public class FatDirectory implements UsbFile {
 	}
 
 	@Override
+	public void moveTo(UsbFile destination) throws IOException {
+		if(isRoot()) throw new IllegalStateException("cannot move root dir!");
+		
+		if(!destination.isDirectory()) throw new IllegalStateException("destination cannot be a file!");
+		if(!(destination instanceof FatDirectory)) throw new IllegalStateException("cannot move between different filesystems!");
+		// TODO check if destination is really on the same physical device or partition!
+		
+		FatDirectory destinationDir = (FatDirectory) destination;
+		if(destinationDir.lfnMap.containsKey(entry.getName().toLowerCase(Locale.getDefault())))
+			throw new IOException("item already exists in destination!");
+		
+		// now the actual magic happens!
+		parent.removeEntry(entry);
+		destinationDir.addEntry(entry, entry.getActualEntry());
+		
+		parent.write();
+		destinationDir.write();
+		parent = destinationDir;
+	}
+	
+	public void move(FatLfnDirectoryEntry entry, UsbFile destination) throws IOException {
+		if(!destination.isDirectory())  throw new IllegalStateException("destination cannot be a file!");
+		if(!(destination instanceof FatDirectory)) throw new IllegalStateException("cannot move between different filesystems!");
+		// TODO check if destination is really on the same physical device or partition!
+		
+		FatDirectory destinationDir = (FatDirectory) destination;
+		if(destinationDir.lfnMap.containsKey(entry.getName().toLowerCase(Locale.getDefault())))
+			throw new IOException("item already exists in destination!");
+		
+		// now the actual magic happens!
+		removeEntry(entry);
+		destinationDir.addEntry(entry, entry.getActualEntry());
+		
+		write();
+		destinationDir.write();
+	}
+
+	@Override
 	public void delete() throws IOException {
 		if(isRoot()) throw new IllegalStateException("Root dir cannot be deleted!");
 		

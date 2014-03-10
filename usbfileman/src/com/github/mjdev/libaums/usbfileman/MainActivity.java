@@ -294,6 +294,13 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	}
 	
 	@Override
+	public boolean onPrepareOptionsMenu (Menu menu) {
+		MoveClipboard cl = MoveClipboard.getInstance();
+		menu.findItem(R.id.paste).setEnabled(cl.getFile() != null);
+		return true;
+	}
+	
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
 	    switch (item.getItemId()) {
@@ -306,6 +313,9 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	        case R.id.create_big_file:
 	        	createBigFile();
 	            return true;
+	        case R.id.paste:
+	        	move();
+	        	return true;
 	        default:
 	            return super.onOptionsItemSelected(item);
 	    }
@@ -328,6 +338,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	        case R.id.delete_item:
 				try {
 					entry.delete();
+					adapter.refresh();
 				} catch (IOException e) {
 					Log.e(TAG, "error deleting!", e);
 				}
@@ -347,6 +358,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 									int whichButton) {
 								try {
 									entry.setName(input.getText().toString());
+									adapter.refresh();
 								} catch (IOException e) {
 									Log.e(TAG, "error renaming!", e);
 								}
@@ -364,6 +376,10 @@ public class MainActivity extends Activity implements OnItemClickListener {
 						});
 				builder.setCancelable(false);
 				builder.create().show();
+	        	return true;
+	        case R.id.move_item:
+	        	MoveClipboard cl = MoveClipboard.getInstance();
+	        	cl.setFile(entry);
 	        	return true;
 	        default:
 	            return super.onContextItemSelected(item);
@@ -407,9 +423,25 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			}
 
 			file.write(i, ByteBuffer.wrap("END\n".getBytes()));
+			
+			file.close();
+
+			adapter.refresh();
 		} catch (IOException e) {
 			Log.e(TAG, "error creating big file!", e);
 		}
+	}
+
+	private void move() {
+		MoveClipboard cl = MoveClipboard.getInstance();
+		UsbFile file = cl.getFile();
+		try {
+			file.moveTo(adapter.getCurrentDir());
+			adapter.refresh();
+		} catch (IOException e) {
+			Log.e(TAG, "error moving!", e);
+		}
+		cl.setFile(null);
 	}
 
 	@Override

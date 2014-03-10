@@ -18,5 +18,6 @@ public interface UsbFile {
 	public void close() throws IOException;
 	public UsbFile createDirectory(String name) throws IOException;
 	public UsbFile createFile(String name) throws IOException;
+	public void moveTo(UsbFile destination) throws IOException;
 	public void delete() throws IOException;
 }

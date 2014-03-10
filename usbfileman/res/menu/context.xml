@@ -9,5 +9,13 @@
         android:id="@+id/rename_item"
         android:title="@string/rename">
     </item>
+    <item
+        android:id="@+id/cut_item"
+        android:title="@string/cut">
+    </item>
+    <item
+        android:id="@+id/move_item"
+        android:title="@string/move">
+    </item>
 
 </menu>
