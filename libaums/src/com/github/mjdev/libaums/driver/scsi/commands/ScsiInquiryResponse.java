@@ -1,8 +1,33 @@
+/*
+ * (C) Copyright 2014 mjahnen <jahnen@in.tum.de>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
+
 package com.github.mjdev.libaums.driver.scsi.commands;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+/**
+ * This class represents the response of an SCSI Inquiry. It holds various information about
+ * the mass storage device.
+ * <p>
+ * This command is received in the data phase.
+ * @author mjahnen
+ * @see com.github.mjdev.libaums.driver.scsi.commands.ScsiInquiry
+ */
 public class ScsiInquiryResponse {
 	
 	private byte peripheralQualifier;
@@ -15,6 +40,11 @@ public class ScsiInquiryResponse {
 		
 	}
 	
+	/**
+	 * Constructs a new object with the given data.
+	 * @param buffer The data where the {@link #ScsiInquiryResponse()} is located.
+	 * @return The parsed {@link #ScsiInquiryResponse()}.
+	 */
 	public static ScsiInquiryResponse read(ByteBuffer buffer) {
 		ScsiInquiryResponse response = new ScsiInquiryResponse();
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -27,18 +57,34 @@ public class ScsiInquiryResponse {
 		return response;
 	}
 
+	/**
+	 * 
+	 * @return Zero if a device is connected to the unit.
+	 */
 	public byte getPeripheralQualifier() {
 		return peripheralQualifier;
 	}
 
+	/**
+	 * The type of the mass storage device.
+	 * @return Zero for a direct access block device.
+	 */
 	public byte getPeripheralDeviceType() {
 		return peripheralDeviceType;
 	}
 
+	/**
+	 * 
+	 * @return True if the media can be removed (eg. card reader).
+	 */
 	public boolean isRemovableMedia() {
 		return removableMedia;
 	}
 
+	/**
+	 * This method returns the version of the SPC standard the device supports.
+	 * @return
+	 */
 	public byte getSpcVersion() {
 		return spcVersion;
 	}

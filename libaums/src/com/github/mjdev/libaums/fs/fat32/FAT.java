@@ -1,3 +1,20 @@
+/*
+ * (C) Copyright 2014 mjahnen <jahnen@in.tum.de>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
+
 package com.github.mjdev.libaums.fs.fat32;
 
 import java.io.IOException;
@@ -10,10 +27,25 @@ import android.util.Log;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 
+/**
+ * This class represents the file allocation table in a FAT32 file system. The FAT is used
+ * to allocate the space of the disk to the different files and directories.
+ * <p>
+ * The FAT distributes clusters with a specific cluster size {@link com.github.mjdev.libaums.fs.fat32.Fat32BootSector #getBytesPerCluster()}.
+ * Every entry in the FAT is 32 bit. The FAT is a list where the clusters can be followed until a cluster chain ends.
+ * <p>
+ * For more information you should refer to the official documentation of FAT32.
+ * @author mjahnen
+ *
+ */
 public class FAT {
 
 	private static final String TAG = FAT.class.getSimpleName();
 	
+	/**
+	 * End of file / chain marker. This is used to determine when follwing a
+	 * cluster chain should be stopped.
+	 */
 	private static final int FAT32_EOF_CLUSTER = 0x0FFFFFF8;
 
 	private BlockDeviceDriver blockDevice;
@@ -21,6 +53,12 @@ public class FAT {
 	private int fatNumbers[];
 	private FsInfoStructure fsInfoStructure;
 	
+	/**
+	 * Constructs a new FAT.
+	 * @param blockDevice The block device where the FAT is located.
+	 * @param bootSector The corresponding boot sector of the FAT32 file system.
+	 * @param fsInfoStructure The info structure where the last allocated block and the free clusters are saved.
+	 */
 	/* package */ FAT(BlockDeviceDriver blockDevice, Fat32BootSector bootSector, FsInfoStructure fsInfoStructure) {
 		this.blockDevice = blockDevice;
 		this.fsInfoStructure = fsInfoStructure;
@@ -43,9 +81,18 @@ public class FAT {
 		}
 	}
 	
+	/**
+	 * This methods gets a chain by following the given start cluster to an end mark. 
+	 * @param startCluster The start cluster where the chain starts.
+	 * @return The chain including the start cluster.
+	 * @throws IOException If reading from device fails.
+	 */
 	/* package */ Long[] getChain(long startCluster) throws IOException {
 		final ArrayList<Long> result = new ArrayList<Long>();
 		final int bufferSize = blockDevice.getBlockSize() * 2;
+		// for performance reasons we always read or write two times the block size
+		// this is esp. good for long cluster chains because it reduces of read or writes
+		// and mostly cluster chains are located consecutively in the FAT
 		final ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		
@@ -59,6 +106,7 @@ public class FAT {
 			offset = ((fatOffset[0] + currentCluster * 4) / bufferSize) * bufferSize;
 			offsetInBlock = ((fatOffset[0] + currentCluster * 4) % bufferSize);
 			
+			// if we have a new offset we are forced to read again
 			if(lastOffset != offset) {
 				buffer.clear();
 				blockDevice.read(offset, buffer);
@@ -71,9 +119,21 @@ public class FAT {
 		return result.toArray(new Long[0]);
 	}
 	
+	/**
+	 * This methods searches for free clusters in the chain and then assigns it to the existing
+	 * chain which is given at a parameter. The current chain given as parameter can also be empty
+	 * so that a completely new chain (with a new start cluster) is created.
+	 * @param chain The existing chain or an empty array to create a completely new chain.
+	 * @param numberOfClusters The number of clusters which shall newly be allocated.
+	 * @return The new chain including the old and the newly allocated clusters.
+	 * @throws IOException If reading or writing to the FAT fails.
+	 */
 	/* package */ Long[] alloc(Long[] chain, int numberOfClusters) throws IOException {
 		final ArrayList<Long> result = new ArrayList<Long>(chain.length + numberOfClusters);
 		result.addAll(Arrays.asList(chain));
+		// for performance reasons we always read or write two times the block size
+		// this is esp. good for long cluster chains because it reduces of read or writes
+		// and mostly cluster chains are located consecutively in the FAT
 		final int bufferSize = blockDevice.getBlockSize() * 2;
 		final ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -101,7 +161,8 @@ public class FAT {
 			currentCluster++;
 			offset = ((fatOffset[0] + currentCluster * 4) / bufferSize) * bufferSize;
 			offsetInBlock = ((fatOffset[0] + currentCluster * 4) % bufferSize);
-			
+
+			// if we have a new offset we are forced to read again
 			if(lastOffset != offset) {
 				buffer.clear();
 				blockDevice.read(offset, buffer);
@@ -120,6 +181,8 @@ public class FAT {
 			// start with the last cluster in the existing chain
 			offset = ((fatOffset[0] + cluster * 4) / bufferSize) * bufferSize;
 			offsetInBlock = ((fatOffset[0] + cluster * 4) % bufferSize);
+
+			// if we have a new offset we are forced to read again
 			if(lastOffset != offset) {
 				buffer.clear();
 				blockDevice.read(offset, buffer);
@@ -133,7 +196,8 @@ public class FAT {
 			currentCluster = result.get(i);
 			offset = ((fatOffset[0] + currentCluster * 4) / bufferSize) * bufferSize;
 			offsetInBlock = ((fatOffset[0] + currentCluster * 4) % bufferSize);
-			
+
+			// if we have a new offset we are forced to read again
 			if(lastOffset != offset) {
 				buffer.clear();
 				blockDevice.write(lastOffset, buffer);
@@ -149,6 +213,8 @@ public class FAT {
 		currentCluster = result.get(result.size() - 1);
 		offset = ((fatOffset[0] + currentCluster * 4) / bufferSize) * bufferSize;
 		offsetInBlock = ((fatOffset[0] + currentCluster * 4) % bufferSize);
+		
+		// if we have a new offset we are forced to read again
 		if(lastOffset != offset) {
 			buffer.clear();
 			blockDevice.write(lastOffset, buffer);
@@ -170,8 +236,22 @@ public class FAT {
 		return result.toArray(new Long[0]);
 	}
 	
+	/**
+	 * This methods frees the desired number of clusters in the FAT and then sets the last remaining
+	 * cluster to the end mark. If all clusters are requested to be freed the last step will be omitted.
+	 * <p>
+	 * This methods frees the clusters starting at the end of the existing cluster chain.
+	 * @param chain The existing chain where the clusters shall be freed from.
+	 * @param numberOfClusters The amount of clusters which shall be freed.
+	 * @return The new chain without the unneeded clusters.
+	 * @throws IOException If reading or writing to the FAT fails.
+	 * @throws IllegalStateException If more clusters are requested to be freed than currently exist in the chain.
+	 */
 	/* package */ Long[] free(Long[] chain, int numberOfClusters) throws IOException {
 		final int offsetInChain = chain.length - numberOfClusters;
+		// for performance reasons we always read or write two times the block size
+		// this is esp. good for long cluster chains because it reduces of read or writes
+		// and mostly cluster chains are located consecutively in the FAT
 		final int bufferSize = blockDevice.getBlockSize() * 2;
 		final ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -190,7 +270,8 @@ public class FAT {
 			currentCluster = chain[i];
 			offset = ((fatOffset[0] + currentCluster * 4) / bufferSize) * bufferSize;
 			offsetInBlock = ((fatOffset[0] + currentCluster * 4) % bufferSize);
-			
+
+			// if we have a new offset we are forced to read again
 			if(lastOffset != offset) {
 				if(lastOffset != -1) {
 					buffer.clear();
@@ -211,6 +292,8 @@ public class FAT {
 			currentCluster = chain[offsetInChain - 1];
 			offset = ((fatOffset[0] + currentCluster * 4) / bufferSize) * bufferSize;
 			offsetInBlock = ((fatOffset[0] + currentCluster * 4) % bufferSize);
+
+			// if we have a new offset we are forced to read again
 			if(lastOffset != offset) {
 				buffer.clear();
 				blockDevice.write(lastOffset, buffer);
@@ -222,6 +305,8 @@ public class FAT {
 			buffer.clear();
 			blockDevice.write(offset, buffer);
 		} else {
+			// if we freed all clusters we have to write the last change of the
+			// for loop above
 			buffer.clear();
 			blockDevice.write(lastOffset, buffer);
 		}

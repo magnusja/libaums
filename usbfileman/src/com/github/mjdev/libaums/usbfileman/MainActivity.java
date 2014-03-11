@@ -1,3 +1,20 @@
+/*
+ * (C) Copyright 2014 mjahnen <jahnen@in.tum.de>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
+
 package com.github.mjdev.libaums.usbfileman;
 
 import java.io.File;
@@ -47,9 +64,16 @@ import com.github.mjdev.libaums.UsbMassStorageDevice;
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.UsbFile;
 
-
+/**
+ * MainActivity of the demo application which shows the contents of the first partition.
+ * @author mjahnen
+ *
+ */
 public class MainActivity extends Activity implements OnItemClickListener {
 	
+	/**
+	 * Action string to request the permission to communicate with an UsbDevice.
+	 */
 	private static final String ACTION_USB_PERMISSION =
 			"com.github.mjdev.libaums.USB_PERMISSION";
 	private static final String TAG = MainActivity.class.getSimpleName();
@@ -57,8 +81,10 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
+			
 			String action = intent.getAction();
 			if (ACTION_USB_PERMISSION.equals(action)) {
+				
 				UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 				if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
 					
@@ -66,10 +92,17 @@ public class MainActivity extends Activity implements OnItemClickListener {
 						setupDevice();
 					}
 				}
+				
 			}
+			
 		}
 	};
 	
+	/**
+	 * Dialog to create new directories.
+	 * @author mjahnen
+	 *
+	 */
 	public static class NewDirDialog extends DialogFragment {
 		
 		@Override
@@ -86,6 +119,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 						@Override
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
+							
 							UsbFile dir = activity.adapter.getCurrentDir();
 							try {
 								dir.createDirectory(input.getText().toString());
@@ -93,6 +127,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 							} catch (Exception e) {
 								Log.e(TAG, "error creating dir!", e);
 							}
+							
 						}
 
 					});
@@ -105,12 +140,18 @@ public class MainActivity extends Activity implements OnItemClickListener {
 							dialog.dismiss();
 						}
 					});
+			
 			builder.setCancelable(false);
 			return builder.create();
 		}
 		
 	}
 	
+	/**
+	 * Dialog to create new files.
+	 * @author mjahnen
+	 *
+	 */
 	public static class NewFileDialog extends DialogFragment {
 		
 		@Override
@@ -139,6 +180,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 						@Override
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
+							
 							UsbFile dir = activity.adapter.getCurrentDir();
 							try {
 								UsbFile file = dir.createFile(input.getText().toString());
@@ -148,6 +190,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 							} catch (Exception e) {
 								Log.e(TAG, "error creating file!", e);
 							}
+							
 						}
 
 					});
@@ -160,21 +203,33 @@ public class MainActivity extends Activity implements OnItemClickListener {
 							dialog.dismiss();
 						}
 					});
+			
 			builder.setCancelable(false);
 			return builder.create();
 		}
 		
 	}
 	
+	/**
+	 * Class to hold the files for a copy task. Holds the source and the destination file.
+	 * @author mjahnen
+	 *
+	 */
 	private static class CopyTaskParam {
-		UsbFile from;
-		File to;
+		/* package */ UsbFile from;
+		/* package */ File to;
 	}
 	
+	/**
+	 * Asynchronous task to copy a file from the mass storage device connected via usb to the
+	 * internal sotrage.
+	 * @author mjahnen
+	 *
+	 */
 	private class CopyTask extends AsyncTask<CopyTaskParam, Integer, Void> {
 		
-		ProgressDialog dialog;
-		CopyTaskParam param;
+		private ProgressDialog dialog;
+		private CopyTaskParam param;
 		
 		public CopyTask() {
 			dialog = new ProgressDialog(MainActivity.this);
@@ -236,10 +291,10 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		
 	}
 	
-	ListView listView;
-	UsbMassStorageDevice device;
-	MyListAdapter adapter;
-	Deque<UsbFile> dirs = new ArrayDeque<UsbFile>();
+	private ListView listView;
+	private UsbMassStorageDevice device;
+	/* package */ UsbFileListAdapter adapter;
+	private Deque<UsbFile> dirs = new ArrayDeque<UsbFile>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -261,25 +316,31 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			return;
 		}
 
+		// we only use the first device
 		device = devices[0];
 
+		// first request permission from user to communicate with the underlying UsbDevice
 		PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
 		IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
 		registerReceiver(usbReceiver, filter);
 		usbManager.requestPermission(device.getUsbDevice(), permissionIntent);
 	}
 	
+	/**
+	 * Sets the device up and shows the contents of the root directory.
+	 */
 	private void setupDevice() {
 		try {
 			device.init();
 			
+			// we always use the first partition of the device
 			FileSystem fs = device.getPartitions().get(0).getFileSystem();
 			UsbFile root = fs.getRootDirectory();
 			
 			ActionBar actionBar = getActionBar();
 			actionBar.setTitle(fs.getVolumeLabel());
 			
-			listView.setAdapter(adapter = new MyListAdapter(this, root));
+			listView.setAdapter(adapter = new UsbFileListAdapter(this, root));
 		} catch (IOException e) {
 			Log.e(TAG, "error setting up device", e);
 		}
@@ -392,7 +453,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		try {
 			if(entry.isDirectory()) {
 				dirs.push(adapter.getCurrentDir());
-				listView.setAdapter(adapter = new MyListAdapter(this, entry));
+				listView.setAdapter(adapter = new UsbFileListAdapter(this, entry));
 
 			} else {
 				CopyTaskParam param = new CopyTaskParam();
@@ -410,6 +471,12 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		}
 	}
 
+	/**
+	 * This methods creates a very big file for testing purposes. It writes only a small chunk of
+	 * bytes in every loop iteration, so the offset where the write starts will not always be a multiple
+	 * of the cluster or block size of the file system or block device. As a plus the file has to be grown
+	 * after every loop iteration which tests for example on FAT32 the dynamic growth of a cluster chain.
+	 */
 	private void createBigFile() {
 		UsbFile dir = adapter.getCurrentDir();
 		UsbFile file;
@@ -432,6 +499,10 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		}
 	}
 
+	/**
+	 * This method moves the file located in the {@link MoveClipboard} into the current shown
+	 * directory.
+	 */
 	private void move() {
 		MoveClipboard cl = MoveClipboard.getInstance();
 		UsbFile file = cl.getFile();
@@ -448,7 +519,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	public void onBackPressed() {
 		try {
 			UsbFile dir = dirs.pop();
-			listView.setAdapter(adapter = new MyListAdapter(this, dir));
+			listView.setAdapter(adapter = new UsbFileListAdapter(this, dir));
 		} catch(NoSuchElementException e) {
 			super.onBackPressed();
 		} catch (IOException e) {

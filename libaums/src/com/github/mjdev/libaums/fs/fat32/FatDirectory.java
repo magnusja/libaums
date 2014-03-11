@@ -1,3 +1,20 @@
+/*
+ * (C) Copyright 2014 mjahnen <jahnen@in.tum.de>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
+
 package com.github.mjdev.libaums.fs.fat32;
 
 import java.io.IOException;
@@ -14,6 +31,11 @@ import android.util.Log;
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 import com.github.mjdev.libaums.fs.UsbFile;
 
+/**
+ * This class represents a directory in the FAT32 file system. It can hold other directories and files.
+ * @author mjahnen
+ *
+ */
 public class FatDirectory implements UsbFile {
 	
 	private static String TAG = FatDirectory.class.getSimpleName();
@@ -22,14 +44,41 @@ public class FatDirectory implements UsbFile {
 	private BlockDeviceDriver blockDevice;
 	private FAT fat;
 	private Fat32BootSector bootSector;
+	/**
+	 * Entries read from the device.
+	 */
 	private List<FatLfnDirectoryEntry> entries;
+	/**
+	 * Map for checking for existence when for example creating
+	 * new files or directories.
+	 * <p>
+	 * All items are stored in lower case because a FAT32 fs is not
+	 * case sensitive.
+	 */
 	private Map<String, FatLfnDirectoryEntry> lfnMap;
+	/**
+	 * Map for checking for existence of short names when generating
+	 * short names for new files or directorys.
+	 */
 	private Map<ShortName, FatDirectoryEntry> shortNameMap;
+	/**
+	 * Null if this is the root directory.
+	 */
 	private FatDirectory parent;
+	/**
+	 * Null if this is the root directory.
+	 */
 	private FatLfnDirectoryEntry entry;
 	
 	private String volumeLabel;
 	
+	/**
+	 * Constructs a new FatDirectory with the given information.
+	 * @param blockDevice The block device the fs is located.
+	 * @param fat The FAT of the fs.
+	 * @param bootSector The boot sector if the fs.
+	 * @param parent The parent directory of the newly created one.
+	 */
 	private FatDirectory(BlockDeviceDriver blockDevice, FAT fat,
 			Fat32BootSector bootSector, FatDirectory parent) {
 		this.blockDevice = blockDevice;
@@ -41,12 +90,29 @@ public class FatDirectory implements UsbFile {
 		shortNameMap = new HashMap<ShortName, FatDirectoryEntry>();
 	}
 	
-	/* package */ static FatDirectory create(FatLfnDirectoryEntry entry, BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector, FatDirectory parent) throws IOException {
+	/**
+	 * This method creates a new directory from a given {@link FatDirectoryEntry}.
+	 * @param entry The entry of the directory.
+	 * @param blockDevice The block device the fs is located.
+	 * @param fat The FAT of the fs.
+	 * @param bootSector The boot sector if the fs.
+	 * @param parent The parent directory of the newly created one.
+	 * @return Newly created directory.
+	 */
+	/* package */ static FatDirectory create(FatLfnDirectoryEntry entry, BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector, FatDirectory parent) {
 		FatDirectory result = new FatDirectory(blockDevice, fat, bootSector, parent);
 		result.entry = entry;
 		return result;
 	}
 
+	/**
+	 * Reads the root directory from a FAT32 file system.
+	 * @param blockDevice The block device the fs is located.
+	 * @param fat The FAT of the fs.
+	 * @param bootSector The boot sector if the fs.
+	 * @return Newly created root directory.
+	 * @throws IOException If reading from the device fails.
+	 */
 	/* package */ static FatDirectory readRoot(BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector) throws IOException {
 		FatDirectory result = new FatDirectory(blockDevice, fat, bootSector, null);
 		result.chain = new ClusterChain(bootSector.getRootDirStartCluster(), blockDevice, fat, bootSector);
@@ -54,6 +120,11 @@ public class FatDirectory implements UsbFile {
 		return result;
 	}
 	
+	/**
+	 * Initializes the {@link FatDirectory}. Creates the cluster chain if needed
+	 * and reads all entries from the cluster chain.
+	 * @throws IOException If reading from the device fails.
+	 */
 	private void init() throws IOException {
 		if(chain == null) {
 			chain = new ClusterChain(entry.getStartCluster(), blockDevice, fat, bootSector);
@@ -63,9 +134,15 @@ public class FatDirectory implements UsbFile {
 			readEntries();
 	}
 	
+	/**
+	 * Reads all entries from the directory and saves them into {@link #lfnMap}, {@link #entries} and {@link #shortNameMap}.
+	 * @throws IOException If reading from the device fails.
+	 * @see #write()
+	 */
 	private void readEntries() throws IOException {
 		ByteBuffer buffer = ByteBuffer.allocate((int)chain.getLength());
 		chain.read(0, buffer);
+		// we have to buffer all long filename entries to parse them later
 		ArrayList<FatDirectoryEntry> list = new ArrayList<FatDirectoryEntry>();
 		buffer.flip();
 		while(buffer.remaining() > 0) {
@@ -88,6 +165,7 @@ public class FatDirectory implements UsbFile {
 				continue;
 			}
 			
+			// we just skip deleted entries
 			if(e.isDeleted()) {
 				list.clear();
 				continue;
@@ -99,18 +177,45 @@ public class FatDirectory implements UsbFile {
 		}
 	}
 	
+	/**
+	 * Adds the long file name entry to {@link #lfnMap} and {@link #entries} and the actual
+	 * entry to {@link #shortNameMap}.
+	 * <p>
+	 * This method does not write the changes to the disk. If you want to do so call {@link #write()}
+	 * after adding an entry.
+	 * @param lfnEntry The long filename entry to add.
+	 * @param entry The corresponding short name entry.
+	 * @see #removeEntry(FatLfnDirectoryEntry)
+	 */
 	private void addEntry(FatLfnDirectoryEntry lfnEntry, FatDirectoryEntry entry) {
 		entries.add(lfnEntry);
 		lfnMap.put(lfnEntry.getName().toLowerCase(Locale.getDefault()), lfnEntry);
 		shortNameMap.put(entry.getShortName(), entry);
 	}
 	
+	/**
+	 * Removes (if existing) the long file name entry from {@link #lfnMap} and {@link #entries} and the actual
+	 * entry from {@link #shortNameMap}.
+	 * <p>
+	 * This method does not write the changes to the disk. If you want to do so call {@link #write()}
+	 * after adding an entry.
+	 * @param lfnEntry The long filename entry to remove.
+	 * @see #addEntry(FatLfnDirectoryEntry, FatDirectoryEntry)
+	 */
 	/* package */  void removeEntry(FatLfnDirectoryEntry lfnEntry) {
 		entries.remove(lfnEntry);
 		lfnMap.remove(lfnEntry.getName().toLowerCase(Locale.getDefault()));
 		shortNameMap.remove(lfnEntry.getActualEntry().getShortName());
 	}
 	
+	/**
+	 * Renames a long filename entry to the desired new name.
+	 * <p>
+	 * This method immediately writes the change to the disk, thus no further call to {@link #write()} is needed.
+	 * @param lfnEntry The long filename entry to rename.
+	 * @param newName The new name.
+	 * @throws IOException If writing the change to the disk fails.
+	 */
 	/* package */ void renameEntry(FatLfnDirectoryEntry lfnEntry, String newName) throws IOException {
 		if(lfnEntry.getName().equals(newName)) return;
 		
@@ -120,6 +225,12 @@ public class FatDirectory implements UsbFile {
 		write();
 	}
 	
+	/**
+	 * Writes the {@link #entries} to the disk. Any changes made by {@link #addEntry(FatLfnDirectoryEntry, FatDirectoryEntry)}
+	 * or {@link #removeEntry(FatLfnDirectoryEntry)} will then be stored also on the device.
+	 * @throws IOException
+	 * @see {@link #write()}
+	 */
 	/* package */ void write() throws IOException {
 		init();
 		final boolean writeVolumeLabel = isRoot() && volumeLabel != null;
@@ -154,10 +265,19 @@ public class FatDirectory implements UsbFile {
 		chain.write(0, buffer);
 	}
 	
+	/**
+	 * 
+	 * @return True if this directory is the root directory.
+	 */
 	private boolean isRoot() {
 		return entry == null;
 	}
 	
+	/**
+	 * This method returns the volume label which can be stored in the
+	 * root directory of a FAT32 file system.
+	 * @return The volume label.
+	 */
 	/* package */ String getVolumeLabel() {
 		return volumeLabel;
 	}
@@ -169,11 +289,13 @@ public class FatDirectory implements UsbFile {
 		ShortName shortName = ShortNameGenerator.generateShortName(name, shortNameMap.keySet());
 		
 		FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.createNew(name, shortName);
+		// alloc completely new chain
 		long newStartCluster = fat.alloc(new Long[0], 1)[0];
 		entry.setStartCluster(newStartCluster);
 		
 		Log.d(TAG, "adding entry: " + entry + " with short name: " + shortName);
 		addEntry(entry, entry.getActualEntry());
+		// write changes immediately to disk
 		write();
 		
 		return FatFile.create(entry, blockDevice, fat, bootSector, this);
@@ -187,11 +309,13 @@ public class FatDirectory implements UsbFile {
 		
 		FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.createNew(name, shortName);
 		entry.setDirectory();
+		// alloc completely new chain
 		long newStartCluster = fat.alloc(new Long[0], 1)[0];
 		entry.setStartCluster(newStartCluster);
 		
 		Log.d(TAG, "adding entry: " + entry + " with short name: " + shortName);
 		addEntry(entry, entry.getActualEntry());
+		// write changes immediately to disk
 		write();
 		
 		FatDirectory result = FatDirectory.create(entry, blockDevice, fat, bootSector, this);
@@ -210,7 +334,8 @@ public class FatDirectory implements UsbFile {
 		dotDotEntry.setStartCluster(isRoot() ? 0 : entry.getStartCluster());
 		FatLfnDirectoryEntry.copyDateTime(entry, dotDotEntry);
 		result.addEntry(dotDotEntry, dotDotEntry.getActualEntry());
-		
+
+		// write changes immediately to disk
 		result.write();
 		
 		return result;
@@ -312,6 +437,15 @@ public class FatDirectory implements UsbFile {
 		parent = destinationDir;
 	}
 	
+	/**
+	 * This method moves an long filename entry currently stored in THIS directory to the 
+	 * destination which also must be a directory.
+	 * @param entry The entry which shall be moved.
+	 * @param destination The destination directory.
+	 * @throws IOException If writing fails or the item already exists in the destination directory.
+	 * @throws IllegalStateException If the destination is not a directory or destination is on a different
+	 * file system.
+	 */
 	public void move(FatLfnDirectoryEntry entry, UsbFile destination) throws IOException {
 		if(!destination.isDirectory())  throw new IllegalStateException("destination cannot be a file!");
 		if(!(destination instanceof FatDirectory)) throw new IllegalStateException("cannot move between different filesystems!");

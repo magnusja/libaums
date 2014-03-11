@@ -1,3 +1,20 @@
+/*
+ * (C) Copyright 2014 mjahnen <jahnen@in.tum.de>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
+
 package com.github.mjdev.libaums.fs.fat32;
 
 import java.io.IOException;
@@ -16,6 +33,14 @@ public class FatFile implements UsbFile {
 	private ClusterChain chain;
 	private FatLfnDirectoryEntry entry;
 	
+	/**
+	 * Constructs a new file with the given information.
+	 * @param blockDevice The device where the file system is located.
+	 * @param fat The FAT used to follow cluster chains.
+	 * @param bootSector The boot sector of the file system.
+	 * @param entry The corresponding entry in a FAT directory.
+	 * @param parent The parent directory of the newly constructed file.
+	 */
 	private FatFile(BlockDeviceDriver blockDevice, FAT fat,
 			Fat32BootSector bootSector, FatLfnDirectoryEntry entry,
 			FatDirectory parent) {
@@ -26,11 +51,25 @@ public class FatFile implements UsbFile {
 		this.parent = parent;
 	}
 	
+	/**
+	 * Creates a new file with the given information.
+	 * @param entry The corresponding entry in a FAT directory.
+	 * @param blockDevice The device where the file system is located.
+	 * @param fat The FAT used to follow cluster chains.
+	 * @param bootSector The boot sector of the file system.
+	 * @param parent The parent directory of the newly created file.
+	 * @return Thew newly constructed file.
+	 * @throws IOException If reading from device fails.
+	 */
 	public static FatFile create(FatLfnDirectoryEntry entry, BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector, FatDirectory parent) throws IOException {
 		FatFile result = new FatFile(blockDevice, fat, bootSector, entry, parent);
 		return result;
 	}
 	
+	/**
+	 * Initializes the cluster chain to access the contents of the file.
+	 * @throws IOException If reading from FAT fails.
+	 */
 	private void initChain() throws IOException {
 		if(chain == null) {
 			chain = new ClusterChain(entry.getStartCluster(), blockDevice, fat, bootSector);
@@ -100,7 +139,8 @@ public class FatFile implements UsbFile {
 	public void flush() throws IOException {
 		// we only have to update the parent because we are always writing everything
 		// immediately to the device
-		// parent updates things like length and dates
+		// the parent directory is responsible for updating the FatDirectoryEntry which
+		// contains things like the file size and the date time fields
 		parent.write();
 	}
 

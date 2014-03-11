@@ -1,3 +1,20 @@
+/*
+ * (C) Copyright 2014 mjahnen <jahnen@in.tum.de>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
+
 package com.github.mjdev.libaums.fs.fat32;
 
 import java.io.IOException;
@@ -8,6 +25,13 @@ import android.util.Log;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 
+/**
+ * This class holds information which shall support the {@link FAT}. For example it has a method to get the last allocated cluster
+ * ({@link #getLastAllocatedClusterHint()}). The FAT can use this to make searching for free clusters more efficient because it
+ * does not has to search the hole FAT.
+ * @author mjahnen
+ *
+ */
 /* package */ class FsInfoStructure {
 	
 	/* package */ static int INVALID_VALUE = 0xFFFFFFFF;
@@ -28,6 +52,12 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 	private BlockDeviceDriver blockDevice;
 	private ByteBuffer buffer;
 	
+	/**
+	 * Constrcut a new info structure.
+	 * @param blockDevice The device where the info structure is located.
+	 * @param offset The offset where the info structure starts.
+	 * @throws IOException If reading fails.
+	 */
 	private FsInfoStructure(BlockDeviceDriver blockDevice, int offset) throws IOException {
 		this.blockDevice = blockDevice;
 		this.offset = offset;
@@ -43,26 +73,61 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 		}
 	}
 	
+	/**
+	 * Reads the info structure from the device. 
+	 * @param blockDevice The device where the info structure is located.
+	 * @param offset The offset where the info structure starts.
+	 * @return The newly created object.
+	 * @throws IOException If reading fails.
+	 */
 	/* package */ static FsInfoStructure read(BlockDeviceDriver blockDevice, int offset) throws IOException {
 		return new FsInfoStructure(blockDevice, offset);
 	}
 	
+	/**
+	 * Sets the cluster count to the new value. This change is not immediately written to the disk.
+	 * If you want to write the change to disk, call {@link #write()}.
+	 * @param value The new cluster count.
+	 * @see #getFreeClusterCount()
+	 * @see #decreaseClusterCount(long)
+	 */
 	/* package */ void setFreeClusterCount(long value) {
 		buffer.putInt(FREE_COUNT_OFF, (int) value);
 	}
 	
+	/**
+	 * 
+	 * @return The free cluster count or {@link #INVALID_VALUE} if this hint is not available.
+	 */
 	/* package */ long getFreeClusterCount() {
 		return buffer.getInt(FREE_COUNT_OFF);
 	}
 	
+	/**
+	 * Sets the last allocated cluster to the new value. This change is not immediately written to the disk.
+	 * If you want to write the change to disk, call {@link #write()}.
+	 * @param value The new last allocated cluster
+	 * @see #getLastAllocatedClusterHint()
+	 */
 	/* package */ void setLastAllocatedClusterHint(long value) {
 		buffer.putInt(NEXT_FREE_OFFSET, (int) value);
 	}
-	
+
+	/**
+	 * 
+	 * @return The last allocated cluster or {@link #INVALID_VALUE} if this hint is not available.
+	 */
 	/* package */ long getLastAllocatedClusterHint() {
 		return buffer.getInt(NEXT_FREE_OFFSET);
 	}
 
+	/**
+	 * Decreases the cluster count by the desired number of clusters. This is ignored {@link #getFreeClusterCount()}
+	 * returns {@link #INVALID_VALUE}, thus the free cluster count is unknown.
+	 * @param numberOfClusters Value free cluster count shall be decreased by.
+	 * @see #setFreeClusterCount(long)
+	 * @see #getFreeClusterCount()
+	 */
 	/* package */ void decreaseClusterCount(long numberOfClusters) {
 		long freeClusterCount = getFreeClusterCount();
 		if(freeClusterCount != FsInfoStructure.INVALID_VALUE) {
@@ -70,6 +135,11 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 		}
 	}
 	
+	/**
+	 * Writes the info structure to the device. This does not happen automatically if contents were changed so a call to
+	 * this method is needed!
+	 * @throws IOException If writing to device fails.
+	 */
 	/* package */ void write() throws IOException {
 		Log.d(TAG, "writing to device");
 		blockDevice.write(offset, buffer);

@@ -1,8 +1,32 @@
+/*
+ * (C) Copyright 2014 mjahnen <jahnen@in.tum.de>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
+
 package com.github.mjdev.libaums.fs.fat32;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+/**
+ * This class represents the FAT32 boot sector which is always located at the beginning of every FAT32 file
+ * system. It holds important information about the file system such as the cluster size and the start cluster
+ * of the root directory.
+ * @author mjahnen
+ *
+ */
 /* package */ class Fat32BootSector {
 	private static final int BYTES_PER_SECTOR_OFF = 11;
 	private static final int SECTORS_PER_CLUSTER_OFF = 13;
@@ -31,6 +55,11 @@ import java.nio.ByteOrder;
 		
 	}
 	
+	/**
+	 * Reads a FAT32 boot sector from the given buffer. The buffer has to be 512 (the size of a boot sector) bytes.
+	 * @param buffer The data where the boot sector is located.
+	 * @return A newly created boot sector.
+	 */
 	/* package */ static Fat32BootSector read(ByteBuffer buffer) {
 		Fat32BootSector result = new Fat32BootSector();
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -59,58 +88,127 @@ import java.nio.ByteOrder;
 		return result;
 	}
 
+	/**
+	 * Returns the number of bytes in one single sector of a FAT32 file system.
+	 * @return Number of bytes.
+	 */
 	/* package */ short getBytesPerSector() {
 		return bytesPerSector;
 	}
 
+	/**
+	 * Returns the number of sectors in one single cluster of a FAT32 file system.
+	 * @return Number of bytes.
+	 */
 	/* package */ byte getSectorsPerCluster() {
 		return sectorsPerCluster;
 	}
 
+	/**
+	 * Returns the number of reserved sectors at the beginning of the FAT32 file system.
+	 * This includes one sector for the boot sector.
+	 * @return Number of sectors.
+	 */
 	/* package */ short getReservedSectors() {
 		return reservedSectors;
 	}
 
+	/**
+	 * Returns the number of the FATs in the FAT32 file system. This is mostly 2.
+	 * @return
+	 */
 	/* package */ byte getFatCount() {
 		return fatCount;
 	}
 
+	/**
+	 * Returns the total number of sectors in the file system.
+	 * @return Total number of sectors.
+	 */
 	/* package */ long getTotalNumberOfSectors() {
 		return totalNumberOfSectors;
 	}
 
+	/**
+	 * Returns the total number of sectors in one file allocation table. The FATs have a
+	 * fixed size.
+	 * @return Number of sectors in one FAT.
+	 */
 	/* package */ long getSectorsPerFat() {
 		return sectorsPerFat;
 	}
 
+	/**
+	 * Returns the start cluster of the root directory in the FAT32 file system.
+	 * @return Start cluster.
+	 */
 	/* package */ long getRootDirStartCluster() {
 		return rootDirStartCluster;
 	}
 
+	/**
+	 * Returns the start sector of the file system info structure.
+	 * @return Start sector.
+	 */
 	/* package */ short getFsInfoStartSector() {
 		return fsInfoStartSector;
 	}
 
+	/**
+	 * Returns if the different FATs in the file system are mirrored meaning that all of them 
+	 * are holding the same data. This is used for backup purposes.
+	 * @return True if the FAT is mirrored
+	 * @see #getValidFat()
+	 * @see #fatCount()
+	 */
 	/* package */ boolean isFatMirrored() {
 		return fatMirrored;
 	}
 
+	/**
+	 * Returns the valid FATs which shall be used if the FAT is not mirrored.
+	 * @return Number of the valid FAT.
+	 * @see #isFatMirrored()
+	 * @see #fatCount()
+	 */
 	/* package */ byte getValidFat() {
 		return validFat;
 	}
 	
+	/**
+	 * Returns the amount in bytes in one cluster.
+	 * @return Amount of bytes.
+	 */
 	/* package */ int getBytesPerCluster() {
 		return sectorsPerCluster * bytesPerSector;
 	}
 	
+	/**
+	 * Returns the FAT offset in bytes from the beginning of the file system for the given FAT number.
+	 * @param fatNumber The number of the FAT.
+	 * @return Offset in bytes.
+	 * @see #isFatMirrored()
+	 * @see #fatCount()
+	 * @see #getValidFat()
+	 */
 	/* package */ long getFatOffset(int fatNumber) {
 		return getBytesPerSector() * (getReservedSectors() + fatNumber * getSectorsPerFat());
 	}
 	
+	/**
+	 * Returns the offset in bytes from the beginning of the file system of the data area. The data
+	 * area is the area where the contents of directories and files are saved.
+	 * @return Offset in bytes.
+	 */
 	/* package */ long getDataAreaOffset() {
 		return getFatOffset(0) + getFatCount() * getSectorsPerFat() * getBytesPerSector();
 	}
 	
+	/**
+	 * This returns the volume label stored in the boot sector. This is mostly not used and you should
+	 * instead use {@link FatDirectory#getVolumeLabel()} of the root directory.
+	 * @return The volume label.
+	 */
 	/* package */ String getVolumeLabel() {
 		return volumeLabel;
 	}

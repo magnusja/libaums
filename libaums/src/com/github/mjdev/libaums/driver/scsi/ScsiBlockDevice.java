@@ -1,3 +1,20 @@
+/*
+ * (C) Copyright 2014 mjahnen <jahnen@in.tum.de>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
+
 package com.github.mjdev.libaums.driver.scsi;
 
 import java.io.IOException;
@@ -19,6 +36,12 @@ import com.github.mjdev.libaums.driver.scsi.commands.ScsiReadCapacityResponse;
 import com.github.mjdev.libaums.driver.scsi.commands.ScsiTestUnitReady;
 import com.github.mjdev.libaums.driver.scsi.commands.ScsiWrite10;
 
+/**
+ * This class is responsible for handling mass storage devices which follow the SCSI standard.
+ * This class communicates with the mass storage device via the different SCSI commands.
+ * @author mjahnen
+ * @see com.github.mjdev.libaums.driver.scsi.commands
+ */
 public class ScsiBlockDevice implements BlockDeviceDriver {
 
 	private static final String TAG = ScsiBlockDevice.class.getSimpleName();
@@ -36,6 +59,18 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		cswBuffer = new byte[CommandStatusWrapper.SIZE];
 	}
 	
+	/**
+	 * Issues a SCSI Inquiry to determine the connected device. After that it is checked if the unit
+	 * is ready. Logs a warning if the unit is not ready. Finally the capacity of the mass storage
+	 * device is read.
+	 * @throws IOException If initialing fails due to an unsupported device or
+	 * if reading fails.
+	 * @see com.github.mjdev.libaums.driver.scsi.commands.ScsiInquiry
+	 * @see com.github.mjdev.libaums.driver.scsi.commands.ScsiInquiryResponse
+	 * @see com.github.mjdev.libaums.driver.scsi.commands.ScsiTestUnitReady
+	 * @see com.github.mjdev.libaums.driver.scsi.commands.ScsiReadCapacity
+	 * @see com.github.mjdev.libaums.driver.scsi.commands.ScsiReadCapacityResponse
+	 */
 	@Override
 	public void init() throws IOException {
 		ByteBuffer inBuffer = ByteBuffer.allocate(36);
@@ -64,7 +99,19 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		Log.i(TAG, "Last block address: " + lastBlockAddress);
 	}
 	
-	private boolean transferCommand(CommandBlockWrapper command, ByteBuffer inBuffer) {
+	/**
+	 * Transfers the desired command to the device. If the command has a data phase the parameter
+	 * <code>inBuffer</code> is used to store or read data to or from. The direction of the data
+	 * phase is determined by {@link com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper #getDirection()}.
+	 * <p>
+	 * Return value is true if the status of the command status wrapper is successful.
+	 * {@link com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper #getbCswStatus()}
+	 * @param command The command which should be transferred.
+	 * @param inBuffer The buffer used for reading or writing.
+	 * @return true if the transaction was successful.
+	 * @throws IOException If something fails.
+	 */
+	private boolean transferCommand(CommandBlockWrapper command, ByteBuffer inBuffer) throws IOException {
 		byte[] outArray = outBuffer.array();
 		outBuffer.clear();
 		Arrays.fill(outArray, (byte) 0);
@@ -84,28 +131,26 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 				do {
 					int tmp = usbCommunication.bulkInTransfer(inArray, read + inBuffer.position(), inBuffer.remaining() - read);
 					if(tmp == -1) {
-						Log.e(TAG, "reading failed!");
-						break;
+						throw new IOException("reading failed!");
 					}
 					read += tmp;
 				} while(read < transferLength);
 				
 				if(read != transferLength) {
-					Log.e(TAG, "Unexpected command size (" + read + ") on response to " + command);
+					throw new IOException("Unexpected command size (" + read + ") on response to " + command);
 				}
 			} else {
 				written = 0;
 				do {
 					int tmp = usbCommunication.bulkOutTransfer(inArray, written + inBuffer.position(), inBuffer.remaining() - written);
 					if(tmp == -1) {
-						Log.e(TAG, "writing failed!");
-						break;
+						throw new IOException("writing failed!");
 					}
 					written += tmp;
 				} while(written < transferLength);
 				
 				if(written != transferLength) {
-					Log.e(TAG, "Could not write all bytes: " + command);
+					throw new IOException("Could not write all bytes: " + command);
 				}
 			}
 		}
@@ -129,6 +174,10 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		return csw.getbCswStatus() == CommandStatusWrapper.COMMAND_PASSED;
 	}
 	
+	/**
+	 * This method reads from the device at the specific device offset. The devOffset specifies at which
+	 * block the reading should begin. That means the devOffset is not in bytes!
+	 */
 	@Override
 	public void read(long devOffset, ByteBuffer dest) throws IOException {
 		long time = System.currentTimeMillis();
@@ -156,6 +205,10 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		Log.d(TAG, "read time: " + (System.currentTimeMillis() - time));
 	}
 
+	/**
+	 * This method writes from the device at the specific device offset. The devOffset specifies at which
+	 * block the writing should begin. That means the devOffset is not in bytes!
+	 */
 	@Override
 	public void write(long devOffset, ByteBuffer src) throws IOException {
 		long time = System.currentTimeMillis();

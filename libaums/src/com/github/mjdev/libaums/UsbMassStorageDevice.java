@@ -1,3 +1,20 @@
+/*
+ * (C) Copyright 2014 mjahnen <jahnen@in.tum.de>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
+
 package com.github.mjdev.libaums;
 
 import java.io.IOException;
@@ -23,8 +40,28 @@ import com.github.mjdev.libaums.partition.PartitionTable;
 import com.github.mjdev.libaums.partition.PartitionTableEntry;
 import com.github.mjdev.libaums.partition.PartitionTableFactory;
 
+/**
+ * Class representing a connected mass storage device. You can enumerate through all connected mass storage devices
+ * via {@link #getMassStorageDevices(Context)}. This method only returns supported devices or if no device is connected an
+ * empty array.
+ * <p>
+ * After choosing a device you have to get the permission for the underlying {@link android.hardware.usb.UsbDevice}. 
+ * The underlying {@link android.hardware.usb.UsbDevice} can be accessed via {@link #getUsbDevice()}.
+ * <p>
+ * After that you need to call {@link #setupDevice()}. This will initialize the mass storage device and read the partitions 
+ * ({@link com.github.mjdev.libaums.partition.Partition}).
+ * <p>
+ * The supported partitions can then be accessed via {@link #getPartitions()} and you can begin to read directorys and files.
+ * @author mjahnen
+ *
+ */
 public class UsbMassStorageDevice {
 	
+	/**
+	 * Usb communication which uses the newer API in Android Jelly Bean MR2 (API level 18).
+	 * @author mjahnen
+	 * 
+	 */
 	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 	private class JellyBeanMr2Communication implements UsbCommunication {
 		@Override
@@ -51,7 +88,8 @@ public class UsbMassStorageDevice {
 	/**
 	 * On Android API level lower 18 (Jelly Bean MR2) we cannot specify a start offset in the source/destination
 	 * array. Because of that we have to use this workaround, where we have to copy the data every time offset is non zero.
-	 * 
+	 * @author mjahnen
+	 *
 	 */
 	private class HoneyCombMr1Communication implements UsbCommunication {
 		@Override
@@ -89,10 +127,14 @@ public class UsbMassStorageDevice {
 	
 	private static final String TAG = UsbMassStorageDevice.class.getSimpleName();
 	
-	// subclass 6 means that the usb mass storage device implements the
-	// SCSI transparent command set
+	/**
+	 * subclass 6 means that the usb mass storage device implements the SCSI transparent command set
+	 */
 	private static final int INTERFACE_SUBCLASS = 6;
-	// protocol 80 means the communication happens only via bulk transfers
+	
+	/**
+	 * protocol 80 means the communication happens only via bulk transfers
+	 */
 	private static final int INTERFACE_PROTOCOL = 80;
 	
 	private static int TRANSFER_TIMEOUT = 21000;
@@ -108,7 +150,16 @@ public class UsbMassStorageDevice {
 	private PartitionTable partitionTable;
 	private List<Partition> partitions = new ArrayList<Partition>();
 	
-	public UsbMassStorageDevice(UsbManager usbManager, UsbDevice usbDevice,
+	/**
+	 * Construct a new {@link com.github.mjdev.libaums.UsbMassStorageDevice}. The given parameters have to
+	 * actually be a mass storage device, this is not checked in the constructor!
+	 * @param usbManager
+	 * @param usbDevice
+	 * @param usbInterface
+	 * @param inEndpoint
+	 * @param outEndpoint
+	 */
+	private UsbMassStorageDevice(UsbManager usbManager, UsbDevice usbDevice,
 			UsbInterface usbInterface, UsbEndpoint inEndpoint,
 			UsbEndpoint outEndpoint) {
 		this.usbManager = usbManager;
@@ -118,6 +169,11 @@ public class UsbMassStorageDevice {
 		this.outEndpoint = outEndpoint;
 	}
 
+	/**
+	 * This methods iterates through all connected USB devices and searches for mass storage devices.
+	 * @param context
+	 * @return An array of suitable mass storage devices or an empty array if none could be found
+	 */
 	public static UsbMassStorageDevice[] getMassStorageDevices(Context context) {
 		UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
 		ArrayList<UsbMassStorageDevice> result = new ArrayList<UsbMassStorageDevice>();
@@ -138,6 +194,8 @@ public class UsbMassStorageDevice {
 					continue;
 				}
 				
+				// Every mass storage device has exactly two endpoints
+				// One IN and one OUT endpoint
 				int endpointCount = usbInterface.getEndpointCount();
 				if(endpointCount != 2) {
 					Log.w(TAG, "inteface endpoint count != 2");
@@ -168,6 +226,14 @@ public class UsbMassStorageDevice {
 		return result.toArray(new UsbMassStorageDevice[0]);
 	}
 	
+	/**
+	 * Initializes the mass storage device and determines different things like for example
+	 * the MBR or the filesystems for the different partitions.
+	 * @throws IOException If reading from the physical device fails.
+	 * @throws IllegalStateException If permission to communicate with the underlying usb device 
+	 * is missing.
+	 * @see #getUsbDevice()
+	 */
 	public void init() throws IOException {
 		if(usbManager.hasPermission(usbDevice))
 			setupDevice();
@@ -176,6 +242,16 @@ public class UsbMassStorageDevice {
 			
 	}
 	
+	/**
+	 * Sets the device up. Claims interface and initiates the device connecting.
+	 * Chooses the right{@link com.github.mjdev.libaums.UsbCommunication} depending on the Android version 
+	 * ({@link com.github.mjdev.libaums.UsbMassStorageDevice.HoneyCombMr1Communication}
+	 * or ({@link com.github.mjdev.libaums.UsbMassStorageDevice.JellyBeanMr2Communication}).
+	 * <p>
+	 * Initializes the {@link #blockDevice} and reads the partitions.
+	 * @throws IOException If reading from the physical device fails.
+	 * @see #init()
+	 */
 	private void setupDevice() throws IOException {
 		Log.d(TAG, "setup device");
 		deviceConnection = usbManager.openDevice(usbDevice);
@@ -204,6 +280,10 @@ public class UsbMassStorageDevice {
 		initPartitions();
 	}
 	
+	/**
+	 * Fills {@link #partitions} with the information received by the {@link #partitionTable}.
+	 * @throws IOException If reading from the {@link #blockDevice} fails.
+	 */
 	private void initPartitions() throws IOException {
 		Collection<PartitionTableEntry> partitionEntrys = partitionTable.getPartitionTableEntries();
 		
@@ -215,6 +295,11 @@ public class UsbMassStorageDevice {
 		}
 	}
 	
+	/**
+	 * Releases the {@link android.hardware.usb.UsbInterface} and closes the {@link android.hardware.usb.UsbDeviceConnection}.
+	 * After calling this method no further communication is possible. That means you can not read or write to the partitions
+	 * returned by {@link #getPartitions()}.
+	 */
 	public void close() {
 		Log.d(TAG, "close device");
 		boolean release = deviceConnection.releaseInterface(usbInterface);
@@ -224,15 +309,21 @@ public class UsbMassStorageDevice {
 		deviceConnection.close();
 	}
 	
+	/**
+	 * Returns the available partitions of the mass storage device. You have to call {@link #init()} before
+	 * calling this method!
+	 * @return List of partitions.
+	 */
 	public List<Partition> getPartitions() {
 		return partitions;
 	}
 
+	/**
+	 * This returns the {@link android.hardware.usb.UsbDevice} which can be used to request permission
+	 * for communcation.
+	 * @return Underlying {@link android.hardware.usb.UsbDevice} used for communication.
+	 */
 	public UsbDevice getUsbDevice() {
 		return usbDevice;
-	}
-	
-	public BlockDeviceDriver getScsiBlockDevice() {
-		return blockDevice;
 	}
 }

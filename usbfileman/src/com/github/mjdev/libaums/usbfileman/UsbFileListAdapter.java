@@ -1,3 +1,20 @@
+/*
+ * (C) Copyright 2014 mjahnen <jahnen@in.tum.de>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ */
+
 package com.github.mjdev.libaums.usbfileman;
 
 import java.io.IOException;
@@ -16,9 +33,18 @@ import android.widget.TextView;
 
 import com.github.mjdev.libaums.fs.UsbFile;
 
-public class MyListAdapter extends ArrayAdapter<UsbFile> {
+/**
+ * List adapter to represent the contents of an {@link UsbFile} direcory.
+ * @author mjahnen
+ *
+ */
+public class UsbFileListAdapter extends ArrayAdapter<UsbFile> {
 	
-	Comparator<UsbFile> comparator = new Comparator<UsbFile>() {
+	/**
+	 * Class to compare {@link UsbFile}s. If the {@link UsbFile} is an directory
+	 * it rated lower than an file, meaning directorys come first when sorting and the files.
+	 */
+	private Comparator<UsbFile> comparator = new Comparator<UsbFile>() {
 
 		@Override
 		public int compare(UsbFile lhs, UsbFile rhs) {
@@ -40,7 +66,13 @@ public class MyListAdapter extends ArrayAdapter<UsbFile> {
 	
 	private LayoutInflater inflater;
 	
-	public MyListAdapter(Context context, UsbFile dir) throws IOException {
+	/**
+	 * Constructs a new List Adapter to show {@link UsbFile}s.
+	 * @param context The context.
+	 * @param dir The directory which shall be shown.
+	 * @throws IOException If reading fails.
+	 */
+	public UsbFileListAdapter(Context context, UsbFile dir) throws IOException {
 		super(context, R.layout.list_item);
 		currentDir = dir;
 		files = new ArrayList<UsbFile>();
@@ -51,6 +83,10 @@ public class MyListAdapter extends ArrayAdapter<UsbFile> {
 		refresh();
 	}
 	
+	/**
+	 * Reads the contents of the directory and notifies that the View shall be updated.
+	 * @throws IOException If reading contents of a directory fails.
+	 */
 	public void refresh() throws IOException {
 		files = Arrays.asList(currentDir.listFiles());
 		Collections.sort(files, comparator);
@@ -89,6 +125,10 @@ public class MyListAdapter extends ArrayAdapter<UsbFile> {
 		return files.get(position);
 	}
 
+	/**
+	 * 
+	 * @return the directory which is currently be shown.
+	 */
 	public UsbFile getCurrentDir() {
 		return currentDir;
 	}
