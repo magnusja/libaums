@@ -313,6 +313,10 @@ public class FAT {
 		
 		Log.i(TAG, "freed " + numberOfClusters + " clusters");
 		
+		// increase the free cluster count by decreasing with a negative value
+		fsInfoStructure.decreaseClusterCount(-numberOfClusters);
+		fsInfoStructure.write();
+		
 		return Arrays.copyOfRange(chain, 0, offsetInChain);
 	}
 }
