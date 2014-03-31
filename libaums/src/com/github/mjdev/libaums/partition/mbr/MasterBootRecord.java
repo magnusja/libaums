@@ -29,7 +29,7 @@ import com.github.mjdev.libaums.partition.PartitionTable;
 import com.github.mjdev.libaums.partition.PartitionTableEntry;
 
 /**
- * This class represents The Master Boot Record (MBR) which is a partition table used by most block devices coming from Windows
+ * This class represents the Master Boot Record (MBR), which is a partition table used by most block devices coming from Windows
  * or Unix.
  * @author mjahnen
  *

@@ -101,14 +101,14 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	
 	/**
 	 * Transfers the desired command to the device. If the command has a data phase the parameter
-	 * <code>inBuffer</code> is used to store or read data to or from. The direction of the data
+	 * <code>inBuffer</code> is used to store or read data to resp. from it. The direction of the data
 	 * phase is determined by {@link com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper #getDirection()}.
 	 * <p>
-	 * Return value is true if the status of the command status wrapper is successful.
-	 * {@link com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper #getbCswStatus()}
+	 * Return value is true if the status of the command status wrapper is successful 
+	 * ({@link com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper #getbCswStatus()}).
 	 * @param command The command which should be transferred.
 	 * @param inBuffer The buffer used for reading or writing.
-	 * @return true if the transaction was successful.
+	 * @return True if the transaction was successful.
 	 * @throws IOException If something fails.
 	 */
 	private boolean transferCommand(CommandBlockWrapper command, ByteBuffer inBuffer) throws IOException {

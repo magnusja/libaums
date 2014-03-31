@@ -58,7 +58,7 @@ public class FatDirectory implements UsbFile {
 	private Map<String, FatLfnDirectoryEntry> lfnMap;
 	/**
 	 * Map for checking for existence of short names when generating
-	 * short names for new files or directorys.
+	 * short names for new files or directories.
 	 */
 	private Map<ShortName, FatDirectoryEntry> shortNameMap;
 	/**
@@ -227,7 +227,7 @@ public class FatDirectory implements UsbFile {
 	
 	/**
 	 * Writes the {@link #entries} to the disk. Any changes made by {@link #addEntry(FatLfnDirectoryEntry, FatDirectoryEntry)}
-	 * or {@link #removeEntry(FatLfnDirectoryEntry)} will then be stored also on the device.
+	 * or {@link #removeEntry(FatLfnDirectoryEntry)} will then be committed to the device.
 	 * @throws IOException
 	 * @see {@link #write()}
 	 */

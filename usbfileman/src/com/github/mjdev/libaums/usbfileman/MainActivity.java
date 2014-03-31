@@ -221,8 +221,8 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	}
 	
 	/**
-	 * Asynchronous task to copy a file from the mass storage device connected via usb to the
-	 * internal sotrage.
+	 * Asynchronous task to copy a file from the mass storage device connected via USB to the
+	 * internal storage.
 	 * @author mjahnen
 	 *
 	 */

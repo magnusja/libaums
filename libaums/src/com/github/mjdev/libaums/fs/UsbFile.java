@@ -49,7 +49,7 @@ public interface UsbFile extends Closeable {
 	 */
 	public void setName(String newName) throws IOException;
 	/**
-	 * Returns the parent directory if this file or directory or null if this is
+	 * Returns the parent directory for the file or directory or null if this is
 	 * the root directory.
 	 * @return The parent directory or null.
 	 */
@@ -77,7 +77,7 @@ public interface UsbFile extends Closeable {
 	 * <p>
 	 * If the space is not allocated before writing the space must be exceeded every time
 	 * a new write occurs. This can sometimes be less efficient.
-	 * @param newLength file length in bytes.
+	 * @param newLength The file length in bytes.
 	 * @throws IOException If requesting the needed space fails.
 	 */
 	public void setLength(long newLength) throws IOException;

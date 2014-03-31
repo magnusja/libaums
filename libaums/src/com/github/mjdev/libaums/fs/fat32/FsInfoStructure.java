@@ -28,7 +28,7 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 /**
  * This class holds information which shall support the {@link FAT}. For example it has a method to get the last allocated cluster
  * ({@link #getLastAllocatedClusterHint()}). The FAT can use this to make searching for free clusters more efficient because it
- * does not has to search the hole FAT.
+ * does not have to search the hole FAT.
  * @author mjahnen
  *
  */
@@ -53,7 +53,7 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 	private ByteBuffer buffer;
 	
 	/**
-	 * Constrcut a new info structure.
+	 * Constructs a new info structure.
 	 * @param blockDevice The device where the info structure is located.
 	 * @param offset The offset where the info structure starts.
 	 * @throws IOException If reading fails.
@@ -123,8 +123,9 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 
 	/**
 	 * Decreases the cluster count by the desired number of clusters. This is ignored {@link #getFreeClusterCount()}
-	 * returns {@link #INVALID_VALUE}, thus the free cluster count is unknown.
-	 * @param numberOfClusters Value free cluster count shall be decreased by.
+	 * returns {@link #INVALID_VALUE}, thus the free cluster count is unknown. The cluster count can also be
+	 * increased by specifying a negative value!
+	 * @param numberOfClusters Value, free cluster count shall be decreased by.
 	 * @see #setFreeClusterCount(long)
 	 * @see #getFreeClusterCount()
 	 */
@@ -136,7 +137,7 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 	}
 	
 	/**
-	 * Writes the info structure to the device. This does not happen automatically if contents were changed so a call to
+	 * Writes the info structure to the device. This does not happen automatically, if contents were changed so a call to
 	 * this method is needed!
 	 * @throws IOException If writing to device fails.
 	 */

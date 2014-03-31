@@ -22,7 +22,7 @@ import java.nio.ByteOrder;
 
 /**
  * SCSI command to read from the mass storage device. The 10 means that the transfer length is two byte
- * and the logical block address field is four byte.
+ * and the logical block address field is four byte. Thus the hole command takes 10 byte when serialized.
  * <p>
  * The actual data is transferred in the data phase.
  * @author mjahnen
@@ -40,7 +40,7 @@ public class ScsiRead10 extends CommandBlockWrapper {
 	private short transferBlocks;
 	
 	/**
-	 * Construct a new read command with the given information.
+	 * Constructs a new read command with the given information.
 	 * @param blockAddress The logical block address the read should start.
 	 * @param transferBytes The bytes which should be transferred.
 	 * @param blockSize The block size of the mass storage device.

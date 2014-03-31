@@ -21,13 +21,21 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- * This class represents the command block wrapper (cbw) which is always wrapped
+ * This class represents the command block wrapper (CBW) which is always wrapped
  * around a specific SCSI command in the SCSI transparent command set standard.
+ * <p>
+ * Every SCSI command shall extend this class, call the constructor {@link #CommandBlockWrapper(int, Direction, byte, byte)} with
+ * the desired information. When transmitting the command, the {@link #serialize(ByteBuffer)} method has to be called!
  * @author mjahnen
  *
  */
 public abstract class CommandBlockWrapper {
 	
+	/**
+	 * The direction of the data phase of the SCSI command.
+	 * @author mjahnen
+	 *
+	 */
 	public enum Direction {
 		/**
 		 * Means from device to host (Android).
@@ -53,10 +61,10 @@ public abstract class CommandBlockWrapper {
 	private Direction direction;
 	
 	/**
-	 * Construct a new command block wrapper with the given information which can than easily be
-	 * derialized with {@link #serialize(ByteBuffer)}.
-	 * @param transferLength The bytes which should be transferred in the following data phase.
-	 * @param direction The direction data shall be transferred in the data phase. If there is no data
+	 * Constructs a new command block wrapper with the given information which can than easily be
+	 * serialized with {@link #serialize(ByteBuffer)}.
+	 * @param transferLength The bytes which should be transferred in the following data phase (Zero if no data phase).
+	 * @param direction The direction the data shall be transferred in the data phase. If there is no data
 	 * phase it should be {@link com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper.Direction #NONE NONE}
 	 * @param lun The logical unit number the command is directed to.
 	 * @param cbwcbLength The length in bytes of the scsi command.
@@ -72,7 +80,10 @@ public abstract class CommandBlockWrapper {
 	
 	/**
 	 * Serializes the command block wrapper for transmission.
-	 * @param buffer The buffer were the data should be copied to.
+	 * <p>
+	 * This method should be called in every subclass right before the specific SCSI command
+	 * serializes itself to the buffer!
+	 * @param buffer The buffer were the serialized data should be copied to.
 	 */
 	public void serialize(ByteBuffer buffer) {
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -86,8 +97,8 @@ public abstract class CommandBlockWrapper {
 
 	/**
 	 * Returns the tag which can be used to determine the corresponding 
-	 * {@link com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper command status wrapper}.
-	 * @return The command block wrapper tag
+	 * {@link com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper CBW}.
+	 * @return The command block wrapper tag.
 	 * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper #getdCswTag()
 	 */
 	public int getdCbwTag() {
@@ -96,7 +107,7 @@ public abstract class CommandBlockWrapper {
 
 	/**
 	 * Sets the tag which can be used to determine the corresponding 
-	 * {@link com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper command status wrapper}.
+	 * {@link com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper CBW}.
 	 * @return The command block wrapper tag
 	 * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper #getdCswTag()
 	 */

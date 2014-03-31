@@ -34,10 +34,10 @@ import java.util.Calendar;
  * </ul>
  * <p>
  * To determine if the entry denotes a volume label entry use {@link #isVolumeLabel()}. If this method returns
- * true only the method {@link #getVolumeLabel()} makes sense to call. On all other methods the results will be undefined.
+ * true only the method {@link #getVolumeLabel()} makes sense to call. Calling any other method the results will be undefined.
  * <p>
  * To determine if an entry is an entry for a long file name use {@link #isLfnEntry()}. If this method returns
- * true only the method {@link #extractLfnPart(StringBuilder)} makes sense to call. On all other methods the results will be undefined.
+ * true only the method {@link #extractLfnPart(StringBuilder)} makes sense to call. Calling any other method the results will be undefined.
  * <p>
  * In all other cases the entry is either a file or a directory which can be determined by {@link #isDirectory()}. Further information of the
  * file or directory give for example {@link #getCreatedDateTime()} or {@link #getStartCluster()} to access the contents.
@@ -71,6 +71,9 @@ import java.util.Calendar;
      * Holds the data like it would be stored on the disk.
      */
     private ByteBuffer data;
+    /**
+     * The 8.3 short name of the entry, when entry represents a directory or file.
+     */
     private ShortName shortName;
     
     private FatDirectoryEntry() {
@@ -79,7 +82,6 @@ import java.util.Calendar;
     
     /**
      * Constructs a new {@link #FatDirectoryEntry()} with the given data.
-     * entries. 
      * @param data The buffer where entry is located.
      */
     private FatDirectoryEntry(ByteBuffer data) {
@@ -128,7 +130,7 @@ import java.util.Calendar;
     }
     
     /**
-     * Serializes this {@link #FatDirectoryEntry()} so that it can written to disk. Updates the 
+     * Serializes this {@link #FatDirectoryEntry()} so that it can be written to disk. Updates the 
      * position of the given buffer.
      * @param buffer The buffer data shall be written to.
      */
@@ -230,7 +232,7 @@ import java.util.Calendar;
 	}
 	
 	/**
-	 * Returns true if the current {@link #FatDirectoryEntry()} is hidden. This entry should onyl
+	 * Returns true if the current {@link #FatDirectoryEntry()} is hidden. This entry should only
 	 * be accessible by the user if he explicitly asks for it!
 	 * @return True if entry is hidden.
 	 */
@@ -433,7 +435,7 @@ import java.util.Calendar;
 	
 	/**
 	 * This method creates an {@link #FatDirectoryEntry()} for a long file name. Every entry can store up to 13 bytes for the long file name, thus
-	 * it has sometimes be split in more parts.
+	 * the name has sometimes to be split in more parts.
 	 * @param unicode The complete unicode String denoting the long filename.
 	 * @param offset The offset where the part shall begin.
 	 * @param checksum The checksum of the short name ({@link ShortName#calculateCheckSum()}).

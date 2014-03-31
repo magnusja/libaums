@@ -58,7 +58,7 @@ public class FatFile implements UsbFile {
 	 * @param fat The FAT used to follow cluster chains.
 	 * @param bootSector The boot sector of the file system.
 	 * @param parent The parent directory of the newly created file.
-	 * @return Thew newly constructed file.
+	 * @return The newly constructed file.
 	 * @throws IOException If reading from device fails.
 	 */
 	public static FatFile create(FatLfnDirectoryEntry entry, BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector, FatDirectory parent) throws IOException {

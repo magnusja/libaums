@@ -23,7 +23,7 @@ import java.nio.ByteOrder;
 import android.util.Log;
 
 /**
- * This class represents the command status wrapper (csw) in the SCSI transparent command set standard,
+ * This class represents the command status wrapper (CSW) in the SCSI transparent command set standard,
  * which is transmitted from the device to the host after the data phase (if any).
  * @author mjahnen
  *
@@ -35,15 +35,19 @@ public class CommandStatusWrapper {
 	 */
 	public static final int COMMAND_PASSED = 0;
 	/**
-	 * SCSI command could not be executed. host should issue an
-	 * SCSI request sense
+	 * SCSI command could not be executed, host should issue an
+	 * SCSI request sense.
 	 * @see com.github.mjdev.libaums.driver.scsi.commands.ScsiRequestSense
 	 */
 	public static final int COMMAND_FAILED = 1;
+	/**
+	 * SCSI command could not be executed, host should issue a mass storage
+	 * reset.
+	 */
 	public static final int PHASE_ERROR = 2;
 	
 	/**
-	 * Every csw has the same size.
+	 * Every CSW has the same size.
 	 */
 	public static final int SIZE = 13;
 	
@@ -77,8 +81,8 @@ public class CommandStatusWrapper {
 
 	/**
 	 * Returns the tag which can be used to determine the corresponding 
-	 * {@link com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper command block wrapper}.
-	 * @return The command status wrapper tag
+	 * {@link com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper CBW}.
+	 * @return The command status wrapper tag.
 	 * @see com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper #getdCswTag()
 	 */
 	public int getdCswTag() {
@@ -86,7 +90,7 @@ public class CommandStatusWrapper {
 	}
 
 	/**
-	 * Returns the amount of bytes which has not been proccessed yet in the data phase
+	 * Returns the amount of bytes which has not been processed yet in the data phase.
 	 * @return The amount of bytes.
 	 */
 	public int getdCswDataResidue() {
@@ -95,7 +99,7 @@ public class CommandStatusWrapper {
 
 	/**
 	 * Returns the status of execution of the transmitted SCSI command.
-	 * @return 
+	 * @return The status.
 	 * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper #COMMAND_PASSED
 	 * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper #COMMAND_FAILED
 	 * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper #PHASE_ERROR

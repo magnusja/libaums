@@ -28,11 +28,11 @@ import android.util.Log;
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 
 /**
- * This class represents the file allocation table in a FAT32 file system. The FAT is used
+ * This class represents the File Allocation Table (FAT) in a FAT32 file system. The FAT is used
  * to allocate the space of the disk to the different files and directories.
  * <p>
  * The FAT distributes clusters with a specific cluster size {@link com.github.mjdev.libaums.fs.fat32.Fat32BootSector #getBytesPerCluster()}.
- * Every entry in the FAT is 32 bit. The FAT is a list where the clusters can be followed until a cluster chain ends.
+ * Every entry in the FAT is 32 bit. The FAT is a (linked) list where the clusters can be followed until a cluster chain ends.
  * <p>
  * For more information you should refer to the official documentation of FAT32.
  * @author mjahnen
@@ -43,8 +43,8 @@ public class FAT {
 	private static final String TAG = FAT.class.getSimpleName();
 	
 	/**
-	 * End of file / chain marker. This is used to determine when follwing a
-	 * cluster chain should be stopped.
+	 * End of file / chain marker. This is used to determine when following a
+	 * cluster chain should be stopped. (Last allocated cluster has been found.)
 	 */
 	private static final int FAT32_EOF_CLUSTER = 0x0FFFFFF8;
 

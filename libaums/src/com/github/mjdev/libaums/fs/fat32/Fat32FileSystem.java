@@ -39,8 +39,8 @@ public class Fat32FileSystem implements FileSystem {
 	
 	/**
 	 * This method constructs a FAT32 file system for the given block device. There are no further checks
-	 * if the block device actually represents a valid FAT32 file system. That means it mus be ensured that
-	 * the device actually holds a FAT32 file system!
+	 * that the block device actually represents a valid FAT32 file system. That means it must be ensured that
+	 * the device actually holds a FAT32 file system in advance!
 	 * @param blockDevice The block device the FAT32 file system is located.
 	 * @throws IOException If reading from the device fails.
 	 */
@@ -55,8 +55,8 @@ public class Fat32FileSystem implements FileSystem {
 	
 	/**
 	 * This method constructs a FAT32 file system for the given block device. There are no further checks
-	 * if the block device actually represents a valid FAT32 file system. That means it mus be ensured that
-	 * the device actually holds a FAT32 file system!
+	 * if the block device actually represents a valid FAT32 file system. That means it must be ensured that
+	 * the device actually holds a FAT32 file system in advance!
 	 * @param blockDevice The block device the FAT32 file system is located.
 	 * @throws IOException If reading from the device fails.
 	 */

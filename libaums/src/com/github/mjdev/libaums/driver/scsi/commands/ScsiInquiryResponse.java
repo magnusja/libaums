@@ -21,10 +21,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- * This class represents the response of an SCSI Inquiry. It holds various information about
+ * This class represents the response of a SCSI Inquiry. It holds various information about
  * the mass storage device.
  * <p>
- * This command is received in the data phase.
+ * This response is received in the data phase.
  * @author mjahnen
  * @see com.github.mjdev.libaums.driver.scsi.commands.ScsiInquiry
  */
@@ -82,8 +82,8 @@ public class ScsiInquiryResponse {
 	}
 
 	/**
-	 * This method returns the version of the SPC standard the device supports.
-	 * @return
+	 * This method returns the version of the SCSI Primary Commands (SPC) standard the device supports.
+	 * @return Version of the SPC standard
 	 */
 	public byte getSpcVersion() {
 		return spcVersion;

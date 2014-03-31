@@ -34,7 +34,7 @@ import android.widget.TextView;
 import com.github.mjdev.libaums.fs.UsbFile;
 
 /**
- * List adapter to represent the contents of an {@link UsbFile} direcory.
+ * List adapter to represent the contents of an {@link UsbFile} directory.
  * @author mjahnen
  *
  */
@@ -42,7 +42,7 @@ public class UsbFileListAdapter extends ArrayAdapter<UsbFile> {
 	
 	/**
 	 * Class to compare {@link UsbFile}s. If the {@link UsbFile} is an directory
-	 * it rated lower than an file, meaning directorys come first when sorting and the files.
+	 * it is rated lower than an file, ie. directories come first when sorting.
 	 */
 	private Comparator<UsbFile> comparator = new Comparator<UsbFile>() {
 

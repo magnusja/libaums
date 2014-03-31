@@ -21,9 +21,9 @@ import java.nio.ByteBuffer;
 
 /**
  * This class represents a SCSI Inquiry command. It is used to get important information
- * about the connected mass storage device. This information include the SCSI supported commands.
+ * about the connected mass storage device. This information include the supported SCSI commands.
  * <p>
- * The response is send in the data phase.
+ * The response is sent in the data phase.
  * @author mjahnen
  * @see com.github.mjdev.libaums.driver.scsi.commands.ScsiInquiryResponse
  */

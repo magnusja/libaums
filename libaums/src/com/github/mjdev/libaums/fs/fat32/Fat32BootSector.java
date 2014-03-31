@@ -115,7 +115,7 @@ import java.nio.ByteOrder;
 
 	/**
 	 * Returns the number of the FATs in the FAT32 file system. This is mostly 2.
-	 * @return
+	 * @return Number of FATs.
 	 */
 	/* package */ byte getFatCount() {
 		return fatCount;
@@ -140,7 +140,7 @@ import java.nio.ByteOrder;
 
 	/**
 	 * Returns the start cluster of the root directory in the FAT32 file system.
-	 * @return Start cluster.
+	 * @return Root directory start cluster.
 	 */
 	/* package */ long getRootDirStartCluster() {
 		return rootDirStartCluster;
@@ -148,16 +148,16 @@ import java.nio.ByteOrder;
 
 	/**
 	 * Returns the start sector of the file system info structure.
-	 * @return Start sector.
+	 * @return FSInfo Structure start sector.
 	 */
 	/* package */ short getFsInfoStartSector() {
 		return fsInfoStartSector;
 	}
 
 	/**
-	 * Returns if the different FATs in the file system are mirrored meaning that all of them 
+	 * Returns if the different FATs in the file system are mirrored, ie. all of them 
 	 * are holding the same data. This is used for backup purposes.
-	 * @return True if the FAT is mirrored
+	 * @return True if the FAT is mirrored.
 	 * @see #getValidFat()
 	 * @see #fatCount()
 	 */
@@ -166,7 +166,7 @@ import java.nio.ByteOrder;
 	}
 
 	/**
-	 * Returns the valid FATs which shall be used if the FAT is not mirrored.
+	 * Returns the valid FATs which shall be used if the FATs are not mirrored.
 	 * @return Number of the valid FAT.
 	 * @see #isFatMirrored()
 	 * @see #fatCount()

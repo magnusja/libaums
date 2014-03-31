@@ -77,7 +77,7 @@ import java.util.List;
 	 * Reads a {@link #FatLfnDirectoryEntry()} with the given information.
 	 * @param actualEntry The actual entry.
 	 * @param lfnParts The entries where the long file name is stored in reverse order.
-	 * @return Thew newly created entry.
+	 * @return The newly created entry.
 	 */
 	/* package */ static FatLfnDirectoryEntry read(FatDirectoryEntry actualEntry, List<FatDirectoryEntry> lfnParts) {
 		StringBuilder builder = new StringBuilder(13 * lfnParts.size());
@@ -236,7 +236,7 @@ import java.util.List;
 	/**
 	 * Copies created, last accessed and last modified date and time fields from one entry to another.
 	 * @param from The source.
-	 * @param to the destination.
+	 * @param to The destination.
 	 */
 	/* package */ static void copyDateTime(FatLfnDirectoryEntry from, FatLfnDirectoryEntry to) {
 		FatDirectoryEntry actualFrom = from.getActualEntry();

@@ -49,10 +49,20 @@ public class ScsiReadCapacityResponse {
 		return res;
 	}
 
+	/**
+	 * Returns the address of the last accessible block on the block device.
+	 * <p>
+	 * The size of the device is then last accessible block + 0!
+	 * @return The last block address.
+	 */
 	public int getLogicalBlockAddress() {
 		return logicalBlockAddress;
 	}
 
+	/**
+	 * Returns the size of each block in the block device.
+	 * @return The block size in bytes.
+	 */
 	public int getBlockLength() {
 		return blockLength;
 	}

@@ -23,6 +23,10 @@ import java.util.Arrays;
 
 /**
  * This class represents a 8.3 short name of a {@link FatDirectoryEntry}.
+ * <p>
+ * The short name has 8 characters for the name and 3 characters for the extension. The period 
+ * between them is not saved in the short name. The short name can only hold eight bit characters.
+ * Only upper case characters and these special characters are allows: $ % Õ - _ @ ~ Ô ! ( )
  * @author mjahnen
  *
  */
@@ -104,7 +108,7 @@ import java.util.Arrays;
 	}
 
 	/**
-	 * Serialzes the short name so that it can be written to disk.
+	 * Serializes the short name so that it can be written to disk.
 	 * This method does not alter the position of the given ByteBuffer!
 	 * @param buffer The buffer where the data shall be stored.
 	 */

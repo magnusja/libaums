@@ -28,7 +28,7 @@ import com.github.mjdev.libaums.fs.FileSystemFactory;
 
 /**
  * This class represents a partition on an mass storage device. A partition has a certain file system which can
- * be accessed via {@link #getFileSystem()}. This file system is then needed to to access the files and directories of a partition.
+ * be accessed via {@link #getFileSystem()}. This file system is needed to to access the files and directories of a partition.
  * <p>
  * The method {@link #getVolumeLabel()} returns the volume label for the partition. Calling the method is equivalent to calling
  * {@link FileSystem#getVolumeLabel()}.
@@ -80,8 +80,7 @@ public class Partition implements BlockDeviceDriver {
 	
 	/**
 	 * 
-	 * @return the file system on the partition which can be used to access files and directories
-	 * on this partition.
+	 * @return the file system on the partition which can be used to access files and directories.
 	 */
 	public FileSystem getFileSystem() {
 		return fileSystem;

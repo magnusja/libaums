@@ -25,10 +25,10 @@ import android.util.Log;
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 
 /**
- * This class represents a cluster chain which can be follows in the FAT of a
+ * This class represents a cluster chain which can be followed in the FAT of a
  * FAT32 file system. You can {@link #read(long, ByteBuffer) read} from
  * or {@link #write(long, ByteBuffer) write} to it easily without having to worry about the
- * which cluster is next.
+ * specific clusters.
  * @author mjahnen
  *
  */
@@ -60,7 +60,7 @@ public class ClusterChain {
 	
 	/**
 	 * Reads from the cluster chain at the given offset into the given buffer. This method
-	 * automatically searches for the new cluster in the chain and reads from it appropriately.
+	 * automatically searches for following clusters in the chain and reads from them appropriately.
 	 * @param offset The offset in bytes where reading shall start.
 	 * @param dest The destination buffer the contents of the chain shall be copied to.
 	 * @throws IOException If reading fails.
@@ -87,6 +87,7 @@ public class ClusterChain {
 
         // now we can proceed reading the clusters without an offset in the cluster
         while(length > 0) {
+        	// we always read one cluster at a time, or if remaining size is less than the cluster size, only "size" bytes
             int size = (int) Math.min(clusterSize, length);
             dest.limit(dest.position() + size);
 
@@ -99,8 +100,8 @@ public class ClusterChain {
 	
 	/**
 	 * Writes to the cluster chain at the given offset from the given buffer. This method
-	 * automatically searches for the new cluster in the chain and writes to it appropriately.
-	 * @param offset The offset in bytes where reading shall start.
+	 * automatically searches for following clusters in the chain and reads from them appropriately.
+	 * @param offset The offset in bytes where writing shall start.
 	 * @param source The buffer which holds the contents which shall be transferred into the cluster chain.
 	 * @throws IOException If writing fails.
 	 */
@@ -125,6 +126,7 @@ public class ClusterChain {
 
         // now we can proceed reading the clusters without an offset in the cluster
         while(length > 0) {
+        	// we always write one cluster at a time, or if remaining size is less than the cluster size, only "size" bytes
             int size = (int) Math.min(clusterSize, length);
             source.limit(source.position() + size);
 
@@ -147,8 +149,8 @@ public class ClusterChain {
 	
 	/**
 	 * Sets a new cluster size for the cluster chain. This method allocates or frees
-	 * cluster in the FAT if the number of the new clusters is bigger or lower than
-	 * the current number of clusters.
+	 * clusters in the FAT if the number of the new clusters is bigger or lower than
+	 * the current number of allocated clusters.
 	 * @param newNumberOfClusters The new number of clusters.
 	 * @throws IOException If growing or allocating the chain fails.
 	 * @see #getClusters()
