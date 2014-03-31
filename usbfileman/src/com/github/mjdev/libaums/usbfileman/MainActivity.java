@@ -94,6 +94,25 @@ public class MainActivity extends Activity implements OnItemClickListener {
 					}
 				}
 
+			} else if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
+				UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+
+				// determine if connected device is a mass storage devuce
+				if (device != null) {
+					discoverDevice();
+				}
+			} else if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
+				UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+
+				// determine if connected device is a mass storage devuce
+				if (device != null) {
+					if (MainActivity.this.device != null) {
+						MainActivity.this.device.close();
+					}
+					// check if there are other devices or set action bar title
+					// to no device if not
+					discoverDevice();
+				}
 			}
 
 		}
@@ -307,6 +326,18 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		listView.setOnItemClickListener(this);
 		registerForContextMenu(listView);
 
+		IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+		filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
+		filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
+		registerReceiver(usbReceiver, filter);
+		discoverDevice();
+	}
+
+	/**
+	 * Searches for connected mass storage devices, and initializes them if it
+	 * could find some.
+	 */
+	private void discoverDevice() {
 		UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
 		UsbMassStorageDevice[] devices = UsbMassStorageDevice.getMassStorageDevices(this);
 
@@ -314,6 +345,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			Log.w(TAG, "no device found!");
 			ActionBar actionBar = getActionBar();
 			actionBar.setTitle("No device");
+			listView.setAdapter(null);
 			return;
 		}
 
@@ -324,8 +356,6 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		// UsbDevice
 		PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(
 				ACTION_USB_PERMISSION), 0);
-		IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-		registerReceiver(usbReceiver, filter);
 		usbManager.requestPermission(device.getUsbDevice(), permissionIntent);
 	}
 
