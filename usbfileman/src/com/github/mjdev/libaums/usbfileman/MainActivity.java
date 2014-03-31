@@ -352,11 +352,20 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		// we only use the first device
 		device = devices[0];
 
-		// first request permission from user to communicate with the underlying
-		// UsbDevice
-		PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(
-				ACTION_USB_PERMISSION), 0);
-		usbManager.requestPermission(device.getUsbDevice(), permissionIntent);
+		UsbDevice usbDevice = (UsbDevice) getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
+
+		if (usbDevice != null) {
+			Log.d(TAG, "received usb device via intent");
+			// requesting permission is not needed in this case
+			setupDevice();
+		} else {
+			// first request permission from user to communicate with the
+			// underlying
+			// UsbDevice
+			PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(
+					ACTION_USB_PERMISSION), 0);
+			usbManager.requestPermission(device.getUsbDevice(), permissionIntent);
+		}
 	}
 
 	/**
@@ -561,9 +570,9 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		unregisterReceiver(usbReceiver);
 		if (device != null) {
 			device.close();
-			unregisterReceiver(usbReceiver);
 		}
 	}
 }
