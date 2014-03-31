@@ -97,12 +97,16 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			} else if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
 				UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 
+				Log.d(TAG, "USB device attached");
+
 				// determine if connected device is a mass storage devuce
 				if (device != null) {
 					discoverDevice();
 				}
 			} else if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
 				UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+
+				Log.d(TAG, "USB device detached");
 
 				// determine if connected device is a mass storage devuce
 				if (device != null) {
