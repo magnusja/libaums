@@ -24,21 +24,25 @@ import java.nio.ByteOrder;
  * Represents the response of a read capacity request.
  * <p>
  * The response data is received in the data phase
+ * 
  * @author mjahnen
  * @see com.github.mjdev.libaums.driver.scsi.commands.ScsiReadCapacity
  */
 public class ScsiReadCapacityResponse {
-	
+
 	private int logicalBlockAddress;
 	private int blockLength;
-	
+
 	private ScsiReadCapacityResponse() {
-		
+
 	}
-	
+
 	/**
 	 * Constructs a new object with the given data.
-	 * @param buffer The data where the {@link #ScsiReadCapacityResponse()} is located.
+	 * 
+	 * @param buffer
+	 *            The data where the {@link #ScsiReadCapacityResponse()} is
+	 *            located.
 	 * @return The parsed {@link #ScsiReadCapacityResponse()}.
 	 */
 	public static ScsiReadCapacityResponse read(ByteBuffer buffer) {
@@ -53,6 +57,7 @@ public class ScsiReadCapacityResponse {
 	 * Returns the address of the last accessible block on the block device.
 	 * <p>
 	 * The size of the device is then last accessible block + 0!
+	 * 
 	 * @return The last block address.
 	 */
 	public int getLogicalBlockAddress() {
@@ -61,6 +66,7 @@ public class ScsiReadCapacityResponse {
 
 	/**
 	 * Returns the size of each block in the block device.
+	 * 
 	 * @return The block size in bytes.
 	 */
 	public int getBlockLength() {

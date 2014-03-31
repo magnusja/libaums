@@ -18,24 +18,30 @@
 package com.github.mjdev.libaums.partition;
 
 /**
- * Class which holds various information about the partitions located on a block device.
+ * Class which holds various information about the partitions located on a block
+ * device.
+ * 
  * @author mjahnen
- *
+ * 
  */
 public class PartitionTableEntry {
-	
+
 	byte partitionType;
 	int logicalBlockAddress;
 	int totalNumberOfSectors;
-	
+
 	/**
 	 * Construct a new PartitionTableEntry with the given information.
-	 * @param partitionType The file system type of the partition (eg. FAT32).
-	 * @param logicalBlockAddress The logical block address on the device where this partition starts.
-	 * @param totalNumberOfSectors The total numbers of sectors occupied by the partition.
+	 * 
+	 * @param partitionType
+	 *            The file system type of the partition (eg. FAT32).
+	 * @param logicalBlockAddress
+	 *            The logical block address on the device where this partition
+	 *            starts.
+	 * @param totalNumberOfSectors
+	 *            The total numbers of sectors occupied by the partition.
 	 */
-	public PartitionTableEntry(byte partitionType, int logicalBlockAddress,
-			int totalNumberOfSectors) {
+	public PartitionTableEntry(byte partitionType, int logicalBlockAddress, int totalNumberOfSectors) {
 		this.partitionType = partitionType;
 		this.logicalBlockAddress = logicalBlockAddress;
 		this.totalNumberOfSectors = totalNumberOfSectors;
@@ -51,7 +57,8 @@ public class PartitionTableEntry {
 
 	/**
 	 * 
-	 * @return The logical block address where this partitions starts on the device.
+	 * @return The logical block address where this partitions starts on the
+	 *         device.
 	 */
 	public int getLogicalBlockAddress() {
 		return logicalBlockAddress;
@@ -59,8 +66,9 @@ public class PartitionTableEntry {
 
 	/**
 	 * 
-	 * @return The total numbers of sectors occupied by this partition. This value is often unused
-	 * because the same information is also stored in the specific file system.
+	 * @return The total numbers of sectors occupied by this partition. This
+	 *         value is often unused because the same information is also stored
+	 *         in the specific file system.
 	 */
 	public int getTotalNumberOfSectors() {
 		return totalNumberOfSectors;

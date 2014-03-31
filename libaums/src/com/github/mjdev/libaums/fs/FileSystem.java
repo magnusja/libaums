@@ -19,24 +19,28 @@ package com.github.mjdev.libaums.fs;
 
 /**
  * This class represents a file system.
+ * 
  * @author mjahnen
- *
+ * 
  */
 public interface FileSystem {
 
 	/**
 	 * This method returns the root directory of the file system.
+	 * 
 	 * @return The root directory of the file system.
 	 */
 	public UsbFile getRootDirectory();
+
 	/**
-	 * This method returns the name of the volume which is mostly saved in
-	 * the file system.
+	 * This method returns the name of the volume which is mostly saved in the
+	 * file system.
 	 * <p>
-	 * In Windows the name of a volume is shown in the explorer before the
-	 * drive letter.
+	 * In Windows the name of a volume is shown in the explorer before the drive
+	 * letter.
+	 * 
 	 * @return
 	 */
 	public String getVolumeLabel();
-	
+
 }

@@ -25,18 +25,24 @@ import com.github.mjdev.libaums.partition.mbr.MasterBootRecord;
 
 /**
  * Helper class to create different supported {@link PartitionTable}s.
+ * 
  * @author mjahnen
- *
+ * 
  */
 public class PartitionTableFactory {
 	/**
-	 * Creates a {@link PartitionTable} suitable for the given block device. The partition table
-	 * should be located at the logical block address zero of the device.
-	 * @param blockDevice The block device where the partition table is located.
+	 * Creates a {@link PartitionTable} suitable for the given block device. The
+	 * partition table should be located at the logical block address zero of
+	 * the device.
+	 * 
+	 * @param blockDevice
+	 *            The block device where the partition table is located.
 	 * @return The newly created {@link PartitionTable}.
-	 * @throws IOException If reading from the device fails.
+	 * @throws IOException
+	 *             If reading from the device fails.
 	 */
-	public static PartitionTable createPartitionTable(BlockDeviceDriver blockDevice) throws IOException {
+	public static PartitionTable createPartitionTable(BlockDeviceDriver blockDevice)
+			throws IOException {
 		// we currently only support mbr
 		ByteBuffer buffer = ByteBuffer.allocate(512);
 		blockDevice.read(0, buffer);

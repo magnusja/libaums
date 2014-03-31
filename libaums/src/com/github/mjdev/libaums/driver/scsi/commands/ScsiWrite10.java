@@ -21,16 +21,18 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- * SCSI command to write to the mass storage device. The 10 means that the transfer length is two byte
- * and the logical block address field is four byte. Thus the hole command takes 10 byte when serialized.
+ * SCSI command to write to the mass storage device. The 10 means that the
+ * transfer length is two byte and the logical block address field is four byte.
+ * Thus the hole command takes 10 byte when serialized.
  * <p>
  * The actual data is transferred in the data phase.
+ * 
  * @author mjahnen
- *
+ * 
  */
 public class ScsiWrite10 extends CommandBlockWrapper {
-	
-	//private static final String TAG = ScsiWrite10.class.getSimpleName();
+
+	// private static final String TAG = ScsiWrite10.class.getSimpleName();
 	private static final byte LENGTH = 0x10;
 	private static final byte OPCODE = 0x2a;
 
@@ -38,12 +40,16 @@ public class ScsiWrite10 extends CommandBlockWrapper {
 	private int transferBytes;
 	private int blockSize;
 	private short transferBlocks;
-	
+
 	/**
 	 * Constructs a new write command with the given information.
-	 * @param blockAddress The logical block address the write should start.
-	 * @param transferBytes The bytes which should be transferred.
-	 * @param blockSize The block size of the mass storage device.
+	 * 
+	 * @param blockAddress
+	 *            The logical block address the write should start.
+	 * @param transferBytes
+	 *            The bytes which should be transferred.
+	 * @param blockSize
+	 *            The block size of the mass storage device.
 	 */
 	public ScsiWrite10(int blockAddress, int transferBytes, int blockSize) {
 		super(transferBytes, Direction.OUT, (byte) 0, LENGTH);
@@ -51,12 +57,12 @@ public class ScsiWrite10 extends CommandBlockWrapper {
 		this.transferBytes = transferBytes;
 		this.blockSize = blockSize;
 		short transferBlocks = (short) (transferBytes / blockSize);
-		if(transferBytes % blockSize != 0) {
+		if (transferBytes % blockSize != 0) {
 			throw new IllegalArgumentException("transfer bytes is not a multiple of block size");
 		}
 		this.transferBlocks = transferBlocks;
 	}
-	
+
 	@Override
 	public void serialize(ByteBuffer buffer) {
 		super.serialize(buffer);
@@ -70,11 +76,9 @@ public class ScsiWrite10 extends CommandBlockWrapper {
 
 	@Override
 	public String toString() {
-		return "ScsiWrite10 [blockAddress=" + blockAddress + ", transferBytes="
-				+ transferBytes + ", blockSize=" + blockSize
-				+ ", transferBlocks=" + transferBlocks
-				+ ", getdCbwDataTransferLength()="
-				+ getdCbwDataTransferLength() + "]";
+		return "ScsiWrite10 [blockAddress=" + blockAddress + ", transferBytes=" + transferBytes
+				+ ", blockSize=" + blockSize + ", transferBlocks=" + transferBlocks
+				+ ", getdCbwDataTransferLength()=" + getdCbwDataTransferLength() + "]";
 	}
 
 }

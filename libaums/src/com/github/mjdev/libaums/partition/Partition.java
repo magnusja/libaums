@@ -27,19 +27,23 @@ import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.FileSystemFactory;
 
 /**
- * This class represents a partition on an mass storage device. A partition has a certain file system which can
- * be accessed via {@link #getFileSystem()}. This file system is needed to to access the files and directories of a partition.
+ * This class represents a partition on an mass storage device. A partition has
+ * a certain file system which can be accessed via {@link #getFileSystem()}.
+ * This file system is needed to to access the files and directories of a
+ * partition.
  * <p>
- * The method {@link #getVolumeLabel()} returns the volume label for the partition. Calling the method is equivalent to calling
+ * The method {@link #getVolumeLabel()} returns the volume label for the
+ * partition. Calling the method is equivalent to calling
  * {@link FileSystem#getVolumeLabel()}.
+ * 
  * @author mjahnen
- *
+ * 
  */
 public class Partition implements BlockDeviceDriver {
-	
+
 	private static final String TAG = Partition.class.getSimpleName();
-	
-	//private PartitionTableEntry partitionTableEntry;
+
+	// private PartitionTableEntry partitionTableEntry;
 	private BlockDeviceDriver blockDevice;
 	/**
 	 * The logical block address where on the device this partition starts.
@@ -47,26 +51,31 @@ public class Partition implements BlockDeviceDriver {
 	private int logicalBlockAddress;
 	private int blockSize;
 	private FileSystem fileSystem;
-	
+
 	private Partition() {
-		
+
 	}
-	
+
 	/**
 	 * Creates a new partition with the information given.
-	 * @param entry The entry the partition shall represent.
-	 * @param blockDevice The underlying block device.
+	 * 
+	 * @param entry
+	 *            The entry the partition shall represent.
+	 * @param blockDevice
+	 *            The underlying block device.
 	 * @return The newly created Partition.
-	 * @throws IOException If reading from the device fails.
+	 * @throws IOException
+	 *             If reading from the device fails.
 	 */
-	public static Partition createPartition(PartitionTableEntry entry, BlockDeviceDriver blockDevice) throws IOException {
+	public static Partition createPartition(PartitionTableEntry entry, BlockDeviceDriver blockDevice)
+			throws IOException {
 		Partition partition = null;
-		
+
 		// we currently only support fat32
 		int partitionType = entry.getPartitionType();
-		if(partitionType == 0x0b || partitionType == 0x0c) {
+		if (partitionType == 0x0b || partitionType == 0x0c) {
 			partition = new Partition();
-			//partition.partitionTableEntry = entry;
+			// partition.partitionTableEntry = entry;
 			partition.logicalBlockAddress = entry.getLogicalBlockAddress();
 			partition.blockDevice = blockDevice;
 			partition.blockSize = blockDevice.getBlockSize();
@@ -74,60 +83,65 @@ public class Partition implements BlockDeviceDriver {
 		} else {
 			Log.w(TAG, "unsupported partition type: " + entry.getPartitionType());
 		}
-		
+
 		return partition;
 	}
-	
+
 	/**
 	 * 
-	 * @return the file system on the partition which can be used to access files and directories.
+	 * @return the file system on the partition which can be used to access
+	 *         files and directories.
 	 */
 	public FileSystem getFileSystem() {
 		return fileSystem;
 	}
-	
+
 	/**
-	 * This method returns the volume label of the file system / partition. Calling this method is equivalent to calling
+	 * This method returns the volume label of the file system / partition.
+	 * Calling this method is equivalent to calling
 	 * {@link FileSystem#getVolumeLabel()}.
+	 * 
 	 * @return Returns the volume label of this partition.
 	 */
 	public String getVolumeLabel() {
 		return fileSystem.getVolumeLabel();
 	}
-	
+
 	@Override
 	public void init() {
-		
+
 	}
 
 	@Override
 	public void read(long offset, ByteBuffer dest) throws IOException {
 		long devOffset = offset / blockSize + logicalBlockAddress;
-		// TODO try to make this more efficient by for example making tmp buffer global
-		if(offset % blockSize != 0) {
+		// TODO try to make this more efficient by for example making tmp buffer
+		// global
+		if (offset % blockSize != 0) {
 			Log.w(TAG, "device offset not a multiple of block size");
 			ByteBuffer tmp = ByteBuffer.allocate(blockSize);
-			
+
 			blockDevice.read(devOffset, tmp);
 			tmp.clear();
 			tmp.position((int) (offset % blockSize));
 			dest.put(tmp);
-			
+
 			devOffset++;
 		}
-		
-		if(dest.remaining() > 0)
+
+		if (dest.remaining() > 0)
 			blockDevice.read(devOffset, dest);
 	}
 
 	@Override
 	public void write(long offset, ByteBuffer src) throws IOException {
 		long devOffset = offset / blockSize + logicalBlockAddress;
-		// TODO try to make this more efficient by for example making tmp buffer global
-		if(offset % blockSize != 0) {
+		// TODO try to make this more efficient by for example making tmp buffer
+		// global
+		if (offset % blockSize != 0) {
 			Log.w(TAG, "device offset not a multiple of block size");
 			ByteBuffer tmp = ByteBuffer.allocate(blockSize);
-			
+
 			blockDevice.read(devOffset, tmp);
 			tmp.clear();
 			tmp.position((int) (offset % blockSize));
@@ -136,11 +150,11 @@ public class Partition implements BlockDeviceDriver {
 			src.position(src.position() + remaining);
 			tmp.clear();
 			blockDevice.write(devOffset, tmp);
-			
+
 			devOffset++;
 		}
-		
-		if(src.remaining() > 0)
+
+		if (src.remaining() > 0)
 			blockDevice.write(devOffset, src);
 	}
 

@@ -21,15 +21,20 @@ import com.github.mjdev.libaums.UsbCommunication;
 import com.github.mjdev.libaums.driver.scsi.ScsiBlockDevice;
 
 /**
- * A helper class to create different {@link com.github.mjdev.libaums.driver.BlockDeviceDriver}s.
+ * A helper class to create different
+ * {@link com.github.mjdev.libaums.driver.BlockDeviceDriver}s.
+ * 
  * @author mjahnen
- *
+ * 
  */
 public class BlockDeviceDriverFactory {
 	/**
-	 * This method creates a {@link com.github.mjdev.libaums.driver.BlockDeviceDriver} which is suitable
-	 * for the underlying mass storage device.
-	 * @param usbCommunication The underlying USB communication.
+	 * This method creates a
+	 * {@link com.github.mjdev.libaums.driver.BlockDeviceDriver} which is
+	 * suitable for the underlying mass storage device.
+	 * 
+	 * @param usbCommunication
+	 *            The underlying USB communication.
 	 * @return A driver which can handle the USB mass storage device.
 	 */
 	public static BlockDeviceDriver createBlockDevice(UsbCommunication usbCommunication) {

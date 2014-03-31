@@ -35,11 +35,12 @@ import com.github.mjdev.libaums.fs.UsbFile;
 
 /**
  * List adapter to represent the contents of an {@link UsbFile} directory.
+ * 
  * @author mjahnen
- *
+ * 
  */
 public class UsbFileListAdapter extends ArrayAdapter<UsbFile> {
-	
+
 	/**
 	 * Class to compare {@link UsbFile}s. If the {@link UsbFile} is an directory
 	 * it is rated lower than an file, ie. directories come first when sorting.
@@ -48,44 +49,50 @@ public class UsbFileListAdapter extends ArrayAdapter<UsbFile> {
 
 		@Override
 		public int compare(UsbFile lhs, UsbFile rhs) {
-			
-			if(lhs.isDirectory() && !rhs.isDirectory()) {
+
+			if (lhs.isDirectory() && !rhs.isDirectory()) {
 				return -1;
-			} 
-			
-			if(rhs.isDirectory() && !lhs.isDirectory()) {
+			}
+
+			if (rhs.isDirectory() && !lhs.isDirectory()) {
 				return 1;
 			}
-			
+
 			return lhs.getName().compareToIgnoreCase(rhs.getName());
 		}
 	};
-	
+
 	private List<UsbFile> files;
 	private UsbFile currentDir;
-	
+
 	private LayoutInflater inflater;
-	
+
 	/**
 	 * Constructs a new List Adapter to show {@link UsbFile}s.
-	 * @param context The context.
-	 * @param dir The directory which shall be shown.
-	 * @throws IOException If reading fails.
+	 * 
+	 * @param context
+	 *            The context.
+	 * @param dir
+	 *            The directory which shall be shown.
+	 * @throws IOException
+	 *             If reading fails.
 	 */
 	public UsbFileListAdapter(Context context, UsbFile dir) throws IOException {
 		super(context, R.layout.list_item);
 		currentDir = dir;
 		files = new ArrayList<UsbFile>();
-		
-		inflater = (LayoutInflater) context
-			        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		
+
+		inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
 		refresh();
 	}
-	
+
 	/**
-	 * Reads the contents of the directory and notifies that the View shall be updated.
-	 * @throws IOException If reading contents of a directory fails.
+	 * Reads the contents of the directory and notifies that the View shall be
+	 * updated.
+	 * 
+	 * @throws IOException
+	 *             If reading contents of a directory fails.
 	 */
 	public void refresh() throws IOException {
 		files = Arrays.asList(currentDir.listFiles());
@@ -101,22 +108,22 @@ public class UsbFileListAdapter extends ArrayAdapter<UsbFile> {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View view;
-		if(convertView != null) {
+		if (convertView != null) {
 			view = convertView;
 		} else {
 			view = inflater.inflate(R.layout.list_item, parent, false);
 		}
-		
+
 		TextView typeText = (TextView) view.findViewById(R.id.type_text_view);
-		TextView  nameText = (TextView) view.findViewById(R.id.name_text_view);
+		TextView nameText = (TextView) view.findViewById(R.id.name_text_view);
 		UsbFile file = files.get(position);
-		if(file.isDirectory()) {
+		if (file.isDirectory()) {
 			typeText.setText("Directory");
 		} else {
 			typeText.setText("File");
 		}
 		nameText.setText(file.getName());
-		
+
 		return view;
 	}
 
@@ -132,5 +139,5 @@ public class UsbFileListAdapter extends ArrayAdapter<UsbFile> {
 	public UsbFile getCurrentDir() {
 		return currentDir;
 	}
-	
+
 }

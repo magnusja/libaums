@@ -24,54 +24,69 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 import com.github.mjdev.libaums.fs.UsbFile;
 
 public class FatFile implements UsbFile {
-	
+
 	private BlockDeviceDriver blockDevice;
 	private FAT fat;
 	private Fat32BootSector bootSector;
-	
+
 	private FatDirectory parent;
 	private ClusterChain chain;
 	private FatLfnDirectoryEntry entry;
-	
+
 	/**
 	 * Constructs a new file with the given information.
-	 * @param blockDevice The device where the file system is located.
-	 * @param fat The FAT used to follow cluster chains.
-	 * @param bootSector The boot sector of the file system.
-	 * @param entry The corresponding entry in a FAT directory.
-	 * @param parent The parent directory of the newly constructed file.
+	 * 
+	 * @param blockDevice
+	 *            The device where the file system is located.
+	 * @param fat
+	 *            The FAT used to follow cluster chains.
+	 * @param bootSector
+	 *            The boot sector of the file system.
+	 * @param entry
+	 *            The corresponding entry in a FAT directory.
+	 * @param parent
+	 *            The parent directory of the newly constructed file.
 	 */
-	private FatFile(BlockDeviceDriver blockDevice, FAT fat,
-			Fat32BootSector bootSector, FatLfnDirectoryEntry entry,
-			FatDirectory parent) {
+	private FatFile(BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector,
+			FatLfnDirectoryEntry entry, FatDirectory parent) {
 		this.blockDevice = blockDevice;
 		this.fat = fat;
 		this.bootSector = bootSector;
 		this.entry = entry;
 		this.parent = parent;
 	}
-	
+
 	/**
 	 * Creates a new file with the given information.
-	 * @param entry The corresponding entry in a FAT directory.
-	 * @param blockDevice The device where the file system is located.
-	 * @param fat The FAT used to follow cluster chains.
-	 * @param bootSector The boot sector of the file system.
-	 * @param parent The parent directory of the newly created file.
+	 * 
+	 * @param entry
+	 *            The corresponding entry in a FAT directory.
+	 * @param blockDevice
+	 *            The device where the file system is located.
+	 * @param fat
+	 *            The FAT used to follow cluster chains.
+	 * @param bootSector
+	 *            The boot sector of the file system.
+	 * @param parent
+	 *            The parent directory of the newly created file.
 	 * @return The newly constructed file.
-	 * @throws IOException If reading from device fails.
+	 * @throws IOException
+	 *             If reading from device fails.
 	 */
-	public static FatFile create(FatLfnDirectoryEntry entry, BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector, FatDirectory parent) throws IOException {
+	public static FatFile create(FatLfnDirectoryEntry entry, BlockDeviceDriver blockDevice,
+			FAT fat, Fat32BootSector bootSector, FatDirectory parent) throws IOException {
 		FatFile result = new FatFile(blockDevice, fat, bootSector, entry, parent);
 		return result;
 	}
-	
+
 	/**
 	 * Initializes the cluster chain to access the contents of the file.
-	 * @throws IOException If reading from FAT fails.
+	 * 
+	 * @throws IOException
+	 *             If reading from FAT fails.
 	 */
 	private void initChain() throws IOException {
-		if(chain == null) {
+		if (chain == null) {
 			chain = new ClusterChain(entry.getStartCluster(), blockDevice, fat, bootSector);
 		}
 	}
@@ -91,7 +106,6 @@ public class FatFile implements UsbFile {
 		parent.renameEntry(entry, newName);
 	}
 
-
 	@Override
 	public UsbFile getParent() {
 		return parent;
@@ -106,12 +120,12 @@ public class FatFile implements UsbFile {
 	public UsbFile[] listFiles() throws IOException {
 		throw new UnsupportedOperationException("This is a file!");
 	}
-	
+
 	@Override
 	public long getLength() {
 		return entry.getFileSize();
 	}
-	
+
 	@Override
 	public void setLength(long newLength) throws IOException {
 		chain.setLength(newLength);
@@ -129,7 +143,7 @@ public class FatFile implements UsbFile {
 	public void write(long offset, ByteBuffer source) throws IOException {
 		initChain();
 		long length = offset + source.remaining();
-		if(length > getLength())
+		if (length > getLength())
 			setLength(length);
 		entry.setLastModifiedTimeToNow();
 		chain.write(offset, source);
@@ -137,9 +151,11 @@ public class FatFile implements UsbFile {
 
 	@Override
 	public void flush() throws IOException {
-		// we only have to update the parent because we are always writing everything
+		// we only have to update the parent because we are always writing
+		// everything
 		// immediately to the device
-		// the parent directory is responsible for updating the FatDirectoryEntry which
+		// the parent directory is responsible for updating the
+		// FatDirectoryEntry which
 		// contains things like the file size and the date time fields
 		parent.write();
 	}
@@ -164,7 +180,7 @@ public class FatFile implements UsbFile {
 		parent.move(entry, destination);
 		parent = (FatDirectory) destination;
 	}
-	
+
 	@Override
 	public void delete() throws IOException {
 		initChain();

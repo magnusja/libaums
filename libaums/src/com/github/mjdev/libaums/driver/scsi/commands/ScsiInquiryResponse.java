@@ -21,28 +21,31 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- * This class represents the response of a SCSI Inquiry. It holds various information about
- * the mass storage device.
+ * This class represents the response of a SCSI Inquiry. It holds various
+ * information about the mass storage device.
  * <p>
  * This response is received in the data phase.
+ * 
  * @author mjahnen
  * @see com.github.mjdev.libaums.driver.scsi.commands.ScsiInquiry
  */
 public class ScsiInquiryResponse {
-	
+
 	private byte peripheralQualifier;
 	private byte peripheralDeviceType;
 	boolean removableMedia;
 	byte spcVersion;
 	byte responseDataFormat;
-	
+
 	private ScsiInquiryResponse() {
-		
+
 	}
-	
+
 	/**
 	 * Constructs a new object with the given data.
-	 * @param buffer The data where the {@link #ScsiInquiryResponse()} is located.
+	 * 
+	 * @param buffer
+	 *            The data where the {@link #ScsiInquiryResponse()} is located.
 	 * @return The parsed {@link #ScsiInquiryResponse()}.
 	 */
 	public static ScsiInquiryResponse read(ByteBuffer buffer) {
@@ -67,6 +70,7 @@ public class ScsiInquiryResponse {
 
 	/**
 	 * The type of the mass storage device.
+	 * 
 	 * @return Zero for a direct access block device.
 	 */
 	public byte getPeripheralDeviceType() {
@@ -82,7 +86,9 @@ public class ScsiInquiryResponse {
 	}
 
 	/**
-	 * This method returns the version of the SCSI Primary Commands (SPC) standard the device supports.
+	 * This method returns the version of the SCSI Primary Commands (SPC)
+	 * standard the device supports.
+	 * 
 	 * @return Version of the SPC standard
 	 */
 	public byte getSpcVersion() {
@@ -95,10 +101,9 @@ public class ScsiInquiryResponse {
 
 	@Override
 	public String toString() {
-		return "ScsiInquiryResponse [peripheralQualifier="
-				+ peripheralQualifier + ", peripheralDeviceType="
-				+ peripheralDeviceType + ", removableMedia=" + removableMedia
-				+ ", spcVersion=" + spcVersion + ", responseDataFormat="
+		return "ScsiInquiryResponse [peripheralQualifier=" + peripheralQualifier
+				+ ", peripheralDeviceType=" + peripheralDeviceType + ", removableMedia="
+				+ removableMedia + ", spcVersion=" + spcVersion + ", responseDataFormat="
 				+ responseDataFormat + "]";
 	}
 }

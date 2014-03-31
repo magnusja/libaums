@@ -20,28 +20,30 @@ package com.github.mjdev.libaums.usbfileman;
 import com.github.mjdev.libaums.fs.UsbFile;
 
 /**
- * Small helper class to move files or directories to another directory. It saves
- * the instance to the {@link UsbFile} which shall be moved to another place.
+ * Small helper class to move files or directories to another directory. It
+ * saves the instance to the {@link UsbFile} which shall be moved to another
+ * place.
+ * 
  * @author mjahnen
- *
+ * 
  */
 public class MoveClipboard {
-	
+
 	private static MoveClipboard instance;
 	private UsbFile file;
-	
+
 	private MoveClipboard() {
-		
+
 	}
-	
+
 	/**
 	 * 
 	 * @return The global used instance.
 	 */
 	public static synchronized MoveClipboard getInstance() {
-		if(instance == null)
+		if (instance == null)
 			instance = new MoveClipboard();
-		
+
 		return instance;
 	}
 
@@ -55,10 +57,12 @@ public class MoveClipboard {
 
 	/**
 	 * Sets the file in the clipboard.
-	 * @param file The file which shall be moved.
+	 * 
+	 * @param file
+	 *            The file which shall be moved.
 	 */
 	public void setFile(UsbFile file) {
 		this.file = file;
 	}
-	
+
 }

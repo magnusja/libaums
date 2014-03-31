@@ -24,13 +24,16 @@ import com.github.mjdev.libaums.fs.fat32.Fat32FileSystem;
 import com.github.mjdev.libaums.partition.PartitionTableEntry;
 
 /**
- * This is a helper class to create different supported file systems. The file system is determined by 
- * {link {@link com.github.mjdev.libaums.partition.PartitionTableEntry}.
+ * This is a helper class to create different supported file systems. The file
+ * system is determined by {link
+ * {@link com.github.mjdev.libaums.partition.PartitionTableEntry}.
+ * 
  * @author mjahnen
- *
+ * 
  */
 public class FileSystemFactory {
-	public static FileSystem createFileSystem(PartitionTableEntry entry, BlockDeviceDriver blockDevice) throws IOException {
+	public static FileSystem createFileSystem(PartitionTableEntry entry,
+			BlockDeviceDriver blockDevice) throws IOException {
 		// we currently only support FAT32
 		return Fat32FileSystem.read(blockDevice);
 	}

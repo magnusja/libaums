@@ -65,46 +65,48 @@ import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.UsbFile;
 
 /**
- * MainActivity of the demo application which shows the contents of the first partition.
+ * MainActivity of the demo application which shows the contents of the first
+ * partition.
+ * 
  * @author mjahnen
- *
+ * 
  */
 public class MainActivity extends Activity implements OnItemClickListener {
-	
+
 	/**
 	 * Action string to request the permission to communicate with an UsbDevice.
 	 */
-	private static final String ACTION_USB_PERMISSION =
-			"com.github.mjdev.libaums.USB_PERMISSION";
+	private static final String ACTION_USB_PERMISSION = "com.github.mjdev.libaums.USB_PERMISSION";
 	private static final String TAG = MainActivity.class.getSimpleName();
 
 	private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			
+
 			String action = intent.getAction();
 			if (ACTION_USB_PERMISSION.equals(action)) {
-				
+
 				UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 				if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-					
-					if(device != null) {
+
+					if (device != null) {
 						setupDevice();
 					}
 				}
-				
+
 			}
-			
+
 		}
 	};
-	
+
 	/**
 	 * Dialog to create new directories.
+	 * 
 	 * @author mjahnen
-	 *
+	 * 
 	 */
 	public static class NewDirDialog extends DialogFragment {
-		
+
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
 			final MainActivity activity = (MainActivity) getActivity();
@@ -114,46 +116,43 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			final EditText input = new EditText(activity);
 			builder.setView(input);
 
-			builder.setPositiveButton("Ok",
-					new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog,
-								int whichButton) {
-							
-							UsbFile dir = activity.adapter.getCurrentDir();
-							try {
-								dir.createDirectory(input.getText().toString());
-								activity.adapter.refresh();
-							} catch (Exception e) {
-								Log.e(TAG, "error creating dir!", e);
-							}
-							
-						}
+			builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int whichButton) {
 
-					});
+					UsbFile dir = activity.adapter.getCurrentDir();
+					try {
+						dir.createDirectory(input.getText().toString());
+						activity.adapter.refresh();
+					} catch (Exception e) {
+						Log.e(TAG, "error creating dir!", e);
+					}
 
-			builder.setNegativeButton("Cancel",
-					new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog,
-								int whichButton) {
-							dialog.dismiss();
-						}
-					});
-			
+				}
+
+			});
+
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int whichButton) {
+					dialog.dismiss();
+				}
+			});
+
 			builder.setCancelable(false);
 			return builder.create();
 		}
-		
+
 	}
-	
+
 	/**
 	 * Dialog to create new files.
+	 * 
 	 * @author mjahnen
-	 *
+	 * 
 	 */
 	public static class NewFileDialog extends DialogFragment {
-		
+
 		@Override
 		public Dialog onCreateDialog(Bundle savedInstanceState) {
 			final MainActivity activity = (MainActivity) getActivity();
@@ -172,65 +171,64 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			textView.setText("Content:");
 			layout.addView(textView);
 			layout.addView(content);
-			
+
 			builder.setView(layout);
 
-			builder.setPositiveButton("Ok",
-					new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog,
-								int whichButton) {
-							
-							UsbFile dir = activity.adapter.getCurrentDir();
-							try {
-								UsbFile file = dir.createFile(input.getText().toString());
-								file.write(0, ByteBuffer.wrap(content.getText().toString().getBytes()));
-								file.close();
-								activity.adapter.refresh();
-							} catch (Exception e) {
-								Log.e(TAG, "error creating file!", e);
-							}
-							
-						}
+			builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int whichButton) {
 
-					});
+					UsbFile dir = activity.adapter.getCurrentDir();
+					try {
+						UsbFile file = dir.createFile(input.getText().toString());
+						file.write(0, ByteBuffer.wrap(content.getText().toString().getBytes()));
+						file.close();
+						activity.adapter.refresh();
+					} catch (Exception e) {
+						Log.e(TAG, "error creating file!", e);
+					}
 
-			builder.setNegativeButton("Cancel",
-					new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog,
-								int whichButton) {
-							dialog.dismiss();
-						}
-					});
-			
+				}
+
+			});
+
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int whichButton) {
+					dialog.dismiss();
+				}
+			});
+
 			builder.setCancelable(false);
 			return builder.create();
 		}
-		
+
 	}
-	
+
 	/**
-	 * Class to hold the files for a copy task. Holds the source and the destination file.
+	 * Class to hold the files for a copy task. Holds the source and the
+	 * destination file.
+	 * 
 	 * @author mjahnen
-	 *
+	 * 
 	 */
 	private static class CopyTaskParam {
-		/* package */ UsbFile from;
-		/* package */ File to;
+		/* package */UsbFile from;
+		/* package */File to;
 	}
-	
+
 	/**
-	 * Asynchronous task to copy a file from the mass storage device connected via USB to the
-	 * internal storage.
+	 * Asynchronous task to copy a file from the mass storage device connected
+	 * via USB to the internal storage.
+	 * 
 	 * @author mjahnen
-	 *
+	 * 
 	 */
 	private class CopyTask extends AsyncTask<CopyTaskParam, Integer, Void> {
-		
+
 		private ProgressDialog dialog;
 		private CopyTaskParam param;
-		
+
 		public CopyTask() {
 			dialog = new ProgressDialog(MainActivity.this);
 			dialog.setTitle("Copying file");
@@ -243,7 +241,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		protected void onPreExecute() {
 			dialog.show();
 		}
-		
+
 		@Override
 		protected Void doInBackground(CopyTaskParam... params) {
 			long time = System.currentTimeMillis();
@@ -252,11 +250,11 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			long length = params[0].from.getLength();
 			try {
 				FileOutputStream out = new FileOutputStream(params[0].to);
-				for(long i = 0; i < length; i += buffer.limit()) {
+				for (long i = 0; i < length; i += buffer.limit()) {
 					buffer.limit((int) Math.min(buffer.capacity(), length - i));
 					params[0].from.read(i, buffer);
 					out.write(buffer.array(), 0, buffer.limit());
-					publishProgress((int)i);
+					publishProgress((int) i);
 					buffer.clear();
 				}
 				out.close();
@@ -266,20 +264,23 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			Log.d(TAG, "copy time: " + (System.currentTimeMillis() - time));
 			return null;
 		}
-		
+
 		@Override
 		protected void onPostExecute(Void result) {
 			dialog.dismiss();
-			
+
 			Intent myIntent = new Intent(android.content.Intent.ACTION_VIEW);
 			File file = new File(param.to.getAbsolutePath());
-			String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
-			String mimetype = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+			String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(Uri
+					.fromFile(file).toString());
+			String mimetype = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+					extension);
 			myIntent.setDataAndType(Uri.fromFile(file), mimetype);
 			try {
 				startActivity(myIntent);
-			} catch(ActivityNotFoundException e) {
-				Toast.makeText(MainActivity.this, "Could no find an app for that file!", Toast.LENGTH_LONG).show();
+			} catch (ActivityNotFoundException e) {
+				Toast.makeText(MainActivity.this, "Could no find an app for that file!",
+						Toast.LENGTH_LONG).show();
 			}
 		}
 
@@ -288,28 +289,28 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			dialog.setMax((int) param.from.getLength());
 			dialog.setProgress(values[0]);
 		}
-		
+
 	}
-	
+
 	private ListView listView;
 	private UsbMassStorageDevice device;
-	/* package */ UsbFileListAdapter adapter;
+	/* package */UsbFileListAdapter adapter;
 	private Deque<UsbFile> dirs = new ArrayDeque<UsbFile>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
 		listView = (ListView) findViewById(R.id.listview);
-		
+
 		listView.setOnItemClickListener(this);
 		registerForContextMenu(listView);
-		
-		UsbManager usbManager  = (UsbManager) getSystemService(Context.USB_SERVICE);
+
+		UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
 		UsbMassStorageDevice[] devices = UsbMassStorageDevice.getMassStorageDevices(this);
-		
-		if(devices.length == 0) {
+
+		if (devices.length == 0) {
 			Log.w(TAG, "no device found!");
 			ActionBar actionBar = getActionBar();
 			actionBar.setTitle("No device");
@@ -319,27 +320,29 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		// we only use the first device
 		device = devices[0];
 
-		// first request permission from user to communicate with the underlying UsbDevice
-		PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+		// first request permission from user to communicate with the underlying
+		// UsbDevice
+		PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(
+				ACTION_USB_PERMISSION), 0);
 		IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
 		registerReceiver(usbReceiver, filter);
 		usbManager.requestPermission(device.getUsbDevice(), permissionIntent);
 	}
-	
+
 	/**
 	 * Sets the device up and shows the contents of the root directory.
 	 */
 	private void setupDevice() {
 		try {
 			device.init();
-			
+
 			// we always use the first partition of the device
 			FileSystem fs = device.getPartitions().get(0).getFileSystem();
 			UsbFile root = fs.getRootDirectory();
-			
+
 			ActionBar actionBar = getActionBar();
 			actionBar.setTitle(fs.getVolumeLabel());
-			
+
 			listView.setAdapter(adapter = new UsbFileListAdapter(this, root));
 		} catch (IOException e) {
 			Log.e(TAG, "error setting up device", e);
@@ -353,112 +356,108 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-	
+
 	@Override
-	public boolean onPrepareOptionsMenu (Menu menu) {
+	public boolean onPrepareOptionsMenu(Menu menu) {
 		MoveClipboard cl = MoveClipboard.getInstance();
 		menu.findItem(R.id.paste).setEnabled(cl.getFile() != null);
 		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
-	    switch (item.getItemId()) {
-	        case R.id.create_file:
-	        	new NewFileDialog().show(getFragmentManager(), "NEW_FILE");
-	            return true;
-	        case R.id.create_dir:
-	        	new NewDirDialog().show(getFragmentManager(), "NEW_DIR");
-	            return true;
-	        case R.id.create_big_file:
-	        	createBigFile();
-	            return true;
-	        case R.id.paste:
-	        	move();
-	        	return true;
-	        default:
-	            return super.onOptionsItemSelected(item);
-	    }
+		switch (item.getItemId()) {
+		case R.id.create_file:
+			new NewFileDialog().show(getFragmentManager(), "NEW_FILE");
+			return true;
+		case R.id.create_dir:
+			new NewDirDialog().show(getFragmentManager(), "NEW_DIR");
+			return true;
+		case R.id.create_big_file:
+			createBigFile();
+			return true;
+		case R.id.paste:
+			move();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-	                                ContextMenuInfo menuInfo) {
-	    super.onCreateContextMenu(menu, v, menuInfo);
-	    MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.context, menu);
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.context, menu);
 	}
-	
+
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-	    AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-		final UsbFile entry = adapter.getItem((int)info.id);
-	    switch (item.getItemId()) {
-	        case R.id.delete_item:
-				try {
-					entry.delete();
-					adapter.refresh();
-				} catch (IOException e) {
-					Log.e(TAG, "error deleting!", e);
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		final UsbFile entry = adapter.getItem((int) info.id);
+		switch (item.getItemId()) {
+		case R.id.delete_item:
+			try {
+				entry.delete();
+				adapter.refresh();
+			} catch (IOException e) {
+				Log.e(TAG, "error deleting!", e);
+			}
+			return true;
+		case R.id.rename_item:
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle("Rename");
+			builder.setMessage("Please enter a name for renaming");
+			final EditText input = new EditText(this);
+			input.setText(entry.getName());
+			builder.setView(input);
+
+			builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int whichButton) {
+					try {
+						entry.setName(input.getText().toString());
+						adapter.refresh();
+					} catch (IOException e) {
+						Log.e(TAG, "error renaming!", e);
+					}
 				}
-	            return true;
-	        case R.id.rename_item:
-	        	AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setTitle("Rename");
-				builder.setMessage("Please enter a name for renaming");
-				final EditText input = new EditText(this);
-				input.setText(entry.getName());
-				builder.setView(input);
 
-				builder.setPositiveButton("Ok",
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int whichButton) {
-								try {
-									entry.setName(input.getText().toString());
-									adapter.refresh();
-								} catch (IOException e) {
-									Log.e(TAG, "error renaming!", e);
-								}
-							}
+			});
 
-						});
-
-				builder.setNegativeButton("Cancel",
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int whichButton) {
-								dialog.dismiss();
-							}
-						});
-				builder.setCancelable(false);
-				builder.create().show();
-	        	return true;
-	        case R.id.move_item:
-	        	MoveClipboard cl = MoveClipboard.getInstance();
-	        	cl.setFile(entry);
-	        	return true;
-	        default:
-	            return super.onContextItemSelected(item);
-	    }
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int whichButton) {
+					dialog.dismiss();
+				}
+			});
+			builder.setCancelable(false);
+			builder.create().show();
+			return true;
+		case R.id.move_item:
+			MoveClipboard cl = MoveClipboard.getInstance();
+			cl.setFile(entry);
+			return true;
+		default:
+			return super.onContextItemSelected(item);
+		}
 	}
-	
+
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long rowId) {
 		UsbFile entry = adapter.getItem(position);
 		try {
-			if(entry.isDirectory()) {
+			if (entry.isDirectory()) {
 				dirs.push(adapter.getCurrentDir());
 				listView.setAdapter(adapter = new UsbFileListAdapter(this, entry));
 
 			} else {
 				CopyTaskParam param = new CopyTaskParam();
 				param.from = entry;
-				File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/usbfileman/cache");
+				File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath()
+						+ "/usbfileman/cache");
 				f.mkdirs();
 				int index = entry.getName().lastIndexOf(".");
 				String prefix = entry.getName().substring(0, index);
@@ -472,10 +471,12 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	}
 
 	/**
-	 * This methods creates a very big file for testing purposes. It writes only a small chunk of
-	 * bytes in every loop iteration, so the offset where the write starts will not always be a multiple
-	 * of the cluster or block size of the file system or block device. As a plus the file has to be grown
-	 * after every loop iteration which tests for example on FAT32 the dynamic growth of a cluster chain.
+	 * This methods creates a very big file for testing purposes. It writes only
+	 * a small chunk of bytes in every loop iteration, so the offset where the
+	 * write starts will not always be a multiple of the cluster or block size
+	 * of the file system or block device. As a plus the file has to be grown
+	 * after every loop iteration which tests for example on FAT32 the dynamic
+	 * growth of a cluster chain.
 	 */
 	private void createBigFile() {
 		UsbFile dir = adapter.getCurrentDir();
@@ -484,13 +485,13 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			file = dir.createFile("big_file_test.txt");
 			file.write(0, ByteBuffer.wrap("START\n".getBytes()));
 			int i;
-			
-			for(i = 6; i < 9000; i += 5) {
+
+			for (i = 6; i < 9000; i += 5) {
 				file.write(i, ByteBuffer.wrap("TEST\n".getBytes()));
 			}
 
 			file.write(i, ByteBuffer.wrap("END\n".getBytes()));
-			
+
 			file.close();
 
 			adapter.refresh();
@@ -500,8 +501,8 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	}
 
 	/**
-	 * This method moves the file located in the {@link MoveClipboard} into the current shown
-	 * directory.
+	 * This method moves the file located in the {@link MoveClipboard} into the
+	 * current shown directory.
 	 */
 	private void move() {
 		MoveClipboard cl = MoveClipboard.getInstance();
@@ -520,7 +521,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 		try {
 			UsbFile dir = dirs.pop();
 			listView.setAdapter(adapter = new UsbFileListAdapter(this, dir));
-		} catch(NoSuchElementException e) {
+		} catch (NoSuchElementException e) {
 			super.onBackPressed();
 		} catch (IOException e) {
 			Log.e(TAG, "error initializing adapter!", e);
@@ -530,7 +531,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		if(device != null) {
+		if (device != null) {
 			device.close();
 			unregisterReceiver(usbReceiver);
 		}

@@ -19,8 +19,10 @@ package com.github.mjdev.libaums.driver.scsi.commands;
 
 /**
  * This class is used to issue a SCSI request sense when a command has failed.
+ * 
  * @author mjahnen
- * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper #getbCswStatus()
+ * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper
+ *      #getbCswStatus()
  */
 public class ScsiRequestSense {
 

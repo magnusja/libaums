@@ -23,20 +23,23 @@ import java.nio.ByteOrder;
 import android.util.Log;
 
 /**
- * This class represents the command status wrapper (CSW) in the SCSI transparent command set standard,
- * which is transmitted from the device to the host after the data phase (if any).
+ * This class represents the command status wrapper (CSW) in the SCSI
+ * transparent command set standard, which is transmitted from the device to the
+ * host after the data phase (if any).
+ * 
  * @author mjahnen
- *
+ * 
  */
 public class CommandStatusWrapper {
-	
+
 	/**
 	 * SCSI command has successfully been executed.
 	 */
 	public static final int COMMAND_PASSED = 0;
 	/**
-	 * SCSI command could not be executed, host should issue an
-	 * SCSI request sense.
+	 * SCSI command could not be executed, host should issue an SCSI request
+	 * sense.
+	 * 
 	 * @see com.github.mjdev.libaums.driver.scsi.commands.ScsiRequestSense
 	 */
 	public static final int COMMAND_FAILED = 1;
@@ -45,32 +48,34 @@ public class CommandStatusWrapper {
 	 * reset.
 	 */
 	public static final int PHASE_ERROR = 2;
-	
+
 	/**
 	 * Every CSW has the same size.
 	 */
 	public static final int SIZE = 13;
-	
+
 	private static final String TAG = CommandStatusWrapper.class.getSimpleName();
-	
+
 	private static final int D_CSW_SIGNATURE = 0x53425355;
-	
+
 	private int dCswSignature;
 	private int dCswTag;
 	private int dCswDataResidue;
 	private byte bCswStatus;
-	
+
 	/**
 	 * Constructs a command block wrapper from the specified buffer.
-	 * @param buffer The data where the command block wrapper is located.
+	 * 
+	 * @param buffer
+	 *            The data where the command block wrapper is located.
 	 * @return A new command block wrapper.
 	 */
 	public static CommandStatusWrapper read(ByteBuffer buffer) {
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
-		
+
 		CommandStatusWrapper csw = new CommandStatusWrapper();
 		csw.dCswSignature = buffer.getInt();
-		if(csw.dCswSignature != D_CSW_SIGNATURE) {
+		if (csw.dCswSignature != D_CSW_SIGNATURE) {
 			Log.e(TAG, "unexpected dCSWSignature");
 		}
 		csw.dCswTag = buffer.getInt();
@@ -80,17 +85,22 @@ public class CommandStatusWrapper {
 	}
 
 	/**
-	 * Returns the tag which can be used to determine the corresponding 
-	 * {@link com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper CBW}.
+	 * Returns the tag which can be used to determine the corresponding
+	 * {@link com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper
+	 * CBW}.
+	 * 
 	 * @return The command status wrapper tag.
-	 * @see com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper #getdCswTag()
+	 * @see com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper
+	 *      #getdCswTag()
 	 */
 	public int getdCswTag() {
 		return dCswTag;
 	}
 
 	/**
-	 * Returns the amount of bytes which has not been processed yet in the data phase.
+	 * Returns the amount of bytes which has not been processed yet in the data
+	 * phase.
+	 * 
 	 * @return The amount of bytes.
 	 */
 	public int getdCswDataResidue() {
@@ -99,10 +109,14 @@ public class CommandStatusWrapper {
 
 	/**
 	 * Returns the status of execution of the transmitted SCSI command.
+	 * 
 	 * @return The status.
-	 * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper #COMMAND_PASSED
-	 * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper #COMMAND_FAILED
-	 * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper #PHASE_ERROR
+	 * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper
+	 *      #COMMAND_PASSED
+	 * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper
+	 *      #COMMAND_FAILED
+	 * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper
+	 *      #PHASE_ERROR
 	 */
 	public byte getbCswStatus() {
 		return bCswStatus;

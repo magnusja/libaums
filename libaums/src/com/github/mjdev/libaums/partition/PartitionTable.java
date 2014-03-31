@@ -22,11 +22,13 @@ import java.util.Collection;
 /**
  * This interface represents a partition table.
  * <p>
- * Normally a block device has a partition table at the beginning of the device which
- * says something about the partitions on the mass storage device. For example where
- * they start and end and which file system a specific partition has.
+ * Normally a block device has a partition table at the beginning of the device
+ * which says something about the partitions on the mass storage device. For
+ * example where they start and end and which file system a specific partition
+ * has.
+ * 
  * @author mjahnen
- *
+ * 
  */
 public interface PartitionTable {
 	/**
@@ -34,9 +36,11 @@ public interface PartitionTable {
 	 * @return The size in bytes the partition table occupies.
 	 */
 	public int getSize();
+
 	/**
 	 * 
-	 * @return A collection of {@link PartitionTableEntry}s located on the block device.
+	 * @return A collection of {@link PartitionTableEntry}s located on the block
+	 *         device.
 	 */
-	public Collection<PartitionTableEntry> getPartitionTableEntries(); 
+	public Collection<PartitionTableEntry> getPartitionTableEntries();
 }
