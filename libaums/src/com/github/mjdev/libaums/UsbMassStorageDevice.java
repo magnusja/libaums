@@ -338,6 +338,8 @@ public class UsbMassStorageDevice {
 	 */
 	public void close() {
 		Log.d(TAG, "close device");
+		if(deviceConnection == null) return;
+		
 		boolean release = deviceConnection.releaseInterface(usbInterface);
 		if (!release) {
 			Log.e(TAG, "could not release interface!");

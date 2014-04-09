@@ -358,7 +358,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
 		UsbDevice usbDevice = (UsbDevice) getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
 
-		if (usbDevice != null) {
+		if (usbDevice != null && usbManager.hasPermission(usbDevice)) {
 			Log.d(TAG, "received usb device via intent");
 			// requesting permission is not needed in this case
 			setupDevice();
