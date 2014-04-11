@@ -25,7 +25,6 @@
     <string name="create_dir">Create directory</string>
     <string name="create_big_file">Create big file</string>
     <string name="rename">Rename</string>
-    <string name="cut">Cut</string>
     <string name="paste">Paste</string>
     <string name="move">Move</string>
 

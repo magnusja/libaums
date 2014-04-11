@@ -423,23 +423,43 @@ public class FatDirectory implements UsbFile {
 	@Override
 	public String[] list() throws IOException {
 		init();
-		String[] list = new String[entries.size()];
-		for (int i = 0; i < entries.size(); i++)
-			list[i] = entries.get(i).getName();
+		int size = entries.size();
+		if (!isRoot())
+			size -= 2; // skip dot and dotdot entry
+
+		String[] list = new String[size];
+		int j = 0;
+		for (int i = 0; i < entries.size(); i++) {
+			String name = entries.get(i).getName();
+			if (!name.equals(".") && !name.equals("..")) {
+				list[j] = name;
+				j++;
+			}
+		}
 		return list;
 	}
 
 	@Override
 	public UsbFile[] listFiles() throws IOException {
 		init();
-		UsbFile[] list = new UsbFile[entries.size()];
+		int size = entries.size();
+		if (!isRoot())
+			size -= 2; // skip dot and dotdot entry
+
+		UsbFile[] list = new UsbFile[size];
+		int j = 0;
 		for (int i = 0; i < entries.size(); i++) {
 			FatLfnDirectoryEntry entry = entries.get(i);
+			String name = entry.getName();
+			if (name.equals(".") || name.equals(".."))
+				continue;
+
 			if (entry.isDirectory()) {
-				list[i] = FatDirectory.create(entry, blockDevice, fat, bootSector, this);
+				list[j] = FatDirectory.create(entry, blockDevice, fat, bootSector, this);
 			} else {
-				list[i] = FatFile.create(entry, blockDevice, fat, bootSector, this);
+				list[j] = FatFile.create(entry, blockDevice, fat, bootSector, this);
 			}
+			j++;
 		}
 		return list;
 	}
