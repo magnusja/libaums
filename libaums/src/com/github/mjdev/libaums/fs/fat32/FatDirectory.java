@@ -512,6 +512,8 @@ public class FatDirectory implements UsbFile {
 	/**
 	 * This method moves an long filename entry currently stored in THIS
 	 * directory to the destination which also must be a directory.
+	 * <p>
+	 * Used by {@link FatFile} to move itself to another directory.
 	 * 
 	 * @param entry
 	 *            The entry which shall be moved.
@@ -524,7 +526,7 @@ public class FatDirectory implements UsbFile {
 	 *             If the destination is not a directory or destination is on a
 	 *             different file system.
 	 */
-	public void move(FatLfnDirectoryEntry entry, UsbFile destination) throws IOException {
+	/* package */void move(FatLfnDirectoryEntry entry, UsbFile destination) throws IOException {
 		if (!destination.isDirectory())
 			throw new IllegalStateException("destination cannot be a file!");
 		if (!(destination instanceof FatDirectory))
@@ -550,6 +552,12 @@ public class FatDirectory implements UsbFile {
 			throw new IllegalStateException("Root dir cannot be deleted!");
 
 		init();
+		UsbFile[] subElements = listFiles();
+
+		for (UsbFile file : subElements) {
+			file.delete();
+		}
+
 		parent.removeEntry(entry);
 		parent.write();
 		chain.setLength(0);

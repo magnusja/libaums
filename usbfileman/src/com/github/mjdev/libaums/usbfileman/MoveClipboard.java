@@ -51,7 +51,7 @@ public class MoveClipboard {
 	 * 
 	 * @return The file saved in the clipboard.
 	 */
-	public UsbFile getFile() {
+	public synchronized UsbFile getFile() {
 		return file;
 	}
 
@@ -61,7 +61,7 @@ public class MoveClipboard {
 	 * @param file
 	 *            The file which shall be moved.
 	 */
-	public void setFile(UsbFile file) {
+	public synchronized void setFile(UsbFile file) {
 		this.file = file;
 	}
 
