@@ -505,6 +505,10 @@ public class MainActivity extends Activity implements OnItemClickListener {
 				int index = entry.getName().lastIndexOf(".");
 				String prefix = entry.getName().substring(0, index);
 				String ext = entry.getName().substring(index);
+				// prefix must be at least 3 characters
+				if(prefix.length() < 3) {
+					prefix += "pad";
+				}
 				param.to = File.createTempFile(prefix, ext, f);
 				new CopyTask().execute(param);
 			}
