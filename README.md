@@ -1,6 +1,18 @@
 libaums
 =======
 
-Open source library to access USB Mass Storage devices on Android
+Libaums - Library to access USB Mass Storage Devices  
+License: Apache 2.0 (see license.txt for details)
 
-This library was part of my bachelor thesis at the operating system chair of the TU Munich (www.os.in.tum.de). A digital version of the thesis can be found [here](https://www.os.in.tum.de/fileadmin/w00bdp/www/Lehre/Abschlussarbeiten/Jahnen-thesis.pdf).
+Author: Magnus Jahnen, jahnen at in.tum.de  
+Advisor: Nils Kannengießer, nils.kannengiesser at tum.de  
+Supervisor: Prof. Uwe Baumgarten, baumgaru at in.tum.de  
+
+
+Technische Universität München (TUM)  
+Lehrstuhl/Fachgebiet für Betriebssysteme  
+www.os.in.tum.de  
+
+The library was developed by Mr. Jahnen as part of his bachelor's thesis in 2014. It's a sub-topic of the research topic "Secure Copy Protection for Mobile Apps" by Mr. Kannengießer. The full thesis document can be downloaded [here](https://www.os.in.tum.de/fileadmin/w00bdp/www/Lehre/Abschlussarbeiten/Jahnen-thesis.pdf).
+
+We would appreciate an information email, when you plan to use the library in your projects.
