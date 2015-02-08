@@ -1,1 +1,3 @@
 language: android
+
+before_script: cd usbfileman
