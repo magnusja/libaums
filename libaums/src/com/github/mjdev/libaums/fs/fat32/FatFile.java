@@ -128,6 +128,7 @@ public class FatFile implements UsbFile {
 
 	@Override
 	public void setLength(long newLength) throws IOException {
+        initChain();
 		chain.setLength(newLength);
 		entry.setFileSize(newLength);
 	}
