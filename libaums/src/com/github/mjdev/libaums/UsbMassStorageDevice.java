@@ -229,13 +229,13 @@ public class UsbMassStorageDevice {
 				for (int j = 0; j < endpointCount; j++) {
 					UsbEndpoint endpoint = usbInterface.getEndpoint(j);
 					Log.i(TAG, "found usb endpoint: " + endpoint);
-                    if(endpoint.getType() == UsbConstants.USB_ENDPOINT_XFER_BULK) {
-                        if (endpoint.getDirection() == UsbConstants.USB_DIR_OUT) {
-                            outEndpoint = endpoint;
-                        } else {
-                            inEndpoint = endpoint;
-                        }
-                    }
+					if(endpoint.getType() == UsbConstants.USB_ENDPOINT_XFER_BULK) {
+						if (endpoint.getDirection() == UsbConstants.USB_DIR_OUT) {
+						    outEndpoint = endpoint;
+						} else {
+						    inEndpoint = endpoint;
+						}
+					}
 				}
 
 				if (outEndpoint == null || inEndpoint == null) {
