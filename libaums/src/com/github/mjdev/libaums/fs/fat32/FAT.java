@@ -102,6 +102,12 @@ public class FAT {
 	 *             If reading from device fails.
 	 */
 	/* package */Long[] getChain(long startCluster) throws IOException {
+		
+		if(startCluster == 0) {
+			// if the start cluster is 0, we have an empty file 
+			return new Long[0];
+		}
+		
 		final ArrayList<Long> result = new ArrayList<Long>();
 		final int bufferSize = blockDevice.getBlockSize() * 2;
 		// for performance reasons we always read or write two times the block
