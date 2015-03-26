@@ -423,7 +423,7 @@ public class FatDirectory implements UsbFile {
 	@Override
 	public String[] list() throws IOException {
 		init();
-        ArrayList<String> list = new ArrayList();
+        List<String> list = new ArrayList<String>(entries.size());
 		for (int i = 0; i < entries.size(); i++) {
 			String name = entries.get(i).getName();
 			if (!name.equals(".") && !name.equals("..")) {
@@ -440,7 +440,7 @@ public class FatDirectory implements UsbFile {
 	@Override
 	public UsbFile[] listFiles() throws IOException {
         init();
-        ArrayList<UsbFile> list = new ArrayList();
+        List<UsbFile> list = new ArrayList<UsbFile>(entries.size());
         for (int i = 0; i < entries.size(); i++) {
             FatLfnDirectoryEntry entry = entries.get(i);
             String name = entry.getName();
