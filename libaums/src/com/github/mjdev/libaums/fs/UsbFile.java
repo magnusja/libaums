@@ -58,6 +58,27 @@ public interface UsbFile extends Closeable {
 	public void setName(String newName) throws IOException;
 
 	/**
+	 * Returns the time this directory or file was created.
+	 * 
+	 * @return Time in milliseconds since January 1 00:00:00, 1970 UTC
+	 */
+	public long createdAt();
+	
+	/**
+	 * Returns the time this directory or file was last modified.
+	 * 
+	 * @return Time in milliseconds since January 1 00:00:00, 1970 UTC
+	 */
+	public long lastModified();
+	
+	/**
+	 * Returns the time this directory or file was last accessed.
+	 * 
+	 * @return Time in milliseconds since January 1 00:00:00, 1970 UTC
+	 */
+	public long lastAccessed();
+
+	/**
 	 * Returns the parent directory for the file or directory or null if this is
 	 * the root directory.
 	 * 

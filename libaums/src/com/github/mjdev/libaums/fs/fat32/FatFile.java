@@ -107,6 +107,21 @@ public class FatFile implements UsbFile {
 	}
 
 	@Override
+	public long createdAt() {
+		return entry.getActualEntry().getCreatedDateTime();
+	}
+
+	@Override
+	public long lastModified() {
+		return entry.getActualEntry().getLastModifiedDateTime();
+	}
+
+	@Override
+	public long lastAccessed() {
+		return entry.getActualEntry().getLastAccessedDateTime();
+	}
+
+	@Override
 	public UsbFile getParent() {
 		return parent;
 	}
