@@ -157,6 +157,10 @@ public class FAT {
 	 *             If reading or writing to the FAT fails.
 	 */
 	/* package */Long[] alloc(Long[] chain, int numberOfClusters) throws IOException {
+        
+        // save original number of clusters for fs info structure
+        final int originalNumberOfClusters = numberOfClusters;
+        
 		final ArrayList<Long> result = new ArrayList<Long>(chain.length + numberOfClusters);
 		result.addAll(Arrays.asList(chain));
 		// for performance reasons we always read or write two times the block
@@ -258,7 +262,7 @@ public class FAT {
 
 		// refresh the info structure
 		fsInfoStructure.setLastAllocatedClusterHint(currentCluster);
-		fsInfoStructure.decreaseClusterCount(numberOfClusters);
+		fsInfoStructure.decreaseClusterCount(originalNumberOfClusters);
 		fsInfoStructure.write();
 
 		Log.i(TAG, "allocating clusters finished");
