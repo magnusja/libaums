@@ -27,7 +27,7 @@ import java.util.Arrays;
  * The short name has 8 characters for the name and 3 characters for the
  * extension. The period between them is not saved in the short name. The short
  * name can only hold eight bit characters. Only upper case characters and these
- * special characters are allowed: $ % Õ - _ @ ~ Ô ! ( )
+ * special characters are allowed: $ %  - _ @ ~  ! ( )
  * <p>
  * For more information regarding short names, please refer to the official
  * FAT32 specification.
