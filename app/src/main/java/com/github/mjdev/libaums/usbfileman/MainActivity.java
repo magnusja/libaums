@@ -25,8 +25,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.NoSuchElementException;
 
-import android.app.ActionBar;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -44,6 +42,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -71,7 +71,7 @@ import com.github.mjdev.libaums.fs.UsbFile;
  * @author mjahnen
  * 
  */
-public class MainActivity extends Activity implements OnItemClickListener {
+public class MainActivity extends AppCompatActivity implements OnItemClickListener {
 
 	/**
 	 * Action string to request the permission to communicate with an UsbDevice.
@@ -347,7 +347,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 
 		if (devices.length == 0) {
 			Log.w(TAG, "no device found!");
-			ActionBar actionBar = getActionBar();
+			android.support.v7.app.ActionBar actionBar = getSupportActionBar();
 			actionBar.setTitle("No device");
 			listView.setAdapter(null);
 			return;
@@ -383,7 +383,7 @@ public class MainActivity extends Activity implements OnItemClickListener {
 			FileSystem fs = device.getPartitions().get(0).getFileSystem();
 			UsbFile root = fs.getRootDirectory();
 
-			ActionBar actionBar = getActionBar();
+			ActionBar actionBar = getSupportActionBar();
 			actionBar.setTitle(fs.getVolumeLabel());
 
 			listView.setAdapter(adapter = new UsbFileListAdapter(this, root));
