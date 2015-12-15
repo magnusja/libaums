@@ -118,9 +118,9 @@ public class UsbFileListAdapter extends ArrayAdapter<UsbFile> {
 		TextView nameText = (TextView) view.findViewById(R.id.name_text_view);
 		UsbFile file = files.get(position);
 		if (file.isDirectory()) {
-			typeText.setText("Directory");
+			typeText.setText(R.string.directory);
 		} else {
-			typeText.setText("File");
+			typeText.setText(R.string.file);
 		}
 		nameText.setText(file.getName());
 

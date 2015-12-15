@@ -187,11 +187,11 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			LinearLayout layout = new LinearLayout(activity);
 			layout.setOrientation(LinearLayout.VERTICAL);
 			TextView textView = new TextView(activity);
-			textView.setText("Name:");
+			textView.setText(R.string.name);
 			layout.addView(textView);
 			layout.addView(input);
 			textView = new TextView(activity);
-			textView.setText("Content:");
+			textView.setText(R.string.content);
 			layout.addView(textView);
 			layout.addView(content);
 
