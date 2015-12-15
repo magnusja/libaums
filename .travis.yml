@@ -12,4 +12,4 @@ android:
     - addon-google_apis-google-19
 
 script:
-  - ./gradlew build connectedCheck --stacktrace
+  - ./gradlew build connectedCheck --stacktrace --info
