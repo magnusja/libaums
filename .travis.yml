@@ -25,6 +25,4 @@ before_script:
 
 script:
   - android list target
-
-#script:
-#  - ./gradlew build connectedCheck --stacktrace --info
+  - ./gradlew build connectedCheck #--stacktrace --info
