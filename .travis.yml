@@ -11,5 +11,5 @@ android:
     - extra-android-m2repository
     - addon-google_apis-google-19
 
-script:
-  - ./gradlew build connectedCheck --stacktrace --info
+#script:
+#  - ./gradlew build connectedCheck --stacktrace --info
