@@ -118,9 +118,8 @@ public class UsbMassStorageDevice {
 
 			byte[] tmpBuffer = new byte[length];
 			System.arraycopy(buffer, offset, tmpBuffer, 0, length);
-			int result = deviceConnection.bulkTransfer(outEndpoint, tmpBuffer, length,
+			return deviceConnection.bulkTransfer(outEndpoint, tmpBuffer, length,
 					TRANSFER_TIMEOUT);
-			return result;
 		}
 
 		@Override

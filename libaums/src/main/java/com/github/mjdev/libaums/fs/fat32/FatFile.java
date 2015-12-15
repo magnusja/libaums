@@ -75,8 +75,7 @@ public class FatFile implements UsbFile {
 	 */
 	public static FatFile create(FatLfnDirectoryEntry entry, BlockDeviceDriver blockDevice,
 			FAT fat, Fat32BootSector bootSector, FatDirectory parent) throws IOException {
-		FatFile result = new FatFile(blockDevice, fat, bootSector, entry, parent);
-		return result;
+		return new FatFile(blockDevice, fat, bootSector, entry, parent);
 	}
 
 	/**
