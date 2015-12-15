@@ -16,3 +16,8 @@ www.os.in.tum.de
 The library was developed by Mr. Jahnen as part of his bachelor's thesis in 2014. It's a sub-topic of the research topic "Secure Copy Protection for Mobile Apps" by Mr. Kannengießer. The full thesis document can be downloaded [here](https://www.os.in.tum.de/fileadmin/w00bdp/www/Lehre/Abschlussarbeiten/Jahnen-thesis.pdf).
 
 We would appreciate an information email, when you plan to use the library in your projects.
+
+### Build status
+
+**develop** [![Build Status](https://travis-ci.org/mjdev/libaums.svg?branch=develop)](https://travis-ci.org/mjdev/libaums)
+**master** [![Build Status](https://travis-ci.org/mjdev/libaums.svg?branch=master)](https://travis-ci.org/mjdev/libaums)
