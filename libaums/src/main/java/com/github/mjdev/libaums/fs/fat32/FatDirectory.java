@@ -298,7 +298,7 @@ public class FatDirectory implements UsbFile {
 			entry.serialize(buffer);
 		}
 
-		if (totalBytes % bootSector.getBytesPerCluster() != 0) {
+		if (totalBytes % bootSector.getBytesPerCluster() != 0 || totalBytes == 0) {
 			// add dummy entry filled with zeros to mark end of entries
 			buffer.put(new byte[32]);
 		}
