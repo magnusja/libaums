@@ -78,7 +78,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	@Override
 	public void init() throws IOException {
 		ByteBuffer inBuffer = ByteBuffer.allocate(36);
-		ScsiInquiry inquiry = new ScsiInquiry();
+		ScsiInquiry inquiry = new ScsiInquiry((byte) inBuffer.array().length);
 		transferCommand(inquiry, inBuffer);
 		// TODO support multiple luns!
 		ScsiInquiryResponse inquiryResponse = ScsiInquiryResponse.read(inBuffer);
