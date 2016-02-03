@@ -42,7 +42,7 @@ import java.nio.ByteOrder;
 	private static final int VOLUME_LABEL_OFF = 48;
 
 	private short bytesPerSector;
-	private byte sectorsPerCluster;
+	private short sectorsPerCluster;
 	private short reservedSectors;
 	private byte fatCount;
 	private long totalNumberOfSectors;
@@ -69,7 +69,7 @@ import java.nio.ByteOrder;
 		Fat32BootSector result = new Fat32BootSector();
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		result.bytesPerSector = buffer.getShort(BYTES_PER_SECTOR_OFF);
-		result.sectorsPerCluster = buffer.get(SECTORS_PER_CLUSTER_OFF);
+		result.sectorsPerCluster = (short) (buffer.get(SECTORS_PER_CLUSTER_OFF) & 0xff);
 		result.reservedSectors = buffer.getShort(RESERVED_COUNT_OFF);
 		result.fatCount = buffer.get(FAT_COUNT_OFF);
 		result.totalNumberOfSectors = buffer.getInt(TOTAL_SECTORS_OFF) & 0xffffffffl;
@@ -109,7 +109,7 @@ import java.nio.ByteOrder;
 	 * 
 	 * @return Number of bytes.
 	 */
-	/* package */byte getSectorsPerCluster() {
+	/* package */short getSectorsPerCluster() {
 		return sectorsPerCluster;
 	}
 
