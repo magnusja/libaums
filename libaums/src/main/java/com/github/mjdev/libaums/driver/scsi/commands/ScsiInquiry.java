@@ -31,14 +31,13 @@ import java.nio.ByteBuffer;
  */
 public class ScsiInquiry extends CommandBlockWrapper {
 
-	private static final int RESPONSE_LENGTH = 0x24;
 	private static final byte LENGTH = 0x6;
 	private static final byte OPCODE = 0x12;
 
 	private byte allocationLength;
 
 	public ScsiInquiry(byte allocationLength) {
-		super(RESPONSE_LENGTH, Direction.IN, (byte) 0, LENGTH);
+		super(allocationLength, Direction.IN, (byte) 0, LENGTH);
 
         this.allocationLength = allocationLength;
 	}
