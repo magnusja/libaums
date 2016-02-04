@@ -23,5 +23,7 @@ android {
 }
 
 dependencies {
+    compile 'com.nanohttpd:nanohttpd-webserver:2.1.1'
+
     testCompile 'junit:junit:4.12'
 }
