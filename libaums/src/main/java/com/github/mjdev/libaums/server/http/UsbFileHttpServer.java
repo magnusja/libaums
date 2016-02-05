@@ -1,14 +1,11 @@
 package com.github.mjdev.libaums.server.http;
 
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.github.mjdev.libaums.fs.UsbFile;
 import com.github.mjdev.libaums.fs.UsbFileInputStream;
 
-import java.util.HashMap;
-import java.util.Map;
 
 import fi.iki.elonen.NanoHTTPD;
 
@@ -49,21 +46,16 @@ public class UsbFileHttpServer extends NanoHTTPD {
             Log.d(TAG, "Serving root file");
             String mimeType = getMimeTypeForFile(rootFile.getName());
 
-            Response res = new Response(Response.Status.OK, mimeType, new UsbFileInputStream(rootFile));
-            res.addHeader("Content-Length", "" + rootFile.getLength());
+            Response res = newFixedLengthResponse(Response.Status.OK,
+                    mimeType, new UsbFileInputStream(rootFile), rootFile.getLength());
+
             return res;
         }
 
         return super.serve(session);
     }
 
-    private String getMimeTypeForFile(String fileName) {
-        int dot = fileName.lastIndexOf('.');
-        String mime = null;
-        if (dot >= 0) {
-            mime = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(
-                    fileName.substring(dot + 1).toLowerCase());
-        }
-        return mime == null ? "application/octet-stream" : mime;
+    public String getUrl() {
+        return "http://" + getHostname() + ":" + getListeningPort();
     }
 }
