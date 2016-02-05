@@ -26,4 +26,5 @@ dependencies {
     compile 'com.nanohttpd:nanohttpd-webserver:2.1.1'
 
     testCompile 'junit:junit:4.12'
+    compile 'com.android.support:support-annotations:23.1.1'
 }

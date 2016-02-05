@@ -336,13 +336,6 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 		filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
 		registerReceiver(usbReceiver, filter);
 		discoverDevice();
-
-        UsbFileHttpServer server = new UsbFileHttpServer();
-        try {
-            server.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
 	/**
@@ -491,12 +484,15 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			MoveClipboard cl = MoveClipboard.getInstance();
 			cl.setFile(entry);
 			return true;
+        case R.id.start_http_server:
+            startHttpServer(entry);
+            return true;
 		default:
 			return super.onContextItemSelected(item);
 		}
 	}
 
-	@Override
+    @Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long rowId) {
 		UsbFile entry = adapter.getItem(position);
 		try {
@@ -524,6 +520,26 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			Log.e(TAG, "error staring to copy!", e);
 		}
 	}
+
+    private void startHttpServer(UsbFile file) {
+
+        UsbFileHttpServer server = new UsbFileHttpServer(file);
+        try {
+            server.start();
+
+            Intent myIntent = new Intent(android.content.Intent.ACTION_VIEW);
+            myIntent.setData(Uri.parse("http://localhost:8000"));
+            try {
+                startActivity(myIntent);
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(MainActivity.this, "Could no find an app for that file!",
+                        Toast.LENGTH_LONG).show();
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Error starting HTTP server", e);
+            Toast.makeText(this, "Could not start HTTP server", Toast.LENGTH_LONG).show();
+        }
+    }
 
 	/**
 	 * This methods creates a very big file for testing purposes. It writes only
