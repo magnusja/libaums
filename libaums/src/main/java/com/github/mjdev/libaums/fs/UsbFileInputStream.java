@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
  */
 public class UsbFileInputStream extends InputStream {
 
+    private static final String TAG = UsbFileInputStream.class.getSimpleName();
     private UsbFile file;
     private int currentByteOffset = 0;
 
@@ -25,12 +26,14 @@ public class UsbFileInputStream extends InputStream {
 
     @Override
     public int available() throws IOException {
-        Log.d("aaaaa", "aaaaaaaaaa");
+        Log.d(TAG, "available");
         return (int) (file.getLength() - currentByteOffset);
     }
 
     @Override
     public int read() throws IOException {
+        Log.d(TAG, "read one byte");
+
         if(currentByteOffset >= file.getLength()) {
             return -1;
         }
@@ -49,12 +52,43 @@ public class UsbFileInputStream extends InputStream {
 
     @Override
     public int read(byte[] buffer) throws IOException {
-        return super.read(buffer);
+        Log.d(TAG, "read into byte array");
+
+        if(currentByteOffset >= file.getLength()) {
+            return -1;
+        }
+
+        long length = file.getLength();
+        long toRead = Math.min(buffer.length, length - currentByteOffset);
+
+        ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
+        byteBuffer.limit((int) toRead);
+
+        file.read(currentByteOffset, byteBuffer);
+        currentByteOffset += toRead;
+
+        return (int) toRead;
     }
 
     @Override
     public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
-        return super.read(buffer, byteOffset, byteCount);
+        Log.d(TAG, "read into byte array with offset and count");
+
+        if(currentByteOffset >= file.getLength()) {
+            return -1;
+        }
+
+        long length = file.getLength();
+        long toRead = Math.min(byteCount, length - currentByteOffset);
+
+        ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
+        byteBuffer.position(byteOffset);
+        byteBuffer.limit((int) toRead + byteOffset);
+
+        file.read(currentByteOffset, byteBuffer);
+        currentByteOffset += toRead;
+
+        return (int) toRead;
     }
 
     @Override

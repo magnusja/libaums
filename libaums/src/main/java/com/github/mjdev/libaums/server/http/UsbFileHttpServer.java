@@ -41,8 +41,14 @@ public class UsbFileHttpServer extends NanoHTTPD {
 
     @Override
     public Response serve(IHTTPSession session) {
-        Log.d(TAG, "Reqeust: " + session.getUri());
+        String uri = session.getUri();
+        Log.d(TAG, "Request: " + uri);
         if(!rootFile.isDirectory()) {
+            if(!"/".equals(uri)) {
+                // return a 404
+                return super.serve(session);
+            }
+
             Log.d(TAG, "Serving root file");
             String mimeType = getMimeTypeForFile(rootFile.getName());
 
@@ -55,7 +61,7 @@ public class UsbFileHttpServer extends NanoHTTPD {
         return super.serve(session);
     }
 
-    public String getUrl() {
-        return "http://" + getHostname() + ":" + getListeningPort();
+    public String getBaseUrl() {
+        return "http://" + getHostname() + ":" + getListeningPort() + "/";
     }
 }
