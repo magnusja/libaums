@@ -321,6 +321,8 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 	/* package */UsbFileListAdapter adapter;
 	private Deque<UsbFile> dirs = new ArrayDeque<UsbFile>();
 
+	private UsbFileHttpServer server;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -405,6 +407,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		MoveClipboard cl = MoveClipboard.getInstance();
 		menu.findItem(R.id.paste).setEnabled(cl.getFile() != null);
+		menu.findItem(R.id.stop_http_server).setEnabled(server != null && server.isAlive());
 		return true;
 	}
 
@@ -424,6 +427,10 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 		case R.id.paste:
 			move();
 			return true;
+        case R.id.stop_http_server:
+            server.stop();
+            server = null;
+            return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -523,7 +530,8 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
     private void startHttpServer(UsbFile file) {
 
-        UsbFileHttpServer server = new UsbFileHttpServer(file);
+        server = new UsbFileHttpServer(file);
+
         try {
             server.start();
 

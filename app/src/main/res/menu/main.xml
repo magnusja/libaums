@@ -20,7 +20,6 @@
 
     <item
         android:id="@+id/create_file"
-        android:orderInCategory="100"
         app:showAsAction="never"
         android:title="@string/create_file"/>
     <item
@@ -34,6 +33,11 @@
     <item
         android:id="@+id/paste"
         android:title="@string/paste">
+    </item>
+
+    <item
+        android:id="@+id/stop_http_server"
+        android:title="@string/stop_http_server">
     </item>
 
 </menu>
