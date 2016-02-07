@@ -76,7 +76,7 @@ public class CommandStatusWrapper {
 		CommandStatusWrapper csw = new CommandStatusWrapper();
 		csw.dCswSignature = buffer.getInt();
 		if (csw.dCswSignature != D_CSW_SIGNATURE) {
-			Log.e(TAG, "unexpected dCSWSignature");
+			Log.e(TAG, "unexpected dCSWSignature " + csw.dCswSignature);
 		}
 		csw.dCswTag = buffer.getInt();
 		csw.dCswDataResidue = buffer.getInt();

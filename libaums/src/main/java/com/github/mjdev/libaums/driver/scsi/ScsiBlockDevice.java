@@ -197,7 +197,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	 */
 	@Override
 	public void read(long devOffset, ByteBuffer dest) throws IOException {
-		long time = System.currentTimeMillis();
+		//long time = System.currentTimeMillis();
 		// TODO try to make this more efficient by for example only allocating
 		// blockSize and making it global
 		ByteBuffer buffer;
@@ -211,7 +211,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		}
 
 		ScsiRead10 read = new ScsiRead10((int) devOffset, buffer.remaining(), blockSize);
-		Log.d(TAG, "reading: " + read);
+		//Log.d(TAG, "reading: " + read);
 		transferCommand(read, buffer);
 
 		if (dest.remaining() % blockSize != 0) {
@@ -220,7 +220,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 
 		dest.position(dest.limit());
 
-		Log.d(TAG, "read time: " + (System.currentTimeMillis() - time));
+		//Log.d(TAG, "read time: " + (System.currentTimeMillis() - time));
 	}
 
 	/**

@@ -50,7 +50,6 @@ public class UsbFileInputStream extends InputStream {
 
     @Override
     public int read() throws IOException {
-        Log.d(TAG, "read one byte");
 
         if(currentByteOffset >= file.getLength()) {
             return -1;
@@ -70,7 +69,6 @@ public class UsbFileInputStream extends InputStream {
 
     @Override
     public int read(byte[] buffer) throws IOException {
-        Log.d(TAG, "read into byte array");
 
         if(currentByteOffset >= file.getLength()) {
             return -1;
@@ -90,7 +88,6 @@ public class UsbFileInputStream extends InputStream {
 
     @Override
     public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
-        Log.d(TAG, "read into byte array with offset and count");
 
         if(currentByteOffset >= file.getLength()) {
             return -1;

@@ -407,7 +407,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		MoveClipboard cl = MoveClipboard.getInstance();
 		menu.findItem(R.id.paste).setEnabled(cl.getFile() != null);
-		menu.findItem(R.id.stop_http_server).setEnabled(server != null && server.isAlive());
+		menu.findItem(R.id.stop_http_server).setEnabled(server != null);
 		return true;
 	}
 

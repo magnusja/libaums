@@ -151,6 +151,8 @@ public class UsbFileHttpServer extends NanoHTTPD {
             contentLength = 0;
         }
 
+        Log.d(TAG, "Serving file from " + start + " to " + end + ", Content-Length: " + contentLength);
+
         UsbFileInputStream stream = new UsbFileInputStream(file);
         stream.skip(start);
 
