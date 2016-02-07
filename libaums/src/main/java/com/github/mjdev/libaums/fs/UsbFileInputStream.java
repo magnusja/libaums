@@ -44,7 +44,8 @@ public class UsbFileInputStream extends InputStream {
     @Override
     public int available() throws IOException {
         Log.d(TAG, "available");
-        return (int) (file.getLength() - currentByteOffset);
+        // return 0, because we always block
+        return 0;
     }
 
     @Override

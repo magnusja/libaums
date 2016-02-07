@@ -536,7 +536,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
             server.start();
 
             Intent myIntent = new Intent(android.content.Intent.ACTION_VIEW);
-            myIntent.setData(Uri.parse("http://localhost:8000"));
+            myIntent.setData(Uri.parse(server.getBaseUrl() + file.getName()));
             try {
                 startActivity(myIntent);
             } catch (ActivityNotFoundException e) {
