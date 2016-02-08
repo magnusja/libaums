@@ -25,6 +25,8 @@ import com.github.mjdev.libaums.fs.UsbFileInputStream;
 
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Map;
 
 import fi.iki.elonen.NanoHTTPD;
@@ -69,7 +71,15 @@ public class UsbFileHttpServer extends NanoHTTPD {
 
     @Override
     public Response serve(IHTTPSession session) {
-        String uri = session.getUri();
+        String uri;
+        try {
+            uri = URLDecoder.decode(session.getUri(), "Unicode");
+        } catch (UnsupportedEncodingException e) {
+            Log.e(TAG, "could not decode URL", e);
+
+            return newFixedLengthResponse(Response.Status.BAD_REQUEST,
+                    NanoHTTPD.MIME_HTML, "Unable to decode URL");
+        }
         Log.d(TAG, "Request: " + uri);
 
         Map<String, String> headers = session.getHeaders();

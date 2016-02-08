@@ -403,7 +403,7 @@ public class FatDirectory implements UsbFile {
         Log.d(TAG, "search file: " + path);
         init();
 
-        int index = path.indexOf(UsbFile.seperator);
+        int index = path.indexOf(UsbFile.separator);
 
         if(index < 0) {
             Log.d(TAG, "search entry: " + path);

@@ -38,10 +38,11 @@ import java.nio.ByteBuffer;
  */
 public interface UsbFile extends Closeable {
 
-    String seperator = "/";
+    String separator = "/";
 
     /**
-     * Tries to search a corresponding entry associated with the path parameter. Path seperator is '/'.
+     * Tries to search a corresponding entry associated with the path parameter. Path separator is '/'.
+     * Parameter path must not start with an '/'. Path is treated relative to current UsbFile.
      * @param path The path to the resource to search.
      * @return UsbFile directory or file if found, null otherwise.
      */
