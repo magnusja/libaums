@@ -320,16 +320,35 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
 	}
 
+    ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.d(TAG, "on service connected " + name);
+            UsbFileHttpServerService.ServiceBinder binder = (UsbFileHttpServerService.ServiceBinder) service;
+            serverService = binder.getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.d(TAG, "on service disconnected " + name);
+            serverService = null;
+        }
+    };
+
 	private ListView listView;
 	private UsbMassStorageDevice device;
 	/* package */UsbFileListAdapter adapter;
 	private Deque<UsbFile> dirs = new ArrayDeque<UsbFile>();
 
+    private Intent serviceIntent = null;
     private UsbFileHttpServerService serverService;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+        serviceIntent = new Intent(this, UsbFileHttpServerService.class);
+
 		setContentView(R.layout.activity_main);
 
 		listView = (ListView) findViewById(R.id.listview);
@@ -344,7 +363,21 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 		discoverDevice();
     }
 
-	/**
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        unbindService(serviceConnection);
+    }
+
+    /**
 	 * Searches for connected mass storage devices, and initializes them if it
 	 * could find some.
 	 */
@@ -411,7 +444,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		MoveClipboard cl = MoveClipboard.getInstance();
 		menu.findItem(R.id.paste).setEnabled(cl.getFile() != null);
-		menu.findItem(R.id.stop_http_server).setEnabled(serverService != null);
+		menu.findItem(R.id.stop_http_server).setEnabled(serverService != null && serverService.isServerRunning());
 		return true;
 	}
 
@@ -537,50 +570,38 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
         Log.d(TAG, "starting HTTP server");
 
-        if(serverService != null) {
+        if(serverService == null) {
+            Toast.makeText(MainActivity.this, "serverService == null!", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if(serverService.isServerRunning()) {
             Log.d(TAG, "Stopping existing server service");
             serverService.stopServer();
         }
 
-		Intent intent = new Intent(this, UsbFileHttpServerService.class);
-		bindService(intent, new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                Log.d(TAG, "on service connected " + name);
-                UsbFileHttpServerService.ServiceBinder binder = (UsbFileHttpServerService.ServiceBinder) service;
-                serverService = binder.getService();
+        // now start the server
+        try {
+            serverService.startServer(file);
+            Toast.makeText(MainActivity.this, "HTTP server up and running", Toast.LENGTH_LONG).show();
+        } catch (IOException e) {
+            Log.e(TAG, "Error starting HTTP server", e);
+            Toast.makeText(MainActivity.this, "Could not start HTTP server", Toast.LENGTH_LONG).show();
+        }
 
-                // no start the server
-                try {
-                    serverService.startServer(file);
-                    Toast.makeText(MainActivity.this, "HTTP server up and running", Toast.LENGTH_LONG).show();
-                } catch (IOException e) {
-                    Log.e(TAG, "Error starting HTTP server", e);
-                    Toast.makeText(MainActivity.this, "Could not start HTTP server", Toast.LENGTH_LONG).show();
-                }
+        if(file.isDirectory()) {
+            // only open activity when serving a file
+            return;
+        }
 
-                if(file.isDirectory()) {
-                    // only open activity when serving a file
-                    return;
-                }
-
-                Intent myIntent = new Intent(android.content.Intent.ACTION_VIEW);
-                myIntent.setData(Uri.parse(serverService.getServer().getBaseUrl() + file.getName()));
-                try {
-                    startActivity(myIntent);
-                } catch (ActivityNotFoundException e) {
-                    Toast.makeText(MainActivity.this, "Could no find an app for that file!",
-                            Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                Log.d(TAG, "on service disconnected " + name);
-
-                serverService = null;
-            }
-        }, Context.BIND_AUTO_CREATE);
+        Intent myIntent = new Intent(android.content.Intent.ACTION_VIEW);
+        myIntent.setData(Uri.parse(serverService.getServer().getBaseUrl() + file.getName()));
+        try {
+            startActivity(myIntent);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(MainActivity.this, "Could no find an app for that file!",
+                    Toast.LENGTH_LONG).show();
+        }
     }
 
 	/**
@@ -645,6 +666,10 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 	public void onDestroy() {
 		super.onDestroy();
 		unregisterReceiver(usbReceiver);
+        if(serverService != null && serverService.isServerRunning()) {
+            return;
+        }
+
 		if (device != null) {
 			device.close();
 		}
