@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2014 mjahnen <jahnen@in.tum.de>
+ * (C) Copyright 2014-2016 mjahnen <jahnen@in.tum.de>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -397,6 +397,53 @@ public class FatDirectory implements UsbFile {
 	public long getLength() {
 		throw new UnsupportedOperationException("This is a directory!");
 	}
+
+	@Override
+	public UsbFile search(String path) throws IOException {
+        Log.d(TAG, "search file: " + path);
+        init();
+
+        int index = path.indexOf(UsbFile.seperator);
+
+        if(index < 0) {
+            Log.d(TAG, "search entry: " + path);
+
+            FatLfnDirectoryEntry entry = findEntry(path);
+            if(entry != null) {
+                if(entry.isDirectory()) {
+                    return FatDirectory.create(entry, blockDevice, fat, bootSector, this);
+                } else {
+                    return FatFile.create(entry, blockDevice, fat, bootSector, this);
+                }
+            }
+        } else {
+            String subPath = path.substring(index + 1);
+            String dirName = path.substring(0, index);
+            Log.d(TAG, "search recursively " + subPath + " in " + dirName);
+
+            for(FatLfnDirectoryEntry entry : entries) {
+                if(entry.isDirectory() && entry.getName().equals(dirName)) {
+                    Log.d(TAG, "found " + dirName);
+                    FatDirectory dir = FatDirectory.create(entry, blockDevice, fat, bootSector, this);
+                    return dir.search(subPath);
+                }
+            }
+        }
+
+        Log.d(TAG, "not found " + path);
+
+        return null;
+	}
+
+    private FatLfnDirectoryEntry findEntry(String name) {
+        for(FatLfnDirectoryEntry entry : entries) {
+            if(entry.getName().equals(name)) {
+                return entry;
+            }
+        }
+
+        return null;
+    }
 
 	@Override
 	public boolean isDirectory() {

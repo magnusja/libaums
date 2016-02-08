@@ -24,7 +24,6 @@ import com.github.mjdev.libaums.fs.UsbFile;
 import com.github.mjdev.libaums.fs.UsbFileInputStream;
 
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
 
@@ -76,27 +75,51 @@ public class UsbFileHttpServer extends NanoHTTPD {
         Map<String, String> headers = session.getHeaders();
         String range = headers.get("range");
 
+        UsbFile fileToServe;
+
         if(!rootFile.isDirectory()) {
+            Log.d(TAG, "Serving root file");
             if(!"/".equals(uri) && !("/" + rootFile.getName()).equals(uri)) {
                 Log.d(TAG, "Invalid request, respond with 404");
                 // return a 404
                 return super.serve(session);
             }
 
-            Log.d(TAG, "Serving root file");
-            if(range == null) {
-                return serveCompleteFile(rootFile);
-            } else {
-                try {
-                    return serveRangeOfFile(rootFile, range);
-                } catch (IOException e) {
-                    return newFixedLengthResponse(Response.Status.FORBIDDEN,
-                            NanoHTTPD.MIME_HTML, "IOException");
-                }
+
+            fileToServe = rootFile;
+        } else {
+            try {
+                fileToServe = rootFile.search(uri.substring(1));
+            } catch (IOException e) {
+                Log.e(TAG, "IOException", e);
+                return newFixedLengthResponse(Response.Status.FORBIDDEN,
+                        NanoHTTPD.MIME_HTML, "IOException");
             }
         }
 
-        return super.serve(session);
+        if(fileToServe == null) {
+            Log.d(TAG, "fileToServe == null");
+
+            // return a 404
+            return super.serve(session);
+        }
+
+        if(fileToServe.isDirectory()) {
+            return newFixedLengthResponse(Response.Status.BAD_REQUEST,
+                    NanoHTTPD.MIME_HTML, "Directory listing not supported");
+        }
+
+        if(range == null) {
+            return serveCompleteFile(fileToServe);
+        } else {
+            try {
+                return serveRangeOfFile(fileToServe, range);
+            } catch (IOException e) {
+                Log.e(TAG, "IOException", e);
+                return newFixedLengthResponse(Response.Status.FORBIDDEN,
+                        NanoHTTPD.MIME_HTML, "IOException");
+            }
+        }
     }
 
     private Response serveCompleteFile(UsbFile file) {
