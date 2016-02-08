@@ -530,6 +530,10 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
     private void startHttpServer(UsbFile file) {
 
+        if(server != null) {
+            server.stop();
+        }
+
         server = new UsbFileHttpServer(file);
 
         try {
