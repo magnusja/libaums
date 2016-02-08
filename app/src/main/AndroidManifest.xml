@@ -45,6 +45,7 @@
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
         </activity>
+        <service android:name="com.github.mjdev.libaums.server.http.UsbFileHttpServerService" />
     </application>
 
 </manifest>

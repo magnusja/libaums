@@ -32,16 +32,19 @@ import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.IBinder;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -64,6 +67,7 @@ import com.github.mjdev.libaums.UsbMassStorageDevice;
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.UsbFile;
 import com.github.mjdev.libaums.server.http.UsbFileHttpServer;
+import com.github.mjdev.libaums.server.http.UsbFileHttpServerService;
 
 /**
  * MainActivity of the demo application which shows the contents of the first
@@ -123,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 		}
 	};
 
-	/**
+    /**
 	 * Dialog to create new directories.
 	 * 
 	 * @author mjahnen
@@ -321,7 +325,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 	/* package */UsbFileListAdapter adapter;
 	private Deque<UsbFile> dirs = new ArrayDeque<UsbFile>();
 
-	private UsbFileHttpServer server;
+    private UsbFileHttpServerService serverService;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -407,7 +411,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		MoveClipboard cl = MoveClipboard.getInstance();
 		menu.findItem(R.id.paste).setEnabled(cl.getFile() != null);
-		menu.findItem(R.id.stop_http_server).setEnabled(server != null);
+		menu.findItem(R.id.stop_http_server).setEnabled(serverService != null);
 		return true;
 	}
 
@@ -428,8 +432,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			move();
 			return true;
         case R.id.stop_http_server:
-            server.stop();
-            server = null;
+            if(serverService != null) {
+                serverService.stopServer();
+            }
             return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -528,29 +533,54 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 		}
 	}
 
-    private void startHttpServer(UsbFile file) {
+    private void startHttpServer(final UsbFile file) {
 
-        if(server != null) {
-            server.stop();
+        Log.d(TAG, "starting HTTP server");
+
+        if(serverService != null) {
+            Log.d(TAG, "Stopping existing server service");
+            serverService.stopServer();
         }
 
-        server = new UsbFileHttpServer(file);
+		Intent intent = new Intent(this, UsbFileHttpServerService.class);
+		bindService(intent, new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                Log.d(TAG, "on service connected " + name);
+                UsbFileHttpServerService.ServiceBinder binder = (UsbFileHttpServerService.ServiceBinder) service;
+                serverService = binder.getService();
 
-        try {
-            server.start();
+                // no start the server
+                try {
+                    serverService.startServer(file);
+                    Toast.makeText(MainActivity.this, "HTTP server up and running", Toast.LENGTH_LONG).show();
+                } catch (IOException e) {
+                    Log.e(TAG, "Error starting HTTP server", e);
+                    Toast.makeText(MainActivity.this, "Could not start HTTP server", Toast.LENGTH_LONG).show();
+                }
 
-            Intent myIntent = new Intent(android.content.Intent.ACTION_VIEW);
-            myIntent.setData(Uri.parse(server.getBaseUrl() + file.getName()));
-            try {
-                startActivity(myIntent);
-            } catch (ActivityNotFoundException e) {
-                Toast.makeText(MainActivity.this, "Could no find an app for that file!",
-                        Toast.LENGTH_LONG).show();
+                if(file.isDirectory()) {
+                    // only open activity when serving a file
+                    return;
+                }
+
+                Intent myIntent = new Intent(android.content.Intent.ACTION_VIEW);
+                myIntent.setData(Uri.parse(serverService.getServer().getBaseUrl() + file.getName()));
+                try {
+                    startActivity(myIntent);
+                } catch (ActivityNotFoundException e) {
+                    Toast.makeText(MainActivity.this, "Could no find an app for that file!",
+                            Toast.LENGTH_LONG).show();
+                }
             }
-        } catch (IOException e) {
-            Log.e(TAG, "Error starting HTTP server", e);
-            Toast.makeText(this, "Could not start HTTP server", Toast.LENGTH_LONG).show();
-        }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                Log.d(TAG, "on service disconnected " + name);
+
+                serverService = null;
+            }
+        }, Context.BIND_AUTO_CREATE);
     }
 
 	/**
