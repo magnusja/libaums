@@ -367,6 +367,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     protected void onStart() {
         super.onStart();
 
+        startService(serviceIntent);
         bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
@@ -666,12 +667,16 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 	public void onDestroy() {
 		super.onDestroy();
 		unregisterReceiver(usbReceiver);
-        if(serverService != null && serverService.isServerRunning()) {
-            return;
-        }
 
-		if (device != null) {
-			device.close();
-		}
+        if(!serverService.isServerRunning()) {
+            Log.d(TAG, "Stopping service");
+            stopService(serviceIntent);
+
+            if (device != null) {
+                Log.d(TAG, "Closing device");
+
+                device.close();
+            }
+        }
 	}
 }
