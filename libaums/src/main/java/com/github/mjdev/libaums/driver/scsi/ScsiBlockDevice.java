@@ -196,13 +196,13 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	 * the devOffset is not in bytes!
 	 */
 	@Override
-	public void read(long devOffset, ByteBuffer dest) throws IOException {
+	public synchronized void read(long devOffset, ByteBuffer dest) throws IOException {
 		//long time = System.currentTimeMillis();
 		// TODO try to make this more efficient by for example only allocating
 		// blockSize and making it global
 		ByteBuffer buffer;
 		if (dest.remaining() % blockSize != 0) {
-			Log.i(TAG, "we have to round up size to next block sector");
+			Log.w(TAG, "we have to round up size to next block sector");
 			int rounded = blockSize - dest.remaining() % blockSize + dest.remaining();
 			buffer = ByteBuffer.allocate(rounded);
 			buffer.limit(rounded);
@@ -229,13 +229,13 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	 * the devOffset is not in bytes!
 	 */
 	@Override
-	public void write(long devOffset, ByteBuffer src) throws IOException {
-		long time = System.currentTimeMillis();
+	public synchronized void write(long devOffset, ByteBuffer src) throws IOException {
+		//long time = System.currentTimeMillis();
 		// TODO try to make this more efficient by for example only allocating
 		// blockSize and making it global
 		ByteBuffer buffer;
 		if (src.remaining() % blockSize != 0) {
-			Log.i(TAG, "we have to round up size to next block sector");
+			Log.w(TAG, "we have to round up size to next block sector");
 			int rounded = blockSize - src.remaining() % blockSize + src.remaining();
 			buffer = ByteBuffer.allocate(rounded);
 			buffer.limit(rounded);
@@ -245,12 +245,12 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		}
 
 		ScsiWrite10 write = new ScsiWrite10((int) devOffset, buffer.remaining(), blockSize);
-		Log.d(TAG, "writing: " + write);
+		//Log.d(TAG, "writing: " + write);
 		transferCommand(write, buffer);
 
 		src.position(src.limit());
 
-		Log.d(TAG, "write time: " + (System.currentTimeMillis() - time));
+		//Log.d(TAG, "write time: " + (System.currentTimeMillis() - time));
 	}
 
 	@Override
