@@ -56,6 +56,7 @@ public class UsbFileInputStream extends InputStream {
         }
 
         ByteBuffer buffer = ByteBuffer.allocate(512);
+        buffer.limit(1);
         file.read(currentByteOffset, buffer);
         currentByteOffset++;
         buffer.flip();
