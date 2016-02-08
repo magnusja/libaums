@@ -620,7 +620,7 @@ import java.util.Calendar;
 		return (i2 << 8) | i1;
 	}
 
-	private int getUnsignedInt32(int offset) {
+	private long getUnsignedInt32(int offset) {
 		final int i1 = data.get(offset) & 0xff;
 		final int i2 = data.get(offset + 1) & 0xff;
 		final int i3 = data.get(offset + 2) & 0xff;
