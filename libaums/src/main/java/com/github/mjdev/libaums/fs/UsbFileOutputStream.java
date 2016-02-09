@@ -7,7 +7,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 /**
- * Created by mep on 08/02/16.
+ * UsbFileOutputStream provides common OutputStream access to a UsbFile.
  */
 public class UsbFileOutputStream extends OutputStream {
 
