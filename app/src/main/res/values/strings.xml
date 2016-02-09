@@ -30,4 +30,6 @@
     <string name="content">Content:</string>
     <string name="directory">Directory</string>
     <string name="file">File</string>
+    <string name="start_http_server">Serve via HTTP Server</string>
+    <string name="stop_http_server">Stop HTTP Server</string>
 </resources>

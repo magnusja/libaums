@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2014 mjahnen <jahnen@in.tum.de>
+ * (C) Copyright 2014-2016 mjahnen <jahnen@in.tum.de>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
  */
 
 package com.github.mjdev.libaums.fs;
+
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -34,17 +37,28 @@ import java.nio.ByteBuffer;
  * 
  */
 public interface UsbFile extends Closeable {
+
+    String separator = "/";
+
+    /**
+     * Tries to search a corresponding entry associated with the path parameter. Path separator is '/'.
+     * Parameter path must not start with an '/'. Path is treated relative to current UsbFile.
+     * @param path The path to the resource to search.
+     * @return UsbFile directory or file if found, null otherwise.
+     */
+	@Nullable UsbFile search(@NonNull String path) throws IOException;
+
 	/**
 	 * 
 	 * @return True if representing a directory.
 	 */
-	public boolean isDirectory();
+	boolean isDirectory();
 
 	/**
 	 * 
 	 * @return The name of the file or directory.
 	 */
-	public String getName();
+	String getName();
 
 	/**
 	 * Set a new name for this file or directory.
@@ -55,28 +69,28 @@ public interface UsbFile extends Closeable {
 	 *             If new name is already assigned or writing to the file system
 	 *             fails.
 	 */
-	public void setName(String newName) throws IOException;
+	void setName(String newName) throws IOException;
 
 	/**
 	 * Returns the time this directory or file was created.
 	 * 
 	 * @return Time in milliseconds since January 1 00:00:00, 1970 UTC
 	 */
-	public long createdAt();
+	long createdAt();
 	
 	/**
 	 * Returns the time this directory or file was last modified.
 	 * 
 	 * @return Time in milliseconds since January 1 00:00:00, 1970 UTC
 	 */
-	public long lastModified();
+	long lastModified();
 	
 	/**
 	 * Returns the time this directory or file was last accessed.
 	 * 
 	 * @return Time in milliseconds since January 1 00:00:00, 1970 UTC
 	 */
-	public long lastAccessed();
+	long lastAccessed();
 
 	/**
 	 * Returns the parent directory for the file or directory or null if this is
@@ -84,7 +98,7 @@ public interface UsbFile extends Closeable {
 	 * 
 	 * @return The parent directory or null.
 	 */
-	public UsbFile getParent();
+	UsbFile getParent();
 
 	/**
 	 * Lists all files in the directory. Throws an exception if called on a
@@ -94,7 +108,7 @@ public interface UsbFile extends Closeable {
 	 * @throws IOException
 	 *             If reading fails
 	 */
-	public String[] list() throws IOException;
+	String[] list() throws IOException;
 
 	/**
 	 * Lists all files in the directory. Throws an exception if called on a
@@ -105,14 +119,14 @@ public interface UsbFile extends Closeable {
 	 * @throws IOException
 	 *             If reading fails
 	 */
-	public UsbFile[] listFiles() throws IOException;
+	UsbFile[] listFiles() throws IOException;
 
 	/**
 	 * Returns the file length or throws an exception if called on a directory.
 	 * 
 	 * @return File length in bytes.
 	 */
-	public long getLength();
+	long getLength();
 
 	/**
 	 * Sets the new file length. This can sometimes be more efficient if all
@@ -127,7 +141,7 @@ public interface UsbFile extends Closeable {
 	 * @throws IOException
 	 *             If requesting the needed space fails.
 	 */
-	public void setLength(long newLength) throws IOException;
+	void setLength(long newLength) throws IOException;
 
 	/**
 	 * Reads from a file or throws an exception if called on a directory.
@@ -139,19 +153,19 @@ public interface UsbFile extends Closeable {
 	 * @throws IOException
 	 *             If reading fails.
 	 */
-	public void read(long offset, ByteBuffer destination) throws IOException;
+	void read(long offset, ByteBuffer destination) throws IOException;
 
 	/**
 	 * Writes to a file or throws an exception if called on a directory.
 	 * 
 	 * @param offset
 	 *            The offset in bytes where writing in the file should be begin.
-	 * @param destination
+	 * @param source
 	 *            Buffer which contains the data which shall be transferred.
 	 * @throws IOException
 	 *             If writing fails.
 	 */
-	public void write(long offset, ByteBuffer source) throws IOException;
+	void write(long offset, ByteBuffer source) throws IOException;
 
 	/**
 	 * Forces a write. Every change to the file is then committed to the disk.
@@ -160,7 +174,7 @@ public interface UsbFile extends Closeable {
 	 * @throws IOException
 	 *             If flushing fails.
 	 */
-	public void flush() throws IOException;
+	void flush() throws IOException;
 
 	/**
 	 * Closes and flushes the file. It is essential to close a file after making
@@ -170,7 +184,7 @@ public interface UsbFile extends Closeable {
 	 *             If closing fails.
 	 */
 	@Override
-	public void close() throws IOException;
+	void close() throws IOException;
 
 	/**
 	 * This methods creates a new directory with the given name and returns it.
@@ -182,7 +196,7 @@ public interface UsbFile extends Closeable {
 	 *             If writing to the disk fails or a item with the same name
 	 *             already exists.
 	 */
-	public UsbFile createDirectory(String name) throws IOException;
+	UsbFile createDirectory(String name) throws IOException;
 
 	/**
 	 * This methods creates a new file with the given name and returns it.
@@ -194,7 +208,7 @@ public interface UsbFile extends Closeable {
 	 *             If writing to the disk fails or a item with the same name
 	 *             already exists.
 	 */
-	public UsbFile createFile(String name) throws IOException;
+	UsbFile createFile(String name) throws IOException;
 
 	/**
 	 * This methods moves THIS item to the destination directory. Make sure that
@@ -210,7 +224,7 @@ public interface UsbFile extends Closeable {
 	 *             If writing fails, or the operation cannot be done (eg. item
 	 *             already exists in the destination directory)
 	 */
-	public void moveTo(UsbFile destination) throws IOException;
+	void moveTo(UsbFile destination) throws IOException;
 
 	/**
 	 * Deletes this file or directory from the parent directory.
@@ -218,5 +232,5 @@ public interface UsbFile extends Closeable {
 	 * @throws IOException
 	 *             If operation fails due to write errors.
 	 */
-	public void delete() throws IOException;
+	void delete() throws IOException;
 }

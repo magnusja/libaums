@@ -30,5 +30,9 @@
         android:id="@+id/move_item"
         android:title="@string/move">
     </item>
+    <item
+        android:id="@+id/start_http_server"
+        android:title="@string/start_http_server">
+    </item>
 
 </menu>

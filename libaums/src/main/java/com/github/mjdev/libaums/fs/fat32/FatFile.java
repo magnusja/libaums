@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2014 mjahnen <jahnen@in.tum.de>
+ * (C) Copyright 2014-2016 mjahnen <jahnen@in.tum.de>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,11 @@ public class FatFile implements UsbFile {
 		if (chain == null) {
 			chain = new ClusterChain(entry.getStartCluster(), blockDevice, fat, bootSector);
 		}
+	}
+
+	@Override
+	public UsbFile search(String path) {
+		throw new UnsupportedOperationException("This is a file!");
 	}
 
 	@Override
