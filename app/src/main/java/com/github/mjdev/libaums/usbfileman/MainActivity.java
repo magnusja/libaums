@@ -381,6 +381,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
 			// we always use the first partition of the device
 			FileSystem fs = device.getPartitions().get(0).getFileSystem();
+			Log.d(TAG, "Capacity: " + fs.getCapacity());
+			Log.d(TAG, "Occupied Space: " + fs.getOccupiedSpace());
+			Log.d(TAG, "Free Space: " + fs.getFreeSpace());
 			UsbFile root = fs.getRootDirectory();
 
 			ActionBar actionBar = getSupportActionBar();
