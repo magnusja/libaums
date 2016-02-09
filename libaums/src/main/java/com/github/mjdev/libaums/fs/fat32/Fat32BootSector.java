@@ -176,7 +176,7 @@ import java.nio.ByteOrder;
 	 * 
 	 * @return True if the FAT is mirrored.
 	 * @see #getValidFat()
-	 * @see #fatCount()
+	 * @see #getFatCount()
 	 */
 	/* package */boolean isFatMirrored() {
 		return fatMirrored;
@@ -187,7 +187,7 @@ import java.nio.ByteOrder;
 	 * 
 	 * @return Number of the valid FAT.
 	 * @see #isFatMirrored()
-	 * @see #fatCount()
+	 * @see #getFatCount()
 	 */
 	/* package */byte getValidFat() {
 		return validFat;

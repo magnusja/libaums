@@ -88,4 +88,19 @@ public class Fat32FileSystem implements FileSystem {
 		}
 		return volumeLabel;
 	}
+
+	@Override
+	public long getCapacity() {
+		return bootSector.getTotalNumberOfSectors() * bootSector.getBytesPerSector();
+	}
+
+	@Override
+	public long getOccupiedSpace() {
+		return getCapacity() - getFreeSpace();
+	}
+
+	@Override
+	public long getFreeSpace() {
+		return fsInfoStructure.getFreeClusterCount() * bootSector.getBytesPerCluster();
+	}
 }

@@ -30,7 +30,7 @@ public interface FileSystem {
 	 * 
 	 * @return The root directory of the file system.
 	 */
-	public UsbFile getRootDirectory();
+	UsbFile getRootDirectory();
 
 	/**
 	 * This method returns the name of the volume which is mostly saved in the
@@ -41,6 +41,26 @@ public interface FileSystem {
 	 * 
 	 * @return
 	 */
-	public String getVolumeLabel();
+	String getVolumeLabel();
+
+    /**
+     *
+     * @return The total "capacity" of the file system in bytes.
+     */
+    long getCapacity();
+
+    /**
+     * ATTENTION: This value can be inaccurate, depending on actual file system and certain file
+     * system specific properties. Use as an estimation.
+     * @return Occupied space in the file system in bytes (estimate).
+     */
+    long getOccupiedSpace();
+
+    /**
+     * ATTENTION: This value can be inaccurate, depending on actual file system and certain file
+     * system specific properties. Use as an estimation.
+     * @return Free space in the file system in bytes (estimate).
+     */
+    long getFreeSpace();
 
 }
