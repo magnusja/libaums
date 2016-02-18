@@ -139,6 +139,7 @@ public class FatDirectory implements UsbFile {
 		result.chain = new ClusterChain(bootSector.getRootDirStartCluster(), blockDevice, fat,
 				bootSector);
 		result.init();
+		result.readEntries();
 		return result;
 	}
 
@@ -152,10 +153,8 @@ public class FatDirectory implements UsbFile {
 	private void init() throws IOException {
 		if (chain == null) {
 			chain = new ClusterChain(entry.getStartCluster(), blockDevice, fat, bootSector);
-		}
-
-		if (entries.size() == 0)
 			readEntries();
+		}
 	}
 
 	/**
