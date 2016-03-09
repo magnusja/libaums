@@ -654,7 +654,7 @@ import java.util.Calendar;
 
 		calendar.set(Calendar.YEAR, 1980 + (date >> 9));
 		calendar.set(Calendar.MONTH, ((date >> 5) & 0x0f) - 1);
-		calendar.set(Calendar.DAY_OF_MONTH, date & 0x0f);
+		calendar.set(Calendar.DAY_OF_MONTH, date & 0x1f);
 		calendar.set(Calendar.HOUR_OF_DAY, time >> 11);
 		calendar.set(Calendar.MINUTE, (time >> 5) & 0x3f);
 		calendar.set(Calendar.SECOND, (time & 0x1f) * 2);
