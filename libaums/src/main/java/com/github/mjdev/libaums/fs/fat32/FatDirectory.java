@@ -153,7 +153,11 @@ public class FatDirectory implements UsbFile {
 	private void init() throws IOException {
 		if (chain == null) {
 			chain = new ClusterChain(entry.getStartCluster(), blockDevice, fat, bootSector);
-			readEntries();
+
+			// only read entries if we have no entries
+			// otherwise newly created directories (. and ..) will read trash data
+			if(entries.size() == 0)
+				readEntries();
 		}
 	}
 
