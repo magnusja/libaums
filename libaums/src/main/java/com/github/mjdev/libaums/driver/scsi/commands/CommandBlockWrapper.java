@@ -127,8 +127,8 @@ public abstract class CommandBlockWrapper {
 	 * Sets the tag which can be used to determine the corresponding
 	 * {@link com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper
 	 * CBW}.
-	 * 
-	 * @return The command block wrapper tag
+	 *
+	 * @param dCbwTag The command block wrapper tag
 	 * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper
 	 *      #getdCswTag()
 	 */
