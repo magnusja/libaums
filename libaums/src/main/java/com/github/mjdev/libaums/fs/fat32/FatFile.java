@@ -209,4 +209,9 @@ public class FatFile implements UsbFile {
 		chain.setLength(0);
 	}
 
+	@Override
+	public boolean isRoot() {
+		return false;
+	}
+
 }

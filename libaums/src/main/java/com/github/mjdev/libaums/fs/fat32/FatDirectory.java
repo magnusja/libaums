@@ -314,7 +314,8 @@ public class FatDirectory implements UsbFile {
 	 * 
 	 * @return True if this directory is the root directory.
 	 */
-	private boolean isRoot() {
+    @Override
+	public boolean isRoot() {
 		return entry == null;
 	}
 
@@ -455,7 +456,7 @@ public class FatDirectory implements UsbFile {
 
 	@Override
 	public String getName() {
-		return entry.getName();
+		return entry != null ? entry.getName() : "";
 	}
 
 	@Override
@@ -467,17 +468,23 @@ public class FatDirectory implements UsbFile {
 
 	@Override
 	public long createdAt() {
-		return entry.getActualEntry().getCreatedDateTime();
+        if (isRoot())
+            throw new IllegalStateException("root dir!");
+        return entry.getActualEntry().getCreatedDateTime();
 	}
 
 	@Override
 	public long lastModified() {
-		return entry.getActualEntry().getLastModifiedDateTime();
+        if (isRoot())
+            throw new IllegalStateException("root dir!");
+        return entry.getActualEntry().getLastModifiedDateTime();
 	}
 
 	@Override
 	public long lastAccessed() {
-		return entry.getActualEntry().getLastAccessedDateTime();
+        if (isRoot())
+            throw new IllegalStateException("root dir!");
+        return entry.getActualEntry().getLastAccessedDateTime();
 	}
 
 	@Override

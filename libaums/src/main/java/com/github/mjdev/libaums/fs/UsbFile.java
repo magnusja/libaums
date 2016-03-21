@@ -233,4 +233,10 @@ public interface UsbFile extends Closeable {
 	 *             If operation fails due to write errors.
 	 */
 	void delete() throws IOException;
+
+	/**
+	 *
+	 * @return True if the current directory is the root directory, false if not or a file.
+	 */
+	boolean isRoot();
 }
