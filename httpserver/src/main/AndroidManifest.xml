@@ -1,0 +1,12 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.github.mjdev.libaums.httpserver">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application>
+
+        <service android:name="com.github.mjdev.libaums.server.http.UsbFileHttpServerService" />
+
+    </application>
+
+</manifest>
