@@ -93,6 +93,8 @@ public class LibAumsTest extends AppCompatActivity {
     private void testCreateFile()
             throws IOException {
 
+        UsbFile[] files;
+
         UsbFile root = fs.getRootDirectory();
 
         UsbFile testDirectory = root.search("testCreateFile");
@@ -101,13 +103,14 @@ public class LibAumsTest extends AppCompatActivity {
         }
 
         testDirectory = root.createDirectory("testCreateFile");
+        files = testDirectory.listFiles();
+        assertTrue((files != null) && (files.length == 0));
 
         testDirectory.createDirectory("testFile1");
 
         testDirectory.createDirectory("testFile2");
 
-        UsbFile[] files = testDirectory.listFiles();
-
+        files = testDirectory.listFiles();
         assertTrue((files != null) && (files.length == 2));
 
         testDirectory.delete();
