@@ -137,8 +137,7 @@ public class FatDirectory implements UsbFile {
 		FatDirectory result = new FatDirectory(blockDevice, fat, bootSector, null);
 		result.chain = new ClusterChain(bootSector.getRootDirStartCluster(), blockDevice, fat,
 				bootSector);
-		result.init();
-		result.readEntries();
+		result.init(); // init calls readEntries
 		return result;
 	}
 
