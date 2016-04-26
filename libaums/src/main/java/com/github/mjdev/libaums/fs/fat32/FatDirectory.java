@@ -92,7 +92,6 @@ public class FatDirectory implements UsbFile {
 		this.fat = fat;
 		this.bootSector = bootSector;
 		this.parent = parent;
-		entries = new ArrayList<FatLfnDirectoryEntry>();
 		lfnMap = new HashMap<String, FatLfnDirectoryEntry>();
 		shortNameMap = new HashMap<ShortName, FatDirectoryEntry>();
 	}
@@ -153,11 +152,19 @@ public class FatDirectory implements UsbFile {
 	private void init() throws IOException {
 		if (chain == null) {
 			chain = new ClusterChain(entry.getStartCluster(), blockDevice, fat, bootSector);
+		}
 
-			// only read entries if we have no entries
-			// otherwise newly created directories (. and ..) will read trash data
-			if(entries.size() == 0)
-				readEntries();
+		// entries is allocated here
+		// an exception will be thrown if entries is used before the directory has been initialised
+		// use of uninitialised entries can lead to data loss!
+		if(entries == null) {
+			entries = new ArrayList<FatLfnDirectoryEntry>();
+		}
+
+		// only read entries if we have no entries
+		// otherwise newly created directories (. and ..) will read trash data
+		if(entries.size() == 0) {
+			readEntries();
 		}
 	}
 
@@ -334,6 +341,8 @@ public class FatDirectory implements UsbFile {
 		if (lfnMap.containsKey(name.toLowerCase(Locale.getDefault())))
 			throw new IOException("Item already exists!");
 
+		init(); // initialise the directory before creating files
+
 		ShortName shortName = ShortNameGenerator.generateShortName(name, shortNameMap.keySet());
 
 		FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.createNew(name, shortName);
@@ -354,6 +363,8 @@ public class FatDirectory implements UsbFile {
 		if (lfnMap.containsKey(name.toLowerCase(Locale.getDefault())))
 			throw new IOException("Item already exists!");
 
+		init(); // initialise the directory before creating files
+
 		ShortName shortName = ShortNameGenerator.generateShortName(name, shortNameMap.keySet());
 
 		FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.createNew(name, shortName);
@@ -368,6 +379,8 @@ public class FatDirectory implements UsbFile {
 		write();
 
 		FatDirectory result = FatDirectory.create(entry, blockDevice, fat, bootSector, this);
+
+		result.init(); // initialise directory before adding sub-directories
 
 		// first create the dot entry which points to the dir just created
 		FatLfnDirectoryEntry dotEntry = FatLfnDirectoryEntry
