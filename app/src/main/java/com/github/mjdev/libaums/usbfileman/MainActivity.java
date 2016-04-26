@@ -68,6 +68,7 @@ import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.UsbFile;
 import com.github.mjdev.libaums.server.http.UsbFileHttpServer;
 import com.github.mjdev.libaums.server.http.UsbFileHttpServerService;
+import com.github.mjdev.libaums.test.LibAumsTest;
 
 /**
  * MainActivity of the demo application which shows the contents of the first
@@ -473,6 +474,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                 serverService.stopServer();
             }
             return true;
+		case R.id.run_tests:
+			startActivity(new Intent(this, LibAumsTest.class));
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
