@@ -40,4 +40,9 @@
         android:title="@string/stop_http_server">
     </item>
 
+    <item
+        android:id="@+id/run_tests"
+        android:title="@string/run_tests">
+    </item>
+
 </menu>
