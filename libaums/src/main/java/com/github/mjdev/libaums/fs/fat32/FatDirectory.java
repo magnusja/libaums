@@ -621,7 +621,8 @@ public class FatDirectory implements UsbFile {
 		if (destinationDir.lfnMap.containsKey(entry.getName().toLowerCase(Locale.getDefault())))
 			throw new IOException("item already exists in destination!");
 
-		parent.init();
+		// TODO: why the following (out commented) line?
+		// parent.init();
 		destinationDir.init();
 
 		// now the actual magic happens!
