@@ -379,7 +379,7 @@ public class FatDirectory implements UsbFile {
 
 		FatDirectory result = FatDirectory.create(entry, blockDevice, fat, bootSector, this);
 
-		result.init(); // initialise directory before adding sub-directories
+		result.entries = new ArrayList<FatLfnDirectoryEntry>(); // initialise entries before adding sub-directories
 
 		// first create the dot entry which points to the dir just created
 		FatLfnDirectoryEntry dotEntry = FatLfnDirectoryEntry
