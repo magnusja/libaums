@@ -21,3 +21,13 @@ We would appreciate an information email, when you plan to use the library in yo
 
 **develop** [![Build Status](https://travis-ci.org/mjdev/libaums.svg?branch=develop)](https://travis-ci.org/mjdev/libaums)
 **master** [![Build Status](https://travis-ci.org/mjdev/libaums.svg?branch=master)](https://travis-ci.org/mjdev/libaums)
+
+### How to use
+
+The library can be included into your project like this:
+
+```
+compile 'com.github.mjdev:libaums:0.3'
+```
+
+For examples on how to use the library, please have a look at the main activity in the sample application.
