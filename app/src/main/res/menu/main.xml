@@ -45,4 +45,8 @@
         android:title="@string/run_tests">
     </item>
 
+    <item
+        android:id="@+id/open_storage_provider"
+        android:title="@string/run_storage_provider"/>
+
 </menu>

@@ -33,4 +33,5 @@
     <string name="start_http_server">Serve via HTTP Server</string>
     <string name="stop_http_server">Stop HTTP Server</string>
     <string name="run_tests">Run tests</string>
+    <string name="run_storage_provider">Run StorageProvider</string>
 </resources>

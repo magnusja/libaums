@@ -42,6 +42,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
@@ -476,6 +477,18 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
             return true;
 		case R.id.run_tests:
 			startActivity(new Intent(this, LibAumsTest.class));
+			return true;
+		case R.id.open_storage_provider:
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+				Intent intent = new Intent();
+				intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+				intent.addCategory(Intent.CATEGORY_OPENABLE);
+				intent.setType("*/*");
+				String[] extraMimeTypes = {"image/*", "video/*"};
+				intent.putExtra(Intent.EXTRA_MIME_TYPES, extraMimeTypes);
+				intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+				startActivityForResult(intent, 1);
+			}
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
