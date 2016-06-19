@@ -74,6 +74,8 @@ public class FatDirectory implements UsbFile {
 
 	private String volumeLabel;
 
+    private boolean hasBeenInited;
+
 	/**
 	 * Constructs a new FatDirectory with the given information.
 	 * 
@@ -116,6 +118,7 @@ public class FatDirectory implements UsbFile {
 			BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector, FatDirectory parent) {
 		FatDirectory result = new FatDirectory(blockDevice, fat, bootSector, parent);
 		result.entry = entry;
+        result.hasBeenInited = true;
 		return result;
 	}
 
@@ -162,9 +165,11 @@ public class FatDirectory implements UsbFile {
 
 		// only read entries if we have no entries
 		// otherwise newly created directories (. and ..) will read trash data
-		if(entries.size() == 0) {
+		if(entries.size() == 0 && !hasBeenInited) {
 			readEntries();
 		}
+
+		hasBeenInited = true;
 	}
 
 	/**
