@@ -118,7 +118,6 @@ public class FatDirectory implements UsbFile {
 			BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector, FatDirectory parent) {
 		FatDirectory result = new FatDirectory(blockDevice, fat, bootSector, parent);
 		result.entry = entry;
-        result.hasBeenInited = true;
 		return result;
 	}
 
@@ -383,6 +382,7 @@ public class FatDirectory implements UsbFile {
 		write();
 
 		FatDirectory result = FatDirectory.create(entry, blockDevice, fat, bootSector, this);
+		result.hasBeenInited = true;
 
 		result.entries = new ArrayList<FatLfnDirectoryEntry>(); // initialise entries before adding sub-directories
 
