@@ -186,10 +186,15 @@ public class UsbDocumentProvider extends DocumentsProvider {
 
             final int accessMode = ParcelFileDescriptor.parseMode(mode);
             if ((accessMode | ParcelFileDescriptor.MODE_READ_ONLY) == ParcelFileDescriptor.MODE_READ_ONLY) {
+                Log.d(TAG, "openDocument() piping to UsbFileInputStream");
                 return ParcelFileDescriptorUtil.pipeFrom(new UsbFileInputStream(file));
             } else if ((accessMode | ParcelFileDescriptor.MODE_WRITE_ONLY) == ParcelFileDescriptor.MODE_WRITE_ONLY) {
+                Log.d(TAG, "openDocument() piping to UsbFileOutputStream");
                 return ParcelFileDescriptorUtil.pipeTo(new UsbFileOutputStream(file));
             }
+
+            Log.d(TAG, "openDocument() return null");
+
 
             return null;
 
@@ -315,7 +320,9 @@ public class UsbDocumentProvider extends DocumentsProvider {
         } else {
             String extension = MimeTypeMap.getFileExtensionFromUrl(file.getName()).toLowerCase();
             if (extension != null) {
-                return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+                String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+                Log.d(TAG, "mimeType: " + mimeType);
+                return mimeType;
             }
         }
         return "application/octet-stream";
