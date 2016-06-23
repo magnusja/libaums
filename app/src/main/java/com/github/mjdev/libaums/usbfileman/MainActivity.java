@@ -25,6 +25,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.NoSuchElementException;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -624,6 +625,22 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                     Toast.LENGTH_LONG).show();
         }
     }
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
+			Uri uri = null;
+			if (data != null) {
+				uri = data.getData();
+				Log.i(TAG, "Uri: " + uri.toString());
+				Intent i = new Intent(Intent.ACTION_VIEW);
+				i.setData(uri);
+				startActivity(i);
+			}
+		}
+	}
 
 	/**
 	 * This methods creates a very big file for testing purposes. It writes only
