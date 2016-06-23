@@ -41,6 +41,7 @@ import static junit.framework.Assert.assertTrue;
  *
  * Created by nowell on 26/04/16.
  */
+// TODO: make this an actual Android unit test
 public class LibAumsTest extends AppCompatActivity {
 
     private static final String TAG = LibAumsTest.class.getSimpleName();
@@ -80,6 +81,8 @@ public class LibAumsTest extends AppCompatActivity {
             testSearchAndCreateFile();
 
             testSearchAndCreateDirectory();
+
+            testdeleteAllFilesInDirectory();
 
             Log.d(TAG, "PASS");
 
@@ -213,6 +216,39 @@ public class LibAumsTest extends AppCompatActivity {
 
         UsbFile[] files = searchDirectory.listFiles();
         assertTrue((files != null) && (files.length == 2));
+
+        testDirectory.delete();
+
+    }
+
+    private void testdeleteAllFilesInDirectory()
+            throws IOException {
+
+        UsbFile root = fs.getRootDirectory();
+
+        UsbFile testDirectory = root.search("testCreateDirectory");
+        if(testDirectory != null) {
+            testDirectory.delete();
+        }
+
+        testDirectory = root.createDirectory("testCreateDirectory");
+
+        testDirectory.createDirectory("testDirectory1");
+
+        testDirectory.createDirectory("testDirectory2");
+
+        UsbFile[] files = testDirectory.listFiles();
+
+        assertTrue((files != null) && (files.length == 2));
+
+
+        for(UsbFile file : files) {
+            file.delete();
+        }
+
+        files = testDirectory.listFiles();
+
+        assertTrue((files != null) && (files.length == 0));
 
         testDirectory.delete();
 
