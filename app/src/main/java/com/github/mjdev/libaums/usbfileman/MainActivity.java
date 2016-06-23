@@ -68,9 +68,7 @@ import android.widget.Toast;
 import com.github.mjdev.libaums.UsbMassStorageDevice;
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.UsbFile;
-import com.github.mjdev.libaums.server.http.UsbFileHttpServer;
 import com.github.mjdev.libaums.server.http.UsbFileHttpServerService;
-import com.github.mjdev.libaums.test.LibAumsTest;
 
 /**
  * MainActivity of the demo application which shows the contents of the first

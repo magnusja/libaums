@@ -1,4 +1,4 @@
-package com.github.mjdev.libaums.test;
+package com.github.mjdev.libaums.usbfileman;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
