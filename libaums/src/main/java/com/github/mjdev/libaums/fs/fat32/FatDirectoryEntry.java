@@ -344,7 +344,7 @@ import java.util.Calendar;
 	 * 
 	 * @return Time in milliseconds since January 1 00:00:00, 1970 UTC
 	 */
-	/* package */long getLastAccessedDateTime() {
+	/* package */long getLastModifiedDateTime() {
 		return decodeDateTime(getUnsignedInt16(LAST_WRITE_DATE_OFF),
 				getUnsignedInt16(LAST_WRITE_TIME_OFF));
 	}
@@ -356,7 +356,7 @@ import java.util.Calendar;
 	 * @param dateTime
 	 *            Time in milliseconds since January 1 00:00:00, 1970 UTC
 	 */
-	/* package */void setLastAccessedDateTime(long dateTime) {
+	/* package */void setLastModifiedDateTime(long dateTime) {
 		setUnsignedInt16(LAST_WRITE_DATE_OFF, encodeDate(dateTime));
 		setUnsignedInt16(LAST_WRITE_TIME_OFF, encodeTime(dateTime));
 	}
@@ -367,7 +367,7 @@ import java.util.Calendar;
 	 * 
 	 * @return Time in milliseconds since January 1 00:00:00, 1970 UTC
 	 */
-	/* package */long getLastModifiedDateTime() {
+	/* package */long getLastAccessedDateTime() {
 		return decodeDateTime(getUnsignedInt16(LAST_ACCESSED_DATE_OFF), 0);
 	}
 
@@ -378,7 +378,7 @@ import java.util.Calendar;
 	 * @param dateTime
 	 *            Time in milliseconds since January 1 00:00:00, 1970 UTC.
 	 */
-	/* package */void setLastModifiedDateTime(long dateTime) {
+	/* package */void setLastAccessedDateTime(long dateTime) {
 		setUnsignedInt16(LAST_ACCESSED_DATE_OFF, encodeDate(dateTime));
 	}
 
