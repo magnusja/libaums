@@ -479,6 +479,10 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			return true;
 		case R.id.open_storage_provider:
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+				if(device != null) {
+                    Log.d(TAG, "Closing device first");
+					device.close();
+				}
 				Intent intent = new Intent();
 				intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
 				intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -629,7 +633,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 		super.onActivityResult(requestCode, resultCode, data);
 
 		if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
-			Uri uri = null;
+			Uri uri;
 			if (data != null) {
 				uri = data.getData();
 				Log.i(TAG, "Uri: " + uri.toString());
