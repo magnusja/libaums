@@ -34,4 +34,6 @@ public interface BootSector {
 
     String getVolumeLabel();
 
+    long getNumberRootDirEntries();
+
 }

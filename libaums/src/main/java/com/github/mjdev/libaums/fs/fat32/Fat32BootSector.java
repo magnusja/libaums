@@ -252,4 +252,9 @@ public class Fat32BootSector implements BootSector {
         return volumeLabel;
     }
 
+    @Override
+    public long getNumberRootDirEntries() {
+        return rootDirStartCluster;
+    }
+
 }

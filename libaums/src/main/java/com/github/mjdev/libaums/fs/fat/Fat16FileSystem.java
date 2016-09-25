@@ -39,7 +39,6 @@ public class Fat16FileSystem implements FileSystem {
     private BootSector bootSector;
     private Fat fat;
     private FatDirectory rootDirectory;
-    private FatType fatType;
 
     /**
      * This method constructs a FAT12/16 file system for the given block device.

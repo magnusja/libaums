@@ -21,7 +21,6 @@ import com.github.mjdev.libaums.fs.BootSector;
 import com.github.mjdev.libaums.fs.fat32.FatDirectory;
 import com.github.mjdev.libaums.partition.PartitionException;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -43,17 +42,10 @@ public class Fat16BootSector implements BootSector {
     private static final int FLAGS_OFF = 40;
     private static final int VOLUME_LABEL_OFF = 43;
     private static final int ROOT_DIR_CLUSTER_OFF = 17;
+    private static final int EXTENDED_BOOT_SIGNATURE_OFFSET = 0x26;
 
-    private short bytesPerSector;
-    private short sectorsPerCluster;
-    private short reservedSectors;
-    private byte fatCount;
-    private long totalNumberOfSectors;
-    private long sectorsPerFat;
-    private long rootDirStartCluster;
     private boolean fatMirrored;
     private byte validFat;
-    private String volumeLabel;
     private ByteBuffer byteBuffer;
 
     private Fat16BootSector() {
@@ -72,33 +64,14 @@ public class Fat16BootSector implements BootSector {
         Fat16BootSector result = new Fat16BootSector();
         result.byteBuffer = buffer;
         buffer.order(ByteOrder.LITTLE_ENDIAN);
-        result.bytesPerSector = (short) result.get16(BYTES_PER_SECTOR_OFF);
-        result.sectorsPerCluster = buffer.get(SECTORS_PER_CLUSTER_OFF);
-        result.reservedSectors = (short) result.get16(RESERVED_COUNT_OFF);
-        result.fatCount = buffer.get(FAT_COUNT_OFF);
-        result.totalNumberOfSectors = result.get16(TOTAL_SECTORS_16_OFFSET);
-        result.sectorsPerFat = result.get16(SECTORS_PER_FAT_OFF);
-        result.rootDirStartCluster = result.get16(ROOT_DIR_CLUSTER_OFF);
         short flag = (short) result.get16(FLAGS_OFF);
         result.fatMirrored = ((byte) flag & 0x80) == 0;
         result.validFat = (byte) ((byte) flag & 0x7);
-
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < 11; i++) {
-            byte b = buffer.get(VOLUME_LABEL_OFF + i);
-            if (b == 0)
-                break;
-            builder.append((char) b);
-        }
-
-        result.volumeLabel = builder.toString();
-        if (result.sectorsPerCluster <= 0) try {
-            throw new IOException(
-                    "suspicious sectors per cluster count " + result.sectorsPerCluster);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         return result;
+    }
+
+    public ByteBuffer getByteBuffer() {
+        return byteBuffer;
     }
 
     /**
@@ -107,7 +80,7 @@ public class Fat16BootSector implements BootSector {
      * @return Number of bytes.
      */
     public short getBytesPerSector() {
-        return bytesPerSector;
+        return (short) get16(BYTES_PER_SECTOR_OFF);
     }
 
     /**
@@ -117,7 +90,7 @@ public class Fat16BootSector implements BootSector {
      * @return Number of bytes.
      */
     public short getSectorsPerCluster() {
-        return sectorsPerCluster;
+        return getByteBuffer().get(SECTORS_PER_CLUSTER_OFF);
     }
 
     /**
@@ -127,7 +100,7 @@ public class Fat16BootSector implements BootSector {
      * @return Number of sectors.
      */
     public short getReservedSectors() {
-        return reservedSectors;
+        return (short) get16(RESERVED_COUNT_OFF);
     }
 
     /**
@@ -137,7 +110,7 @@ public class Fat16BootSector implements BootSector {
      * @return Number of FATs.
      */
     public byte getFatCount() {
-        return fatCount;
+        return getByteBuffer().get(FAT_COUNT_OFF);
     }
 
     /**
@@ -146,7 +119,7 @@ public class Fat16BootSector implements BootSector {
      * @return Total number of sectors.
      */
     public long getTotalNumberOfSectors() {
-        return totalNumberOfSectors;
+        return get16(TOTAL_SECTORS_16_OFFSET);
     }
 
     /**
@@ -156,7 +129,7 @@ public class Fat16BootSector implements BootSector {
      * @return Number of sectors in one FAT.
      */
     public long getSectorsPerFat() {
-        return sectorsPerFat;
+        return get16(SECTORS_PER_FAT_OFF);
     }
 
     /**
@@ -165,7 +138,7 @@ public class Fat16BootSector implements BootSector {
      * @return Root directory start cluster.
      */
     public long getRootDirStartCluster() {
-        return rootDirStartCluster;
+        return 2;
     }
 
     @Override
@@ -213,7 +186,7 @@ public class Fat16BootSector implements BootSector {
      * @return Amount of bytes.
      */
     public int getBytesPerCluster() {
-        return sectorsPerCluster * bytesPerSector;
+        return (int) (getSectorsPerCluster() * getNumberRootDirEntries());
     }
 
     /**
@@ -234,26 +207,6 @@ public class Fat16BootSector implements BootSector {
         long fatSize = sectsPerFat * sectSize;
 
         offset += fatNumber * fatSize;
-
-        return offset;
-    }
-
-    public final long getRootDirOffset() {
-        long sectSize = this.getBytesPerSector();
-        long sectsPerFat = this.getSectorsPerFat();
-        int fats = this.getFatCount();
-
-        long offset = getFatOffset(0);
-
-        offset += fats * sectsPerFat * sectSize;
-
-        return offset;
-    }
-
-    public final long getFilesOffset() {
-        long offset = getRootDirOffset();
-
-        offset += this.getRootDirStartCluster() * 32l;
 
         return offset;
     }
@@ -282,7 +235,19 @@ public class Fat16BootSector implements BootSector {
      * @return The volume label.
      */
     public String getVolumeLabel() {
-        return volumeLabel;
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < 11; i++) {
+            byte b = getByteBuffer().get(VOLUME_LABEL_OFF + i);
+            if (b == 0)
+                break;
+            builder.append((char) b);
+        }
+        return builder.toString();
+    }
+
+    @Override
+    public long getNumberRootDirEntries() {
+        return get16(ROOT_DIR_CLUSTER_OFF);
     }
 
 
