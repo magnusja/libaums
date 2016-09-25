@@ -71,7 +71,6 @@ public class Partition implements BlockDeviceDriver {
     public static Partition createPartition(PartitionTableEntry entry, BlockDeviceDriver blockDevice)
             throws IOException {
         Partition partition = new Partition();
-
         // we currently only support fat32
         int partitionType = entry.getPartitionType();
         if (partitionType == 0x01 || partitionType == 0x10) {
@@ -79,6 +78,10 @@ public class Partition implements BlockDeviceDriver {
             //throw new PartitionException("FAT12 not support", -1);
         } else if (partitionType == 0x04 || partitionType == 0x06 || partitionType == 0x0e) {
             partition.fatType = FAT16;
+            partition.logicalBlockAddress = entry.getLogicalBlockAddress();
+            partition.blockDevice = blockDevice;
+            partition.blockSize = blockDevice.getBlockSize();
+            partition.fileSystem = FileSystemFactory.createFileSystem(entry, partition);
             //throw new PartitionException("FAT16 not support", -1);
         } else if (partitionType == 0x0b || partitionType == 0x0c) {
             partition.fatType = FAT32;
@@ -125,6 +128,11 @@ public class Partition implements BlockDeviceDriver {
     @Override
     public void read(long offset, ByteBuffer dest) throws IOException {
         long devOffset = offset / blockSize + logicalBlockAddress;
+        Log.d(TAG, "logicalBlockAddress: " + logicalBlockAddress);
+        Log.d(TAG, "blockSize: " + blockSize);
+        Log.d(TAG, "offset: " + offset);
+        Log.d(TAG, "devOffset: " + devOffset);
+        Log.d(TAG, "---------------------------");
         // TODO try to make this more efficient by for example making tmp buffer
         // global
         if (offset % blockSize != 0) {

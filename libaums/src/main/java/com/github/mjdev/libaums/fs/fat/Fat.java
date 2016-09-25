@@ -22,6 +22,7 @@ import android.util.Log;
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 import com.github.mjdev.libaums.fs.BootSector;
 import com.github.mjdev.libaums.fs.FatIntf;
+import com.github.mjdev.libaums.partition.FatType;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -35,7 +36,7 @@ import java.util.Arrays;
  * directories.
  * <p>
  * The FAT distributes clusters with a specific cluster size
- * {@link FatBootSector #getBytesPerCluster()}
+ * {@link Fat16BootSector #getBytesPerCluster()}
  * . Every entry in the FAT is 32 bit. The FAT is a (linked) list where the
  * clusters can be followed until a cluster chain ends.
  * <p>
@@ -46,46 +47,30 @@ import java.util.Arrays;
 public class Fat implements FatIntf {
 
     private static final String TAG = Fat.class.getSimpleName();
-    public final static int FIRST_CLUSTER = 2;
-
-    /**
-     * End of file / chain marker. This is used to determine when following a
-     * cluster chain should be stopped. (Last allocated cluster has been found.)
-     */
-    private static final int FAT32_EOF_CLUSTER = 0x0FFFFFF8;
-    public static final float NUMBER = 1.5f;
-    private final int lastClusterIndex;
 
     private BlockDeviceDriver blockDevice;
     private long fatOffset[];
     private int fatNumbers[];
+    private FatType fatType;
 
     /**
      * Constructs a new FAT.
      *
      * @param blockDevice The block device where the FAT is located.
-     * @param bootSector  The corresponding boot sector of the FAT12 file system.
+     * @param bootSector  The corresponding boot sector of the FAT12/16 file system.
      */
-    public Fat(BlockDeviceDriver blockDevice, BootSector bootSector) {
+    public Fat(BlockDeviceDriver blockDevice, BootSector bootSector, FatType fatType) {
         this.blockDevice = blockDevice;
-        if (!bootSector.isFatMirrored()) {
-            int fatNumber = bootSector.getValidFat();
-            fatNumbers = new int[]{fatNumber};
-            Log.i(TAG, "fat is not mirrored, fat " + fatNumber + " is valid");
-        } else {
-            int fatCount = bootSector.getFatCount();
-            fatNumbers = new int[fatCount];
-            for (int i = 0; i < fatCount; i++) {
-                fatNumbers[i] = i;
-            }
+        this.fatType = fatType;
+        int fatCount = bootSector.getFatCount();
+        fatNumbers = new int[fatCount];
+        for (int i = 0; i < fatCount; i++) {
+            fatNumbers[i] = i;
             Log.i(TAG, "fat is mirrored, fat count: " + fatCount);
         }
-        this.lastClusterIndex = (int) bootSector.getDataClusterCount() + FIRST_CLUSTER;
         fatOffset = new long[fatNumbers.length];
         for (int i = 0; i < fatOffset.length; i++) {
             fatOffset[i] = bootSector.getFatOffset(fatNumbers[i]);
-
-
         }
     }
 
@@ -121,8 +106,8 @@ public class Fat implements FatIntf {
 
         do {
             result.add(currentCluster);
-            offset = (long) (((fatOffset[0] + currentCluster * NUMBER) / bufferSize) * bufferSize);
-            offsetInBlock = (long) ((fatOffset[0] + currentCluster * NUMBER) % bufferSize);
+            offset = (long) (((fatOffset[0] + currentCluster * fatType.getEntrySize()) / bufferSize) * bufferSize);
+            offsetInBlock = (long) ((fatOffset[0] + currentCluster * fatType.getEntrySize()) % bufferSize);
 
             // if we have a new offset we are forced to read again
             if (lastOffset != offset) {
@@ -132,7 +117,7 @@ public class Fat implements FatIntf {
             }
 
             currentCluster = buffer.getInt((int) offsetInBlock);
-        } while (currentCluster < FAT32_EOF_CLUSTER);
+        } while (fatType.isEofCluster(currentCluster));
 
         return result.toArray(new Long[0]);
     }
@@ -150,10 +135,6 @@ public class Fat implements FatIntf {
      * @throws IOException If reading or writing to the FAT fails.
      */
     public Long[] alloc(Long[] chain, int numberOfClusters) throws IOException {
-
-        // save original number of clusters for fs info structure
-        final int originalNumberOfClusters = numberOfClusters;
-
         final ArrayList<Long> result = new ArrayList<Long>(chain.length + numberOfClusters);
         result.addAll(Arrays.asList(chain));
         // for performance reasons we always read or write two times the block
@@ -186,8 +167,8 @@ public class Fat implements FatIntf {
         // first we search all needed cluster and save them
         while (numberOfClusters > 0) {
             currentCluster++;
-            offset = (long) (((fatOffset[0] + currentCluster * NUMBER) / bufferSize) * bufferSize);
-            offsetInBlock = (long) ((fatOffset[0] + currentCluster * NUMBER) % bufferSize);
+            offset = (long) (((fatOffset[0] + currentCluster * fatType.getEntrySize()) / bufferSize) * bufferSize);
+            offsetInBlock = (long) ((fatOffset[0] + currentCluster * fatType.getEntrySize()) % bufferSize);
 
             // if we have a new offset we are forced to read again
             if (lastOffset != offset) {
@@ -206,8 +187,8 @@ public class Fat implements FatIntf {
         if (cluster != -1) {
             // now it is time to write the partial cluster chain
             // start with the last cluster in the existing chain
-            offset = (long) (((fatOffset[0] + cluster * NUMBER) / bufferSize) * bufferSize);
-            offsetInBlock = (long) ((fatOffset[0] + cluster * NUMBER) % bufferSize);
+            offset = (long) (((fatOffset[0] + cluster * fatType.getEntrySize()) / bufferSize) * bufferSize);
+            offsetInBlock = (long) ((fatOffset[0] + cluster * fatType.getEntrySize()) % bufferSize);
 
             // if we have a new offset we are forced to read again
             if (lastOffset != offset) {
@@ -221,8 +202,8 @@ public class Fat implements FatIntf {
         // write the new allocated clusters now
         for (int i = chain.length; i < result.size() - 1; i++) {
             currentCluster = result.get(i);
-            offset = (long) (((fatOffset[0] + currentCluster * NUMBER) / bufferSize) * bufferSize);
-            offsetInBlock = (long) ((fatOffset[0] + currentCluster * NUMBER) % bufferSize);
+            offset = (long) (((fatOffset[0] + currentCluster * fatType.getEntrySize()) / bufferSize) * bufferSize);
+            offsetInBlock = (long) ((fatOffset[0] + currentCluster * fatType.getEntrySize()) % bufferSize);
 
             // if we have a new offset we are forced to read again
             if (lastOffset != offset) {
@@ -238,8 +219,8 @@ public class Fat implements FatIntf {
 
         // write end mark to last newly allocated cluster now
         currentCluster = result.get(result.size() - 1);
-        offset = (long) (((fatOffset[0] + currentCluster * NUMBER) / bufferSize) * bufferSize);
-        offsetInBlock = (long) ((fatOffset[0] + currentCluster * NUMBER) % bufferSize);
+        offset = (long) (((fatOffset[0] + currentCluster * fatType.getEntrySize()) / bufferSize) * bufferSize);
+        offsetInBlock = (long) ((fatOffset[0] + currentCluster * fatType.getEntrySize()) % bufferSize);
 
         // if we have a new offset we are forced to read again
         if (lastOffset != offset) {
@@ -249,7 +230,7 @@ public class Fat implements FatIntf {
             blockDevice.read(offset, buffer);
             lastOffset = offset;
         }
-        buffer.putInt((int) offsetInBlock, FAT32_EOF_CLUSTER);
+        buffer.putInt((int) offsetInBlock, (int) fatType.getEofMarker());
         buffer.clear();
         blockDevice.write(offset, buffer);
 
@@ -303,8 +284,8 @@ public class Fat implements FatIntf {
         // free all unneeded clusters
         for (int i = offsetInChain; i < chain.length; i++) {
             currentCluster = chain[i];
-            offset = (long) (((fatOffset[0] + currentCluster * NUMBER) / bufferSize) * bufferSize);
-            offsetInBlock = (long) ((fatOffset[0] + currentCluster * NUMBER) % bufferSize);
+            offset = (long) (((fatOffset[0] + currentCluster * fatType.getEntrySize()) / bufferSize) * bufferSize);
+            offsetInBlock = (long) ((fatOffset[0] + currentCluster * fatType.getEntrySize()) % bufferSize);
 
             // if we have a new offset we are forced to read again
             if (lastOffset != offset) {
@@ -325,8 +306,8 @@ public class Fat implements FatIntf {
         if (offsetInChain > 0) {
             // write the end mark to last cluster in the new chain
             currentCluster = chain[offsetInChain - 1];
-            offset = (long) (((fatOffset[0] + currentCluster * NUMBER) / bufferSize) * bufferSize);
-            offsetInBlock = (long) ((fatOffset[0] + currentCluster * NUMBER) % bufferSize);
+            offset = (long) (((fatOffset[0] + currentCluster * fatType.getEntrySize()) / bufferSize) * bufferSize);
+            offsetInBlock = (long) ((fatOffset[0] + currentCluster * fatType.getEntrySize()) % bufferSize);
 
             // if we have a new offset we are forced to read again
             if (lastOffset != offset) {
@@ -336,7 +317,7 @@ public class Fat implements FatIntf {
                 blockDevice.read(offset, buffer);
                 lastOffset = offset;
             }
-            buffer.putInt((int) offsetInBlock, FAT32_EOF_CLUSTER);
+            buffer.putInt((int) offsetInBlock, (int) fatType.getEofMarker());
             buffer.clear();
             blockDevice.write(offset, buffer);
         } else {

@@ -20,7 +20,7 @@ package com.github.mjdev.libaums.fs;
 import android.util.Log;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
-import com.github.mjdev.libaums.fs.fat.FatFileSystem;
+import com.github.mjdev.libaums.fs.fat.Fat16FileSystem;
 import com.github.mjdev.libaums.fs.fat32.Fat32FileSystem;
 import com.github.mjdev.libaums.partition.Partition;
 import com.github.mjdev.libaums.partition.PartitionException;
@@ -38,20 +38,21 @@ import java.io.IOException;
 public class FileSystemFactory {
 
     private static final String TAG = FileSystemFactory.class.getSimpleName();
+
     public static FileSystem createFileSystem(PartitionTableEntry entry,
                                               BlockDeviceDriver blockDevice) throws IOException {
         switch (((Partition) blockDevice).getFatType()) {
             case FAT12:
-                Log.d(TAG,"FAT12 file system");
-                return FatFileSystem.read(blockDevice);
+                Log.d(TAG, "FAT12 file system");
+                return Fat16FileSystem.read(blockDevice, ((Partition) blockDevice).getFatType());
             case FAT16:
-                Log.d(TAG,"FAT16 file system");
-                return FatFileSystem.read(blockDevice);
+                Log.d(TAG, "FAT16 file system");
+                return Fat16FileSystem.read(blockDevice, ((Partition) blockDevice).getFatType());
             case FAT32:
-                Log.d(TAG,"FAT32 file system");
-                return Fat32FileSystem.read(blockDevice);
+                Log.d(TAG, "FAT32 file system");
+                return Fat32FileSystem.read(blockDevice, ((Partition) blockDevice).getFatType());
             default:
-                throw new PartitionException("Unsupported partition",-1);
+                throw new PartitionException("Unsupported partition", -1);
         }
     }
 }

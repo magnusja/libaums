@@ -18,10 +18,11 @@
 package com.github.mjdev.libaums.fs.fat;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
+import com.github.mjdev.libaums.fs.BootSector;
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.UsbFile;
-import com.github.mjdev.libaums.fs.fat32.FAT;
 import com.github.mjdev.libaums.fs.fat32.FatDirectory;
+import com.github.mjdev.libaums.partition.FatType;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -33,11 +34,12 @@ import java.nio.ByteBuffer;
  *
  * @author mjahnen
  */
-public class FatFileSystem implements FileSystem {
+public class Fat16FileSystem implements FileSystem {
 
-    private FatBootSector bootSector;
+    private BootSector bootSector;
     private Fat fat;
     private FatDirectory rootDirectory;
+    private FatType fatType;
 
     /**
      * This method constructs a FAT12/16 file system for the given block device.
@@ -48,11 +50,11 @@ public class FatFileSystem implements FileSystem {
      * @param blockDevice The block device the FAT12/16 file system is located.
      * @throws IOException If reading from the device fails.
      */
-    private FatFileSystem(BlockDeviceDriver blockDevice) throws IOException {
+    private Fat16FileSystem(BlockDeviceDriver blockDevice, FatType fatType) throws IOException {
         ByteBuffer buffer = ByteBuffer.allocate(512);
         blockDevice.read(0, buffer);
-        bootSector = FatBootSector.read(buffer);
-		fat = new Fat(blockDevice, bootSector);
+        bootSector = Fat16BootSector.read(buffer);
+        fat = new Fat(blockDevice, bootSector,fatType);
         rootDirectory = FatDirectory.readRoot(blockDevice, fat, bootSector);
     }
 
@@ -65,8 +67,8 @@ public class FatFileSystem implements FileSystem {
      * @param blockDevice The block device the FAT12/16 file system is located.
      * @throws IOException If reading from the device fails.
      */
-    public static FatFileSystem read(BlockDeviceDriver blockDevice) throws IOException {
-        return new FatFileSystem(blockDevice);
+    public static Fat16FileSystem read(BlockDeviceDriver blockDevice, FatType fatType) throws IOException {
+        return new Fat16FileSystem(blockDevice, fatType);
     }
 
     @Override

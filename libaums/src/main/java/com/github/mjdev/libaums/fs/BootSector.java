@@ -34,6 +34,4 @@ public interface BootSector {
 
     String getVolumeLabel();
 
-    long getDataClusterCount();
-
 }

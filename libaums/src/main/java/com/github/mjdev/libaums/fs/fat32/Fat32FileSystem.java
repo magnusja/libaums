@@ -17,90 +17,86 @@
 
 package com.github.mjdev.libaums.fs.fat32;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.UsbFile;
+import com.github.mjdev.libaums.partition.FatType;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * This class represents the FAT32 file system and is responsible for setting
  * the FAT32 file system up and extracting the volume label and the root
  * directory.
- * 
+ *
  * @author mjahnen
- * 
  */
 public class Fat32FileSystem implements FileSystem {
 
-	private Fat32BootSector bootSector;
-	private FAT fat;
-	private FsInfoStructure fsInfoStructure;
-	private FatDirectory rootDirectory;
+    private Fat32BootSector bootSector;
+    private FAT fat;
+    private FsInfoStructure fsInfoStructure;
+    private FatDirectory rootDirectory;
 
-	/**
-	 * This method constructs a FAT32 file system for the given block device.
-	 * There are no further checks that the block device actually represents a
-	 * valid FAT32 file system. That means it must be ensured that the device
-	 * actually holds a FAT32 file system in advance!
-	 * 
-	 * @param blockDevice
-	 *            The block device the FAT32 file system is located.
-	 * @throws IOException
-	 *             If reading from the device fails.
-	 */
-	private Fat32FileSystem(BlockDeviceDriver blockDevice) throws IOException {
-		ByteBuffer buffer = ByteBuffer.allocate(512);
-		blockDevice.read(0, buffer);
-		bootSector = Fat32BootSector.read(buffer);
-		fsInfoStructure = FsInfoStructure.read(blockDevice, bootSector.getFsInfoStartSector()
-				* bootSector.getBytesPerSector());
-		fat = new FAT(blockDevice, bootSector, fsInfoStructure);
-		rootDirectory = FatDirectory.readRoot(blockDevice, fat, bootSector);
-	}
+    /**
+     * This method constructs a FAT32 file system for the given block device.
+     * There are no further checks that the block device actually represents a
+     * valid FAT32 file system. That means it must be ensured that the device
+     * actually holds a FAT32 file system in advance!
+     *
+     * @param blockDevice The block device the FAT32 file system is located.
+     * @throws IOException If reading from the device fails.
+     */
+    private Fat32FileSystem(BlockDeviceDriver blockDevice, FatType fatType) throws IOException {
+        ByteBuffer buffer = ByteBuffer.allocate(512);
+        blockDevice.read(0, buffer);
+        bootSector = Fat32BootSector.read(buffer);
+        fsInfoStructure = FsInfoStructure.read(blockDevice, bootSector.getFsInfoStartSector()
+                * bootSector.getBytesPerSector());
+        fat = new FAT(blockDevice, bootSector, fsInfoStructure, fatType);
+        rootDirectory = FatDirectory.readRoot(blockDevice, fat, bootSector);
+    }
 
-	/**
-	 * This method constructs a FAT32 file system for the given block device.
-	 * There are no further checks if the block device actually represents a
-	 * valid FAT32 file system. That means it must be ensured that the device
-	 * actually holds a FAT32 file system in advance!
-	 * 
-	 * @param blockDevice
-	 *            The block device the FAT32 file system is located.
-	 * @throws IOException
-	 *             If reading from the device fails.
-	 */
-	public static Fat32FileSystem read(BlockDeviceDriver blockDevice) throws IOException {
-		return new Fat32FileSystem(blockDevice);
-	}
+    /**
+     * This method constructs a FAT32 file system for the given block device.
+     * There are no further checks if the block device actually represents a
+     * valid FAT32 file system. That means it must be ensured that the device
+     * actually holds a FAT32 file system in advance!
+     *
+     * @param blockDevice The block device the FAT32 file system is located.
+     * @throws IOException If reading from the device fails.
+     */
+    public static Fat32FileSystem read(BlockDeviceDriver blockDevice, FatType fatType) throws IOException {
+        return new Fat32FileSystem(blockDevice, fatType);
+    }
 
-	@Override
-	public UsbFile getRootDirectory() {
-		return rootDirectory;
-	}
+    @Override
+    public UsbFile getRootDirectory() {
+        return rootDirectory;
+    }
 
-	@Override
-	public String getVolumeLabel() {
-		String volumeLabel = rootDirectory.getVolumeLabel();
-		if (volumeLabel == null) {
-			volumeLabel = bootSector.getVolumeLabel();
-		}
-		return volumeLabel;
-	}
+    @Override
+    public String getVolumeLabel() {
+        String volumeLabel = rootDirectory.getVolumeLabel();
+        if (volumeLabel == null) {
+            volumeLabel = bootSector.getVolumeLabel();
+        }
+        return volumeLabel;
+    }
 
-	@Override
-	public long getCapacity() {
-		return bootSector.getTotalNumberOfSectors() * bootSector.getBytesPerSector();
-	}
+    @Override
+    public long getCapacity() {
+        return bootSector.getTotalNumberOfSectors() * bootSector.getBytesPerSector();
+    }
 
-	@Override
-	public long getOccupiedSpace() {
-		return getCapacity() - getFreeSpace();
-	}
+    @Override
+    public long getOccupiedSpace() {
+        return getCapacity() - getFreeSpace();
+    }
 
-	@Override
-	public long getFreeSpace() {
-		return fsInfoStructure.getFreeClusterCount() * bootSector.getBytesPerCluster();
-	}
+    @Override
+    public long getFreeSpace() {
+        return fsInfoStructure.getFreeClusterCount() * bootSector.getBytesPerCluster();
+    }
 }

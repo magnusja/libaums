@@ -19,7 +19,9 @@ package com.github.mjdev.libaums.fs.fat;
 
 import com.github.mjdev.libaums.fs.BootSector;
 import com.github.mjdev.libaums.fs.fat32.FatDirectory;
+import com.github.mjdev.libaums.partition.PartitionException;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -31,16 +33,16 @@ import java.nio.ByteOrder;
  *
  * @author mjahnen
  */
-public class FatBootSector implements BootSector {
+public class Fat16BootSector implements BootSector {
     private static final int BYTES_PER_SECTOR_OFF = 11;
     private static final int SECTORS_PER_CLUSTER_OFF = 13;
     private static final int RESERVED_COUNT_OFF = 14;
     private static final int FAT_COUNT_OFF = 16;
-    private static final int TOTAL_SECTORS_OFF = 32;
-    private static final int SECTORS_PER_FAT_OFF = 36;
+    private static final int TOTAL_SECTORS_16_OFFSET = 19;
+    private static final int SECTORS_PER_FAT_OFF = 22;
     private static final int FLAGS_OFF = 40;
-    private static final int ROOT_DIR_CLUSTER_OFF = 44;
-    private static final int VOLUME_LABEL_OFF = 48;
+    private static final int VOLUME_LABEL_OFF = 43;
+    private static final int ROOT_DIR_CLUSTER_OFF = 17;
 
     private short bytesPerSector;
     private short sectorsPerCluster;
@@ -54,7 +56,7 @@ public class FatBootSector implements BootSector {
     private String volumeLabel;
     private ByteBuffer byteBuffer;
 
-    private FatBootSector() {
+    private Fat16BootSector() {
 
     }
 
@@ -66,17 +68,17 @@ public class FatBootSector implements BootSector {
      * @param buffer The data where the boot sector is located.
      * @return A newly created boot sector.
      */
-    public static FatBootSector read(ByteBuffer buffer) {
-        FatBootSector result = new FatBootSector();
+    public static Fat16BootSector read(ByteBuffer buffer) {
+        Fat16BootSector result = new Fat16BootSector();
         result.byteBuffer = buffer;
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         result.bytesPerSector = (short) result.get16(BYTES_PER_SECTOR_OFF);
-        result.sectorsPerCluster = (short) (buffer.get(SECTORS_PER_CLUSTER_OFF) & 0xff);
+        result.sectorsPerCluster = buffer.get(SECTORS_PER_CLUSTER_OFF);
         result.reservedSectors = (short) result.get16(RESERVED_COUNT_OFF);
         result.fatCount = buffer.get(FAT_COUNT_OFF);
-        result.totalNumberOfSectors = result.get32(TOTAL_SECTORS_OFF);
-        result.sectorsPerFat = result.get32(SECTORS_PER_FAT_OFF);
-        result.rootDirStartCluster = result.get32(ROOT_DIR_CLUSTER_OFF);
+        result.totalNumberOfSectors = result.get16(TOTAL_SECTORS_16_OFFSET);
+        result.sectorsPerFat = result.get16(SECTORS_PER_FAT_OFF);
+        result.rootDirStartCluster = result.get16(ROOT_DIR_CLUSTER_OFF);
         short flag = (short) result.get16(FLAGS_OFF);
         result.fatMirrored = ((byte) flag & 0x80) == 0;
         result.validFat = (byte) ((byte) flag & 0x7);
@@ -90,7 +92,12 @@ public class FatBootSector implements BootSector {
         }
 
         result.volumeLabel = builder.toString();
-
+        if (result.sectorsPerCluster <= 0) try {
+            throw new IOException(
+                    "suspicious sectors per cluster count " + result.sectorsPerCluster);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return result;
     }
 
@@ -163,6 +170,11 @@ public class FatBootSector implements BootSector {
 
     @Override
     public short getFsInfoStartSector() {
+        try {
+            throw new PartitionException("The FS_info is only support on fat32", -1);
+        } catch (PartitionException e) {
+            e.printStackTrace();
+        }
         return 0;
     }
 
@@ -214,7 +226,36 @@ public class FatBootSector implements BootSector {
      * @see #getValidFat()
      */
     public long getFatOffset(int fatNumber) {
-        return getBytesPerSector() * (getReservedSectors() + fatNumber * getSectorsPerFat());
+        long sectSize = this.getBytesPerSector();
+        long sectsPerFat = this.getSectorsPerFat();
+        long resSects = this.getReservedSectors();
+
+        long offset = resSects * sectSize;
+        long fatSize = sectsPerFat * sectSize;
+
+        offset += fatNumber * fatSize;
+
+        return offset;
+    }
+
+    public final long getRootDirOffset() {
+        long sectSize = this.getBytesPerSector();
+        long sectsPerFat = this.getSectorsPerFat();
+        int fats = this.getFatCount();
+
+        long offset = getFatOffset(0);
+
+        offset += fats * sectsPerFat * sectSize;
+
+        return offset;
+    }
+
+    public final long getFilesOffset() {
+        long offset = getRootDirOffset();
+
+        offset += this.getRootDirStartCluster() * 32l;
+
+        return offset;
     }
 
     /**
@@ -225,7 +266,12 @@ public class FatBootSector implements BootSector {
      * @return Offset in bytes.
      */
     public long getDataAreaOffset() {
-        return getFatOffset(0) + getFatCount() * getSectorsPerFat() * getBytesPerSector();
+        long sectSize = this.getBytesPerSector();
+        long sectsPerFat = this.getSectorsPerFat();
+        int fats = this.getFatCount();
+        long offset = getFatOffset(0);
+        offset += fats * sectsPerFat * sectSize;
+        return offset;
     }
 
     /**
@@ -237,21 +283,6 @@ public class FatBootSector implements BootSector {
      */
     public String getVolumeLabel() {
         return volumeLabel;
-    }
-
-    @Override
-    public long getDataClusterCount() {
-        return getDataSize() / getBytesPerCluster();
-    }
-
-    /**
-     * Returns the size of the data-containing portion of the file system.
-     *
-     * @return the number of bytes usable for storing user data
-     */
-    private long getDataSize() {
-        return /*(getSectorCount() * getBytesPerSector()) -
-                this.getFilesOffset()*/0;
     }
 
 
