@@ -35,9 +35,9 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
  * @author mjahnen
  * 
  */
-/* package */class FsInfoStructure {
+public class FsInfoStructure {
 
-	/* package */static int INVALID_VALUE = 0xFFFFFFFF;
+	public static int INVALID_VALUE = 0xFFFFFFFF;
 
 	private static int LEAD_SIGNATURE_OFF = 0;
 	private static int STRUCT_SIGNATURE_OFF = 484;
@@ -91,7 +91,7 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 	 * @throws IOException
 	 *             If reading fails.
 	 */
-	/* package */static FsInfoStructure read(BlockDeviceDriver blockDevice, int offset)
+	public static FsInfoStructure read(BlockDeviceDriver blockDevice, int offset)
 			throws IOException {
 		return new FsInfoStructure(blockDevice, offset);
 	}
@@ -106,7 +106,7 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 	 * @see #getFreeClusterCount()
 	 * @see #decreaseClusterCount(long)
 	 */
-	/* package */void setFreeClusterCount(long value) {
+	public void setFreeClusterCount(long value) {
 		buffer.putInt(FREE_COUNT_OFF, (int) value);
 	}
 
@@ -115,7 +115,7 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 	 * @return The free cluster count or {@link #INVALID_VALUE} if this hint is
 	 *         not available.
 	 */
-	/* package */long getFreeClusterCount() {
+	public long getFreeClusterCount() {
 		return buffer.getInt(FREE_COUNT_OFF);
 	}
 
@@ -128,7 +128,7 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 	 *            The new last allocated cluster
 	 * @see #getLastAllocatedClusterHint()
 	 */
-	/* package */void setLastAllocatedClusterHint(long value) {
+	public void setLastAllocatedClusterHint(long value) {
 		buffer.putInt(NEXT_FREE_OFFSET, (int) value);
 	}
 
@@ -137,7 +137,7 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 	 * @return The last allocated cluster or {@link #INVALID_VALUE} if this hint
 	 *         is not available.
 	 */
-	/* package */long getLastAllocatedClusterHint() {
+	public long getLastAllocatedClusterHint() {
 		return buffer.getInt(NEXT_FREE_OFFSET);
 	}
 
@@ -152,7 +152,7 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 	 * @see #setFreeClusterCount(long)
 	 * @see #getFreeClusterCount()
 	 */
-	/* package */void decreaseClusterCount(long numberOfClusters) {
+	public void decreaseClusterCount(long numberOfClusters) {
 		long freeClusterCount = getFreeClusterCount();
 		if (freeClusterCount != FsInfoStructure.INVALID_VALUE) {
 			setFreeClusterCount(freeClusterCount - numberOfClusters);
@@ -167,7 +167,7 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 	 * @throws IOException
 	 *             If writing to device fails.
 	 */
-	/* package */void write() throws IOException {
+	public void write() throws IOException {
 		Log.d(TAG, "writing to device");
 		blockDevice.write(offset, buffer);
 		buffer.clear();

@@ -45,7 +45,7 @@ import static com.github.mjdev.libaums.partition.FatType.FAT32;
 public class Partition implements BlockDeviceDriver {
 
     private static final String TAG = Partition.class.getSimpleName();
-    private static FatType fatType;
+    private FatType fatType;
 
     // private PartitionTableEntry partitionTableEntry;
     private BlockDeviceDriver blockDevice;
@@ -70,19 +70,18 @@ public class Partition implements BlockDeviceDriver {
      */
     public static Partition createPartition(PartitionTableEntry entry, BlockDeviceDriver blockDevice)
             throws IOException {
-        Partition partition = null;
+        Partition partition = new Partition();
 
         // we currently only support fat32
         int partitionType = entry.getPartitionType();
         if (partitionType == 0x01 || partitionType == 0x10) {
-            fatType = FAT12;
-            throw new PartitionException("FAT12 not support", -1);
+            partition.fatType = FAT12;
+            //throw new PartitionException("FAT12 not support", -1);
         } else if (partitionType == 0x04 || partitionType == 0x06 || partitionType == 0x0e) {
-            fatType = FAT16;
-            throw new PartitionException("FAT16 not support", -1);
+            partition.fatType = FAT16;
+            //throw new PartitionException("FAT16 not support", -1);
         } else if (partitionType == 0x0b || partitionType == 0x0c) {
-            fatType = FAT32;
-            partition = new Partition();
+            partition.fatType = FAT32;
             // partition.partitionTableEntry = entry;
             partition.logicalBlockAddress = entry.getLogicalBlockAddress();
             partition.blockDevice = blockDevice;
@@ -95,7 +94,7 @@ public class Partition implements BlockDeviceDriver {
         return partition;
     }
 
-    public static FatType getFatType() {
+    public FatType getFatType() {
         return fatType;
     }
 

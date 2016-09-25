@@ -35,7 +35,7 @@ import java.util.Arrays;
  * @author mjahnen
  * 
  */
-/* package */class ShortName {
+public class ShortName {
 
 	private static int SIZE = 11;
 
@@ -50,7 +50,7 @@ import java.util.Arrays;
 	 * @param extension
 	 *            The extension, must not be null, but can be empty.
 	 */
-	/* package */ShortName(String name, String extension) {
+	public ShortName(String name, String extension) {
 		byte[] tmp = new byte[SIZE];
 		// fill with spaces
 		Arrays.fill(tmp, (byte) 0x20);
@@ -88,7 +88,7 @@ import java.util.Arrays;
 	 * @param data
 	 *            The 32 bytes from the entry.
 	 */
-	/* package */static ShortName parse(ByteBuffer data) {
+	public static ShortName parse(ByteBuffer data) {
 		byte[] tmp = new byte[SIZE];
 		data.get(tmp);
 		return new ShortName(ByteBuffer.wrap(tmp));
@@ -99,7 +99,7 @@ import java.util.Arrays;
 	 * 
 	 * @return The name.
 	 */
-	/* package */String getString() {
+	public String getString() {
 		final char[] name = new char[8];
 		final char[] extension = new char[3];
 
@@ -131,7 +131,7 @@ import java.util.Arrays;
 	 * @param buffer
 	 *            The buffer where the data shall be stored.
 	 */
-	/* package */void serialize(ByteBuffer buffer) {
+	public void serialize(ByteBuffer buffer) {
 		buffer.put(data.array(), 0, SIZE);
 	}
 
@@ -143,7 +143,7 @@ import java.util.Arrays;
 	 * @see FatLfnDirectoryEntry
 	 * @see FatLfnDirectoryEntry#serialize(ByteBuffer)
 	 */
-	/* package */byte calculateCheckSum() {
+	public byte calculateCheckSum() {
 		int sum = 0;
 
 		for (int i = 0; i < SIZE; i++) {

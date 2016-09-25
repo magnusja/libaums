@@ -17,201 +17,191 @@
 
 package com.github.mjdev.libaums.fs.fat32;
 
+import com.github.mjdev.libaums.driver.BlockDeviceDriver;
+import com.github.mjdev.libaums.fs.BootSector;
+import com.github.mjdev.libaums.fs.FatIntf;
+import com.github.mjdev.libaums.fs.UsbFile;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import com.github.mjdev.libaums.driver.BlockDeviceDriver;
-import com.github.mjdev.libaums.fs.UsbFile;
-
 public class FatFile implements UsbFile {
 
-	private BlockDeviceDriver blockDevice;
-	private FAT fat;
-	private Fat32BootSector bootSector;
+    private BlockDeviceDriver blockDevice;
+    private FatIntf fat;
+    private BootSector bootSector;
 
-	private FatDirectory parent;
-	private ClusterChain chain;
-	private FatLfnDirectoryEntry entry;
+    private FatDirectory parent;
+    private ClusterChain chain;
+    private FatLfnDirectoryEntry entry;
 
-	/**
-	 * Constructs a new file with the given information.
-	 * 
-	 * @param blockDevice
-	 *            The device where the file system is located.
-	 * @param fat
-	 *            The FAT used to follow cluster chains.
-	 * @param bootSector
-	 *            The boot sector of the file system.
-	 * @param entry
-	 *            The corresponding entry in a FAT directory.
-	 * @param parent
-	 *            The parent directory of the newly constructed file.
-	 */
-	private FatFile(BlockDeviceDriver blockDevice, FAT fat, Fat32BootSector bootSector,
-			FatLfnDirectoryEntry entry, FatDirectory parent) {
-		this.blockDevice = blockDevice;
-		this.fat = fat;
-		this.bootSector = bootSector;
-		this.entry = entry;
-		this.parent = parent;
-	}
+    /**
+     * Constructs a new file with the given information.
+     *
+     * @param blockDevice The device where the file system is located.
+     * @param fat         The FAT used to follow cluster chains.
+     * @param bootSector  The boot sector of the file system.
+     * @param entry       The corresponding entry in a FAT directory.
+     * @param parent      The parent directory of the newly constructed file.
+     */
+    private FatFile(BlockDeviceDriver blockDevice, FatIntf fat, BootSector bootSector,
+                    FatLfnDirectoryEntry entry, FatDirectory parent) {
+        this.blockDevice = blockDevice;
+        this.fat = fat;
+        this.bootSector = bootSector;
+        this.entry = entry;
+        this.parent = parent;
+    }
 
-	/**
-	 * Creates a new file with the given information.
-	 * 
-	 * @param entry
-	 *            The corresponding entry in a FAT directory.
-	 * @param blockDevice
-	 *            The device where the file system is located.
-	 * @param fat
-	 *            The FAT used to follow cluster chains.
-	 * @param bootSector
-	 *            The boot sector of the file system.
-	 * @param parent
-	 *            The parent directory of the newly created file.
-	 * @return The newly constructed file.
-	 * @throws IOException
-	 *             If reading from device fails.
-	 */
-	public static FatFile create(FatLfnDirectoryEntry entry, BlockDeviceDriver blockDevice,
-			FAT fat, Fat32BootSector bootSector, FatDirectory parent) throws IOException {
-		return new FatFile(blockDevice, fat, bootSector, entry, parent);
-	}
+    /**
+     * Creates a new file with the given information.
+     *
+     * @param entry       The corresponding entry in a FAT directory.
+     * @param blockDevice The device where the file system is located.
+     * @param fat         The FAT used to follow cluster chains.
+     * @param bootSector  The boot sector of the file system.
+     * @param parent      The parent directory of the newly created file.
+     * @return The newly constructed file.
+     * @throws IOException If reading from device fails.
+     */
+    public static FatFile create(FatLfnDirectoryEntry entry, BlockDeviceDriver blockDevice,
+                                 FatIntf fat, BootSector bootSector, FatDirectory parent) throws IOException {
+        return new FatFile(blockDevice, fat, bootSector, entry, parent);
+    }
 
-	/**
-	 * Initializes the cluster chain to access the contents of the file.
-	 * 
-	 * @throws IOException
-	 *             If reading from FAT fails.
-	 */
-	private void initChain() throws IOException {
-		if (chain == null) {
-			chain = new ClusterChain(entry.getStartCluster(), blockDevice, fat, bootSector);
-		}
-	}
+    /**
+     * Initializes the cluster chain to access the contents of the file.
+     *
+     * @throws IOException If reading from FAT fails.
+     */
+    private void initChain() throws IOException {
+        if (chain == null) {
+            chain = new ClusterChain(entry.getStartCluster(), blockDevice, fat, bootSector);
+        }
+    }
 
-	@Override
-	public UsbFile search(String path) {
-		throw new UnsupportedOperationException("This is a file!");
-	}
+    @Override
+    public UsbFile search(String path) {
+        throw new UnsupportedOperationException("This is a file!");
+    }
 
-	@Override
-	public boolean isDirectory() {
-		return false;
-	}
+    @Override
+    public boolean isDirectory() {
+        return false;
+    }
 
-	@Override
-	public String getName() {
-		return entry.getName();
-	}
+    @Override
+    public String getName() {
+        return entry.getName();
+    }
 
-	@Override
-	public void setName(String newName) throws IOException {
-		parent.renameEntry(entry, newName);
-	}
+    @Override
+    public void setName(String newName) throws IOException {
+        parent.renameEntry(entry, newName);
+    }
 
-	@Override
-	public long createdAt() {
-		return entry.getActualEntry().getCreatedDateTime();
-	}
+    @Override
+    public long createdAt() {
+        return entry.getActualEntry().getCreatedDateTime();
+    }
 
-	@Override
-	public long lastModified() {
-		return entry.getActualEntry().getLastModifiedDateTime();
-	}
+    @Override
+    public long lastModified() {
+        return entry.getActualEntry().getLastModifiedDateTime();
+    }
 
-	@Override
-	public long lastAccessed() {
-		return entry.getActualEntry().getLastAccessedDateTime();
-	}
+    @Override
+    public long lastAccessed() {
+        return entry.getActualEntry().getLastAccessedDateTime();
+    }
 
-	@Override
-	public UsbFile getParent() {
-		return parent;
-	}
+    @Override
+    public UsbFile getParent() {
+        return parent;
+    }
 
-	@Override
-	public String[] list() {
-		throw new UnsupportedOperationException("This is a file!");
-	}
+    @Override
+    public String[] list() {
+        throw new UnsupportedOperationException("This is a file!");
+    }
 
-	@Override
-	public UsbFile[] listFiles() throws IOException {
-		throw new UnsupportedOperationException("This is a file!");
-	}
+    @Override
+    public UsbFile[] listFiles() throws IOException {
+        throw new UnsupportedOperationException("This is a file!");
+    }
 
-	@Override
-	public long getLength() {
-		return entry.getFileSize();
-	}
+    @Override
+    public long getLength() {
+        return entry.getFileSize();
+    }
 
-	@Override
-	public void setLength(long newLength) throws IOException {
-        	initChain();
-		chain.setLength(newLength);
-		entry.setFileSize(newLength);
-	}
+    @Override
+    public void setLength(long newLength) throws IOException {
+        initChain();
+        chain.setLength(newLength);
+        entry.setFileSize(newLength);
+    }
 
-	@Override
-	public void read(long offset, ByteBuffer destination) throws IOException {
-		initChain();
-		entry.setLastAccessedTimeToNow();
-		chain.read(offset, destination);
-	}
+    @Override
+    public void read(long offset, ByteBuffer destination) throws IOException {
+        initChain();
+        entry.setLastAccessedTimeToNow();
+        chain.read(offset, destination);
+    }
 
-	@Override
-	public void write(long offset, ByteBuffer source) throws IOException {
-		initChain();
-		long length = offset + source.remaining();
-		if (length > getLength())
-			setLength(length);
-		entry.setLastModifiedTimeToNow();
-		chain.write(offset, source);
-	}
+    @Override
+    public void write(long offset, ByteBuffer source) throws IOException {
+        initChain();
+        long length = offset + source.remaining();
+        if (length > getLength())
+            setLength(length);
+        entry.setLastModifiedTimeToNow();
+        chain.write(offset, source);
+    }
 
-	@Override
-	public void flush() throws IOException {
-		// we only have to update the parent because we are always writing
-		// everything
-		// immediately to the device
-		// the parent directory is responsible for updating the
-		// FatDirectoryEntry which
-		// contains things like the file size and the date time fields
-		parent.write();
-	}
+    @Override
+    public void flush() throws IOException {
+        // we only have to update the parent because we are always writing
+        // everything
+        // immediately to the device
+        // the parent directory is responsible for updating the
+        // FatDirectoryEntry which
+        // contains things like the file size and the date time fields
+        parent.write();
+    }
 
-	@Override
-	public void close() throws IOException {
-		flush();
-	}
+    @Override
+    public void close() throws IOException {
+        flush();
+    }
 
-	@Override
-	public UsbFile createDirectory(String name) throws IOException {
-		throw new UnsupportedOperationException("This is a file!");
-	}
+    @Override
+    public UsbFile createDirectory(String name) throws IOException {
+        throw new UnsupportedOperationException("This is a file!");
+    }
 
-	@Override
-	public UsbFile createFile(String name) throws IOException {
-		throw new UnsupportedOperationException("This is a file!");
-	}
+    @Override
+    public UsbFile createFile(String name) throws IOException {
+        throw new UnsupportedOperationException("This is a file!");
+    }
 
-	@Override
-	public void moveTo(UsbFile destination) throws IOException {
-		parent.move(entry, destination);
-		parent = (FatDirectory) destination;
-	}
+    @Override
+    public void moveTo(UsbFile destination) throws IOException {
+        parent.move(entry, destination);
+        parent = (FatDirectory) destination;
+    }
 
-	@Override
-	public void delete() throws IOException {
-		initChain();
-		parent.removeEntry(entry);
-		parent.write();
-		chain.setLength(0);
-	}
+    @Override
+    public void delete() throws IOException {
+        initChain();
+        parent.removeEntry(entry);
+        parent.write();
+        chain.setLength(0);
+    }
 
-	@Override
-	public boolean isRoot() {
-		return false;
-	}
+    @Override
+    public boolean isRoot() {
+        return false;
+    }
 
 }

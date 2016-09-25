@@ -32,7 +32,7 @@ import java.util.List;
  * @author mjahnen
  * 
  */
-/* package */class FatLfnDirectoryEntry {
+public class FatLfnDirectoryEntry {
 
 	/**
 	 * The actual entry which holds information like the start cluster and the
@@ -71,7 +71,7 @@ import java.util.List;
 	 *            The generated short name.
 	 * @return The newly created entry.
 	 */
-	/* package */static FatLfnDirectoryEntry createNew(String name, ShortName shortName) {
+	public static FatLfnDirectoryEntry createNew(String name, ShortName shortName) {
 		FatLfnDirectoryEntry result = new FatLfnDirectoryEntry();
 
 		result.lfnName = name;
@@ -91,7 +91,7 @@ import java.util.List;
 	 *            order.
 	 * @return The newly created entry.
 	 */
-	/* package */static FatLfnDirectoryEntry read(FatDirectoryEntry actualEntry,
+	public static FatLfnDirectoryEntry read(FatDirectoryEntry actualEntry,
 			List<FatDirectoryEntry> lfnParts) {
 		StringBuilder builder = new StringBuilder(13 * lfnParts.size());
 
@@ -114,7 +114,7 @@ import java.util.List;
 	 * @param buffer
 	 *            The buffer were the serialized data shall be stored.
 	 */
-	/* package */void serialize(ByteBuffer buffer) {
+	public void serialize(ByteBuffer buffer) {
 		if (lfnName != null) {
 			byte checksum = actualEntry.getShortName().calculateCheckSum();
 			int entrySize = getEntryCount();
@@ -143,7 +143,7 @@ import java.util.List;
 	 * 
 	 * @return The amount of entries.
 	 */
-	/* package */int getEntryCount() {
+	public int getEntryCount() {
 		// we always have the actual entry
 		int result = 1;
 
@@ -164,7 +164,7 @@ import java.util.List;
 	 * 
 	 * @return The name of the entry
 	 */
-	/* package */String getName() {
+	public String getName() {
 		if (lfnName != null)
 			return lfnName;
 		return actualEntry.getShortName().getString();
@@ -178,7 +178,7 @@ import java.util.List;
 	 * @param shortName
 	 *            The new short name.
 	 */
-	/* package */void setName(String newName, ShortName shortName) {
+	public void setName(String newName, ShortName shortName) {
 		lfnName = newName;
 		actualEntry.setShortName(shortName);
 	}
@@ -190,7 +190,7 @@ import java.util.List;
 	 * @see #isDirectory()
 	 * @see #setFileSize(long)
 	 */
-	/* package */long getFileSize() {
+	public long getFileSize() {
 		return actualEntry.getFileSize();
 	}
 
@@ -202,7 +202,7 @@ import java.util.List;
 	 * @see #isDirectory()
 	 * @see #getFileSize()
 	 */
-	/* package */void setFileSize(long newSize) {
+	public void setFileSize(long newSize) {
 		actualEntry.setFileSize(newSize);
 	}
 
@@ -212,7 +212,7 @@ import java.util.List;
 	 * @return The start cluster.
 	 * @see #getStartCluster()
 	 */
-	/* package */long getStartCluster() {
+	public long getStartCluster() {
 		return actualEntry.getStartCluster();
 	}
 
@@ -223,21 +223,21 @@ import java.util.List;
 	 *            The new start cluster.
 	 * @see #getStartCluster()
 	 */
-	/* package */void setStartCluster(long newStartCluster) {
+	public void setStartCluster(long newStartCluster) {
 		actualEntry.setStartCluster(newStartCluster);
 	}
 
 	/**
 	 * Sets the last accessed time of the actual entry to now.
 	 */
-	/* package */void setLastAccessedTimeToNow() {
+	public void setLastAccessedTimeToNow() {
 		actualEntry.setLastAccessedDateTime(System.currentTimeMillis());
 	}
 
 	/**
 	 * Sets the last modified time of the actual entry to now.
 	 */
-	/* package */void setLastModifiedTimeToNow() {
+	public void setLastModifiedTimeToNow() {
 		actualEntry.setLastModifiedDateTime(System.currentTimeMillis());
 	}
 
@@ -245,14 +245,14 @@ import java.util.List;
 	 * 
 	 * @return True if this entry denotes a directory.
 	 */
-	/* package */boolean isDirectory() {
+	public boolean isDirectory() {
 		return actualEntry.isDirectory();
 	}
 
 	/**
 	 * Sets this entry to indicate a directory.
 	 */
-	/* package */void setDirectory() {
+	public void setDirectory() {
 		actualEntry.setDirectory();
 	}
 
@@ -262,7 +262,7 @@ import java.util.List;
 	 * 
 	 * @return The actual entry.
 	 */
-	/* package */FatDirectoryEntry getActualEntry() {
+	public FatDirectoryEntry getActualEntry() {
 		return actualEntry;
 	}
 
@@ -275,7 +275,7 @@ import java.util.List;
 	 * @param to
 	 *            The destination.
 	 */
-	/* package */static void copyDateTime(FatLfnDirectoryEntry from, FatLfnDirectoryEntry to) {
+	public static void copyDateTime(FatLfnDirectoryEntry from, FatLfnDirectoryEntry to) {
 		FatDirectoryEntry actualFrom = from.getActualEntry();
 		FatDirectoryEntry actualTo = from.getActualEntry();
 		actualTo.setCreatedDateTime(actualFrom.getCreatedDateTime());

@@ -28,7 +28,7 @@ import java.util.Locale;
  * @see FatLfnDirectoryEntry
  * @see FatDirectoryEntry
  */
-/* package */class ShortNameGenerator {
+public class ShortNameGenerator {
 
 	/**
 	 * See fatgen103.pdf from Microsoft for allowed characters.
@@ -99,7 +99,7 @@ import java.util.Locale;
 	 *            The short names already existing in the directory.
 	 * @return The generated short name.
 	 */
-	/* package */static ShortName generateShortName(String lfnName,
+	public static ShortName generateShortName(String lfnName,
 			Collection<ShortName> existingShortNames) {
 		lfnName = lfnName.toUpperCase(Locale.ROOT).trim();
 

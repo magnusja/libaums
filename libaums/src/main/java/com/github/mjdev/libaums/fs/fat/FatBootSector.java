@@ -15,9 +15,10 @@
  * 
  */
 
-package com.github.mjdev.libaums.fs.fat32;
+package com.github.mjdev.libaums.fs.fat;
 
 import com.github.mjdev.libaums.fs.BootSector;
+import com.github.mjdev.libaums.fs.fat32.FatDirectory;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -30,7 +31,7 @@ import java.nio.ByteOrder;
  *
  * @author mjahnen
  */
-public class Fat32BootSector implements BootSector {
+public class FatBootSector implements BootSector {
     private static final int BYTES_PER_SECTOR_OFF = 11;
     private static final int SECTORS_PER_CLUSTER_OFF = 13;
     private static final int RESERVED_COUNT_OFF = 14;
@@ -39,7 +40,6 @@ public class Fat32BootSector implements BootSector {
     private static final int SECTORS_PER_FAT_OFF = 36;
     private static final int FLAGS_OFF = 40;
     private static final int ROOT_DIR_CLUSTER_OFF = 44;
-    private static final int FS_INFO_SECTOR_OFF = 48;
     private static final int VOLUME_LABEL_OFF = 48;
 
     private short bytesPerSector;
@@ -49,39 +49,39 @@ public class Fat32BootSector implements BootSector {
     private long totalNumberOfSectors;
     private long sectorsPerFat;
     private long rootDirStartCluster;
-    private short fsInfoStartSector;
     private boolean fatMirrored;
     private byte validFat;
     private String volumeLabel;
+    private ByteBuffer byteBuffer;
 
-    private Fat32BootSector() {
+    private FatBootSector() {
 
     }
 
+
     /**
-     * Reads a FAT32 boot sector from the given buffer. The buffer has to be 512
+     * Reads a FAT12 boot sector from the given byteBuffer. The byteBuffer has to be 512
      * (the size of a boot sector) bytes.
      *
      * @param buffer The data where the boot sector is located.
      * @return A newly created boot sector.
      */
-    public static Fat32BootSector read(ByteBuffer buffer) {
-        Fat32BootSector result = new Fat32BootSector();
+    public static FatBootSector read(ByteBuffer buffer) {
+        FatBootSector result = new FatBootSector();
+        result.byteBuffer = buffer;
         buffer.order(ByteOrder.LITTLE_ENDIAN);
-        result.bytesPerSector = buffer.getShort(BYTES_PER_SECTOR_OFF);
+        result.bytesPerSector = (short) result.get16(BYTES_PER_SECTOR_OFF);
         result.sectorsPerCluster = (short) (buffer.get(SECTORS_PER_CLUSTER_OFF) & 0xff);
-        result.reservedSectors = buffer.getShort(RESERVED_COUNT_OFF);
+        result.reservedSectors = (short) result.get16(RESERVED_COUNT_OFF);
         result.fatCount = buffer.get(FAT_COUNT_OFF);
-        result.totalNumberOfSectors = buffer.getInt(TOTAL_SECTORS_OFF) & 0xffffffffl;
-        result.sectorsPerFat = buffer.getInt(SECTORS_PER_FAT_OFF) & 0xffffffffl;
-        result.rootDirStartCluster = buffer.getInt(ROOT_DIR_CLUSTER_OFF) & 0xffffffffl;
-        result.fsInfoStartSector = buffer.getShort(FS_INFO_SECTOR_OFF);
-        short flag = buffer.getShort(FLAGS_OFF);
+        result.totalNumberOfSectors = result.get32(TOTAL_SECTORS_OFF);
+        result.sectorsPerFat = result.get32(SECTORS_PER_FAT_OFF);
+        result.rootDirStartCluster = result.get32(ROOT_DIR_CLUSTER_OFF);
+        short flag = (short) result.get16(FLAGS_OFF);
         result.fatMirrored = ((byte) flag & 0x80) == 0;
         result.validFat = (byte) ((byte) flag & 0x7);
 
         StringBuilder builder = new StringBuilder();
-
         for (int i = 0; i < 11; i++) {
             byte b = buffer.get(VOLUME_LABEL_OFF + i);
             if (b == 0)
@@ -94,13 +94,11 @@ public class Fat32BootSector implements BootSector {
         return result;
     }
 
-
     /**
      * Returns the number of bytes in one single sector of a FAT32 file system.
      *
      * @return Number of bytes.
      */
-    @Override
     public short getBytesPerSector() {
         return bytesPerSector;
     }
@@ -111,7 +109,6 @@ public class Fat32BootSector implements BootSector {
      *
      * @return Number of bytes.
      */
-    @Override
     public short getSectorsPerCluster() {
         return sectorsPerCluster;
     }
@@ -122,7 +119,6 @@ public class Fat32BootSector implements BootSector {
      *
      * @return Number of sectors.
      */
-    @Override
     public short getReservedSectors() {
         return reservedSectors;
     }
@@ -133,7 +129,6 @@ public class Fat32BootSector implements BootSector {
      *
      * @return Number of FATs.
      */
-    @Override
     public byte getFatCount() {
         return fatCount;
     }
@@ -143,7 +138,6 @@ public class Fat32BootSector implements BootSector {
      *
      * @return Total number of sectors.
      */
-    @Override
     public long getTotalNumberOfSectors() {
         return totalNumberOfSectors;
     }
@@ -154,7 +148,6 @@ public class Fat32BootSector implements BootSector {
      *
      * @return Number of sectors in one FAT.
      */
-    @Override
     public long getSectorsPerFat() {
         return sectorsPerFat;
     }
@@ -164,9 +157,13 @@ public class Fat32BootSector implements BootSector {
      *
      * @return Root directory start cluster.
      */
-    @Override
     public long getRootDirStartCluster() {
         return rootDirStartCluster;
+    }
+
+    @Override
+    public short getFsInfoStartSector() {
+        return 0;
     }
 
     /**
@@ -174,10 +171,6 @@ public class Fat32BootSector implements BootSector {
      *
      * @return FSInfo Structure start sector.
      */
-    @Override
-    public short getFsInfoStartSector() {
-        return fsInfoStartSector;
-    }
 
     /**
      * Returns if the different FATs in the file system are mirrored, ie. all of
@@ -187,7 +180,6 @@ public class Fat32BootSector implements BootSector {
      * @see #getValidFat()
      * @see #getFatCount()
      */
-    @Override
     public boolean isFatMirrored() {
         return fatMirrored;
     }
@@ -199,7 +191,6 @@ public class Fat32BootSector implements BootSector {
      * @see #isFatMirrored()
      * @see #getFatCount()
      */
-    @Override
     public byte getValidFat() {
         return validFat;
     }
@@ -209,7 +200,6 @@ public class Fat32BootSector implements BootSector {
      *
      * @return Amount of bytes.
      */
-    @Override
     public int getBytesPerCluster() {
         return sectorsPerCluster * bytesPerSector;
     }
@@ -223,7 +213,6 @@ public class Fat32BootSector implements BootSector {
      * @see #isFatMirrored()
      * @see #getValidFat()
      */
-    @Override
     public long getFatOffset(int fatNumber) {
         return getBytesPerSector() * (getReservedSectors() + fatNumber * getSectorsPerFat());
     }
@@ -235,7 +224,6 @@ public class Fat32BootSector implements BootSector {
      *
      * @return Offset in bytes.
      */
-    @Override
     public long getDataAreaOffset() {
         return getFatOffset(0) + getFatCount() * getSectorsPerFat() * getBytesPerSector();
     }
@@ -247,13 +235,52 @@ public class Fat32BootSector implements BootSector {
      *
      * @return The volume label.
      */
-    @Override
     public String getVolumeLabel() {
         return volumeLabel;
     }
 
     @Override
     public long getDataClusterCount() {
-        return 0;
+        return getDataSize() / getBytesPerCluster();
+    }
+
+    /**
+     * Returns the size of the data-containing portion of the file system.
+     *
+     * @return the number of bytes usable for storing user data
+     */
+    private long getDataSize() {
+        return /*(getSectorCount() * getBytesPerSector()) -
+                this.getFilesOffset()*/0;
+    }
+
+
+    protected int get16(int offset) {
+        return byteBuffer.getShort(offset) & 0xffff;
+    }
+
+    protected long get32(int offset) {
+        return byteBuffer.getInt(offset);
+    }
+
+    protected int get8(int offset) {
+        return byteBuffer.get(offset) & 0xff;
+    }
+
+    protected void set16(int offset, int value) {
+        byteBuffer.putShort(offset, (short) (value & 0xffff));
+    }
+
+    protected void set32(int offset, long value) {
+        byteBuffer.putInt(offset, (int) (value & 0xffffffff));
+    }
+
+    protected void set8(int offset, int value) {
+        if ((value & 0xff) != value) {
+            throw new IllegalArgumentException(
+                    value + " too big to be stored in a single octet");
+        }
+
+        byteBuffer.put(offset, (byte) (value & 0xff));
     }
 }

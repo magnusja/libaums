@@ -20,6 +20,7 @@ package com.github.mjdev.libaums.fs;
 import android.util.Log;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
+import com.github.mjdev.libaums.fs.fat.FatFileSystem;
 import com.github.mjdev.libaums.fs.fat32.Fat32FileSystem;
 import com.github.mjdev.libaums.partition.Partition;
 import com.github.mjdev.libaums.partition.PartitionException;
@@ -42,10 +43,10 @@ public class FileSystemFactory {
         switch (((Partition) blockDevice).getFatType()) {
             case FAT12:
                 Log.d(TAG,"FAT12 file system");
-                return null;
+                return FatFileSystem.read(blockDevice);
             case FAT16:
                 Log.d(TAG,"FAT16 file system");
-                return null;
+                return FatFileSystem.read(blockDevice);
             case FAT32:
                 Log.d(TAG,"FAT32 file system");
                 return Fat32FileSystem.read(blockDevice);

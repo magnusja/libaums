@@ -53,9 +53,9 @@ import java.util.Calendar;
  * @author mjahnen
  * 
  */
-/* package */class FatDirectoryEntry {
+public class FatDirectoryEntry {
 
-	/* package */final static int SIZE = 32;
+	public final static int SIZE = 32;
 
 	private static final int ATTR_OFF = 0x0b;
 	private static final int FILE_SIZE_OFF = 0x1c;
@@ -74,7 +74,7 @@ import java.util.Calendar;
 	private static final int FLAG_DIRECTORY = 0x10;
 	private static final int FLAG_ARCHIVE = 0x20;
 
-	/* package */static final int ENTRY_DELETED = 0xe5;
+	public static final int ENTRY_DELETED = 0xe5;
 
 	/**
 	 * Holds the data like it would be stored on the disk.
@@ -114,7 +114,7 @@ import java.util.Calendar;
 	 * @see #setStartCluster(long)
 	 * @see #setDirectory()
 	 */
-	/* package */static FatDirectoryEntry createNew() {
+	public static FatDirectoryEntry createNew() {
 		FatDirectoryEntry result = new FatDirectoryEntry();
 		result.data = ByteBuffer.allocate(SIZE);
 
@@ -135,7 +135,7 @@ import java.util.Calendar;
 	 *            The buffer where the entries are located.
 	 * @return Newly constructed entry.
 	 */
-	/* package */static FatDirectoryEntry read(ByteBuffer data) {
+	public static FatDirectoryEntry read(ByteBuffer data) {
 		byte[] buffer = new byte[SIZE];
 
 		if (data.get(data.position()) == 0)
@@ -153,7 +153,7 @@ import java.util.Calendar;
 	 * @param buffer
 	 *            The buffer data shall be written to.
 	 */
-	/* package */void serialize(ByteBuffer buffer) {
+	public void serialize(ByteBuffer buffer) {
 		buffer.put(data.array());
 	}
 
@@ -218,7 +218,7 @@ import java.util.Calendar;
 	 * @see #extractLfnPart(StringBuilder)
 	 * @see #createLfnPart(String, int, byte, int, boolean)
 	 */
-	/* package */boolean isLfnEntry() {
+	public boolean isLfnEntry() {
 		return isHidden() && isVolume() && isReadOnly() && isSystem();
 	}
 
@@ -228,7 +228,7 @@ import java.util.Calendar;
 	 * 
 	 * @return True if entry is a directory.
 	 */
-	/* package */boolean isDirectory() {
+	public boolean isDirectory() {
 		return ((getFlags() & (FLAG_DIRECTORY | FLAG_VOLUME_ID)) == FLAG_DIRECTORY);
 	}
 
@@ -236,7 +236,7 @@ import java.util.Calendar;
 	 * Sets a mark that indicates that this {@link #FatDirectoryEntry()} shall
 	 * denote a directory.
 	 */
-	/* package */void setDirectory() {
+	public void setDirectory() {
 		setFlag(FLAG_DIRECTORY);
 	}
 
@@ -248,7 +248,7 @@ import java.util.Calendar;
 	 * @see #getVolumeLabel()
 	 * @see #createVolumeLabel(String)
 	 */
-	/* package */boolean isVolumeLabel() {
+	public boolean isVolumeLabel() {
 		if (isLfnEntry())
 			return false;
 		else
@@ -261,7 +261,7 @@ import java.util.Calendar;
 	 * 
 	 * @return True if entry is a system item.
 	 */
-	/* package */boolean isSystem() {
+	public boolean isSystem() {
 		return isFlagSet(FLAG_SYSTEM);
 	}
 
@@ -271,7 +271,7 @@ import java.util.Calendar;
 	 * 
 	 * @return True if entry is hidden.
 	 */
-	/* package */boolean isHidden() {
+	public boolean isHidden() {
 		return isFlagSet(FLAG_HIDDEN);
 	}
 
@@ -281,7 +281,7 @@ import java.util.Calendar;
 	 * 
 	 * @return True if entry is an archive.
 	 */
-	/* package */boolean isArchive() {
+	public boolean isArchive() {
 		return isFlagSet(FLAG_ARCHIVE);
 	}
 
@@ -292,7 +292,7 @@ import java.util.Calendar;
 	 * 
 	 * @return True if entry is read only.
 	 */
-	/* package */boolean isReadOnly() {
+	public boolean isReadOnly() {
 		return isFlagSet(FLAG_READONLY);
 	}
 
@@ -302,7 +302,7 @@ import java.util.Calendar;
 	 * @return True if volume id set.
 	 * @see #FLAG_VOLUME_ID
 	 */
-	/* package */boolean isVolume() {
+	public boolean isVolume() {
 		return isFlagSet(FLAG_VOLUME_ID);
 	}
 
@@ -312,7 +312,7 @@ import java.util.Calendar;
 	 * 
 	 * @return True if entry was deleted.
 	 */
-	/* package */boolean isDeleted() {
+	public boolean isDeleted() {
 		return getUnsignedInt8(0) == ENTRY_DELETED;
 	}
 
@@ -321,7 +321,7 @@ import java.util.Calendar;
 	 * 
 	 * @return Time in milliseconds since January 1 00:00:00, 1970 UTC
 	 */
-	/* package */long getCreatedDateTime() {
+	public long getCreatedDateTime() {
 		return decodeDateTime(getUnsignedInt16(CREATED_DATE_OFF),
 				getUnsignedInt16(CREATED_TIME_OFF));
 	}
@@ -332,7 +332,7 @@ import java.util.Calendar;
 	 * @param dateTime
 	 *            Time in milliseconds since January 1 00:00:00, 1970 UTC
 	 */
-	/* package */void setCreatedDateTime(long dateTime) {
+	public void setCreatedDateTime(long dateTime) {
 		// TODO entry has also field which holds 10th seconds created
 		setUnsignedInt16(CREATED_DATE_OFF, encodeDate(dateTime));
 		setUnsignedInt16(CREATED_TIME_OFF, encodeTime(dateTime));
@@ -344,7 +344,7 @@ import java.util.Calendar;
 	 * 
 	 * @return Time in milliseconds since January 1 00:00:00, 1970 UTC
 	 */
-	/* package */long getLastModifiedDateTime() {
+	public long getLastModifiedDateTime() {
 		return decodeDateTime(getUnsignedInt16(LAST_WRITE_DATE_OFF),
 				getUnsignedInt16(LAST_WRITE_TIME_OFF));
 	}
@@ -356,7 +356,7 @@ import java.util.Calendar;
 	 * @param dateTime
 	 *            Time in milliseconds since January 1 00:00:00, 1970 UTC
 	 */
-	/* package */void setLastModifiedDateTime(long dateTime) {
+	public void setLastModifiedDateTime(long dateTime) {
 		setUnsignedInt16(LAST_WRITE_DATE_OFF, encodeDate(dateTime));
 		setUnsignedInt16(LAST_WRITE_TIME_OFF, encodeTime(dateTime));
 	}
@@ -367,7 +367,7 @@ import java.util.Calendar;
 	 * 
 	 * @return Time in milliseconds since January 1 00:00:00, 1970 UTC
 	 */
-	/* package */long getLastAccessedDateTime() {
+	public long getLastAccessedDateTime() {
 		return decodeDateTime(getUnsignedInt16(LAST_ACCESSED_DATE_OFF), 0);
 	}
 
@@ -378,7 +378,7 @@ import java.util.Calendar;
 	 * @param dateTime
 	 *            Time in milliseconds since January 1 00:00:00, 1970 UTC.
 	 */
-	/* package */void setLastAccessedDateTime(long dateTime) {
+	public void setLastAccessedDateTime(long dateTime) {
 		setUnsignedInt16(LAST_ACCESSED_DATE_OFF, encodeDate(dateTime));
 	}
 
@@ -388,7 +388,7 @@ import java.util.Calendar;
 	 * @return Newly constructed short name.
 	 * @see #setShortName(ShortName)
 	 */
-	/* package */ShortName getShortName() {
+	public ShortName getShortName() {
 		if (data.get(0) == 0)
 			return null;
 		else {
@@ -404,7 +404,7 @@ import java.util.Calendar;
 	 *            The new short name.
 	 * @see #getShortName()
 	 */
-	/* package */void setShortName(ShortName shortName) {
+	public void setShortName(ShortName shortName) {
 		this.shortName = shortName;
 		shortName.serialize(data);
 		// clear buffer because short name put 13 bytes
@@ -421,7 +421,7 @@ import java.util.Calendar;
 	 * @see #getVolumeLabel()
 	 * @see #isVolumeLabel()
 	 */
-	/* package */static FatDirectoryEntry createVolumeLabel(String volumeLabel) {
+	public static FatDirectoryEntry createVolumeLabel(String volumeLabel) {
 		FatDirectoryEntry result = new FatDirectoryEntry();
 		ByteBuffer buffer = ByteBuffer.allocate(SIZE);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -443,7 +443,7 @@ import java.util.Calendar;
 	 * @see #createVolumeLabel(String)
 	 * @see #isVolumeLabel()
 	 */
-	/* package */String getVolumeLabel() {
+	public String getVolumeLabel() {
 		StringBuilder builder = new StringBuilder();
 
 		for (int i = 0; i < 11; i++) {
@@ -463,7 +463,7 @@ import java.util.Calendar;
 	 * @return The start cluster.
 	 * @see #setStartCluster(long)
 	 */
-	/* package */long getStartCluster() {
+	public long getStartCluster() {
 		final int msb = getUnsignedInt16(MSB_CLUSTER_OFF);
 		final int lsb = getUnsignedInt16(LSB_CLUSTER_OFF);
 		return (msb << 16) | lsb;
@@ -477,7 +477,7 @@ import java.util.Calendar;
 	 *            The start cluster
 	 * @see #getStartCluster()
 	 */
-	/* package */void setStartCluster(long newStartCluster) {
+	public void setStartCluster(long newStartCluster) {
 		setUnsignedInt16(MSB_CLUSTER_OFF, (int) ((newStartCluster >> 16) & 0xffff));
 		setUnsignedInt16(LSB_CLUSTER_OFF, (int) (newStartCluster & 0xffff));
 	}
@@ -489,7 +489,7 @@ import java.util.Calendar;
 	 * @return The file size in bytes.
 	 * @see #setFileSize(long)
 	 */
-	/* package */long getFileSize() {
+	public long getFileSize() {
 		return getUnsignedInt32(FILE_SIZE_OFF);
 	}
 
@@ -501,7 +501,7 @@ import java.util.Calendar;
 	 *            The file size in bytes.
 	 * @see #getFileSize()
 	 */
-	/* package */void setFileSize(long newSize) {
+	public void setFileSize(long newSize) {
 		setUnsignedInt32(FILE_SIZE_OFF, newSize);
 	}
 
@@ -525,7 +525,7 @@ import java.util.Calendar;
 	 * @see #extractLfnPart(StringBuilder)
 	 * @see #isLfnEntry()
 	 */
-	/* package */static FatDirectoryEntry createLfnPart(String unicode, int offset, byte checksum,
+	public static FatDirectoryEntry createLfnPart(String unicode, int offset, byte checksum,
 			int index, boolean isLast) {
 		FatDirectoryEntry result = new FatDirectoryEntry();
 
@@ -587,7 +587,7 @@ import java.util.Calendar;
 	 * @see #createLfnPart(String, int, byte, int, boolean)
 	 * @see #isLfnEntry()
 	 */
-	/* package */void extractLfnPart(StringBuilder builder) {
+	public void extractLfnPart(StringBuilder builder) {
 		final char[] name = new char[13];
 		name[0] = (char) data.getShort(1);
 		name[1] = (char) data.getShort(3);
