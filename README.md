@@ -19,15 +19,15 @@ We would appreciate an information email, when you plan to use the library in yo
 
 ### Build status
 
-**develop** [![Build Status](https://travis-ci.org/mjdev/libaums.svg?branch=develop)](https://travis-ci.org/mjdev/libaums)
-**master** [![Build Status](https://travis-ci.org/mjdev/libaums.svg?branch=master)](https://travis-ci.org/mjdev/libaums)
+**develop** [![Build Status](https://travis-ci.org/magnusja/libaums.svg?branch=develop)](https://travis-ci.org/magnusja/libaums)
+**master** [![Build Status](https://travis-ci.org/magnusja/libaums.svg?branch=master)](https://travis-ci.org/magnusja/libaums)
 
 ### How to use
 
 The library can be included into your project like this:
 
 ```
-compile 'com.github.mjdev:libaums:0.3'
+compile 'com.github.mjdev:libaums:0.4.0'
 ```
 
 For examples on how to use the library, please have a look at the main activity in the sample application.
