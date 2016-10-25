@@ -18,6 +18,7 @@
 package com.github.mjdev.libaums.fs.fat32;
 
 import com.github.mjdev.libaums.fs.BootSector;
+import com.github.mjdev.libaums.partition.FatType;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -53,6 +54,7 @@ public class Fat32BootSector implements BootSector {
     private boolean fatMirrored;
     private byte validFat;
     private String volumeLabel;
+    private FatType fatType;
 
     private Fat32BootSector() {
 
@@ -65,8 +67,9 @@ public class Fat32BootSector implements BootSector {
      * @param buffer The data where the boot sector is located.
      * @return A newly created boot sector.
      */
-    public static Fat32BootSector read(ByteBuffer buffer) {
+    public static Fat32BootSector read(ByteBuffer buffer, FatType fatType) {
         Fat32BootSector result = new Fat32BootSector();
+        result.setFatType(fatType);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         result.bytesPerSector = buffer.getShort(BYTES_PER_SECTOR_OFF);
         result.sectorsPerCluster = (short) (buffer.get(SECTORS_PER_CLUSTER_OFF) & 0xff);
@@ -255,6 +258,16 @@ public class Fat32BootSector implements BootSector {
     @Override
     public long getNumberRootDirEntries() {
         return rootDirStartCluster;
+    }
+
+    @Override
+    public FatType getFatType() {
+        return fatType;
+    }
+
+    @Override
+    public void setFatType(FatType fatType) {
+        this.fatType = fatType;
     }
 
 }

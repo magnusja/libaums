@@ -200,7 +200,7 @@ public class UsbMassStorageDevice {
 		ArrayList<UsbMassStorageDevice> result = new ArrayList<UsbMassStorageDevice>();
 
 		for (UsbDevice device : usbManager.getDeviceList().values()) {
-			Log.i(TAG, "found usb device: " + device);
+			Log.i(TAG, "found usb device: " + device.getDeviceName());
 
 			int interfaceCount = device.getInterfaceCount();
 			for (int i = 0; i < interfaceCount; i++) {

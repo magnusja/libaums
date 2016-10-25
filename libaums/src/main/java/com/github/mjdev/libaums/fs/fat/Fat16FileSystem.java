@@ -17,6 +17,8 @@
 
 package com.github.mjdev.libaums.fs.fat;
 
+import android.util.Log;
+
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 import com.github.mjdev.libaums.fs.BootSector;
 import com.github.mjdev.libaums.fs.FileSystem;
@@ -27,6 +29,7 @@ import com.github.mjdev.libaums.partition.FatType;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+
 /**
  * This class represents the FAT32 file system and is responsible for setting
  * the FAT32 file system up and extracting the volume label and the root
@@ -36,6 +39,7 @@ import java.nio.ByteBuffer;
  */
 public class Fat16FileSystem implements FileSystem {
 
+    private final String TAG = Fat16FileSystem.class.getSimpleName();
     private BootSector bootSector;
     private Fat fat;
     private FatDirectory rootDirectory;
@@ -52,7 +56,7 @@ public class Fat16FileSystem implements FileSystem {
     private Fat16FileSystem(BlockDeviceDriver blockDevice, FatType fatType) throws IOException {
         ByteBuffer buffer = ByteBuffer.allocate(512);
         blockDevice.read(0, buffer);
-        bootSector = Fat16BootSector.read(buffer);
+        bootSector = Fat16BootSector.read(buffer,fatType);
         fat = new Fat(blockDevice, bootSector,fatType);
         rootDirectory = FatDirectory.readRoot(blockDevice, fat, bootSector);
     }
@@ -78,8 +82,10 @@ public class Fat16FileSystem implements FileSystem {
     @Override
     public String getVolumeLabel() {
         String volumeLabel = rootDirectory.getVolumeLabel();
+        Log.d(TAG, "Volume name by root:"+volumeLabel);
         if (volumeLabel == null) {
             volumeLabel = bootSector.getVolumeLabel();
+            Log.d(TAG, "Volume name by boot sector:"+volumeLabel);
         }
         return volumeLabel;
     }

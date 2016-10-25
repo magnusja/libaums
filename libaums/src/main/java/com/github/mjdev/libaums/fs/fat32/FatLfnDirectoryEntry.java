@@ -17,6 +17,8 @@
 
 package com.github.mjdev.libaums.fs.fat32;
 
+import com.github.mjdev.libaums.partition.FatType;
+
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -71,11 +73,11 @@ public class FatLfnDirectoryEntry {
 	 *            The generated short name.
 	 * @return The newly created entry.
 	 */
-	public static FatLfnDirectoryEntry createNew(String name, ShortName shortName) {
+	public static FatLfnDirectoryEntry createNew(String name, ShortName shortName,FatType fatType) {
 		FatLfnDirectoryEntry result = new FatLfnDirectoryEntry();
 
 		result.lfnName = name;
-		result.actualEntry = FatDirectoryEntry.createNew();
+		result.actualEntry = FatDirectoryEntry.createNew(fatType);
 		result.actualEntry.setShortName(shortName);
 
 		return result;

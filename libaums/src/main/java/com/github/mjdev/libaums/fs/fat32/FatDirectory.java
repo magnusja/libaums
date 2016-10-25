@@ -327,7 +327,7 @@ public class FatDirectory implements UsbFile {
 
         ShortName shortName = ShortNameGenerator.generateShortName(name, shortNameMap.keySet());
 
-        FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.createNew(name, shortName);
+        FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.createNew(name, shortName,bootSector.getFatType());
         // alloc completely new chain
         long newStartCluster = fat.alloc(new Long[0], 1)[0];
         entry.setStartCluster(newStartCluster);
@@ -349,7 +349,7 @@ public class FatDirectory implements UsbFile {
 
         ShortName shortName = ShortNameGenerator.generateShortName(name, shortNameMap.keySet());
 
-        FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.createNew(name, shortName);
+        FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.createNew(name, shortName,bootSector.getFatType());
         entry.setDirectory();
         // alloc completely new chain
         long newStartCluster = fat.alloc(new Long[0], 1)[0];
@@ -367,7 +367,7 @@ public class FatDirectory implements UsbFile {
 
         // first create the dot entry which points to the dir just created
         FatLfnDirectoryEntry dotEntry = FatLfnDirectoryEntry
-                .createNew(null, new ShortName(".", ""));
+                .createNew(null, new ShortName(".", ""),bootSector.getFatType());
         dotEntry.setDirectory();
         dotEntry.setStartCluster(newStartCluster);
         FatLfnDirectoryEntry.copyDateTime(entry, dotEntry);
@@ -376,7 +376,7 @@ public class FatDirectory implements UsbFile {
         // Second the dotdot entry which points to the parent directory (this)
         // if parent is the root dir then set start cluster to zero
         FatLfnDirectoryEntry dotDotEntry = FatLfnDirectoryEntry.createNew(null, new ShortName("..",
-                ""));
+                ""),bootSector.getFatType());
         dotDotEntry.setDirectory();
         dotDotEntry.setStartCluster(isRoot() ? 0 : entry.getStartCluster());
         FatLfnDirectoryEntry.copyDateTime(entry, dotDotEntry);

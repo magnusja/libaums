@@ -47,6 +47,7 @@ import java.util.Arrays;
 public class Fat implements FatIntf {
 
     private static final String TAG = Fat.class.getSimpleName();
+    public static final int FIRST_CLUSTER = 2;
 
     private BlockDeviceDriver blockDevice;
     private long fatOffset[];
@@ -85,6 +86,7 @@ public class Fat implements FatIntf {
     public Long[] getChain(long startCluster) throws IOException {
 
         if (startCluster == 0) {
+            Log.i(TAG, "startCluster: " + startCluster);
             // if the start cluster is 0, we have an empty file
             return new Long[0];
         }
@@ -158,7 +160,7 @@ public class Fat implements FatIntf {
             lastAllocated = 2;
         }*/
 
-        long currentCluster = 2;
+        long currentCluster = FIRST_CLUSTER;
 
         long offset;
         long offsetInBlock;

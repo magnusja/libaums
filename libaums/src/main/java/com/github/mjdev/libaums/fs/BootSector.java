@@ -1,5 +1,7 @@
 package com.github.mjdev.libaums.fs;
 
+import com.github.mjdev.libaums.partition.FatType;
+
 /**
  * Created by Yuriy on 25.09.2016.
  */
@@ -35,5 +37,9 @@ public interface BootSector {
     String getVolumeLabel();
 
     long getNumberRootDirEntries();
+
+    FatType getFatType();
+
+    void setFatType(FatType fatType);
 
 }

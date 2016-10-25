@@ -47,7 +47,6 @@ public class Partition implements BlockDeviceDriver {
     private static final String TAG = Partition.class.getSimpleName();
     private FatType fatType;
 
-    // private PartitionTableEntry partitionTableEntry;
     private BlockDeviceDriver blockDevice;
     /**
      * The logical block address where on the device this partition starts.
@@ -71,21 +70,21 @@ public class Partition implements BlockDeviceDriver {
     public static Partition createPartition(PartitionTableEntry entry, BlockDeviceDriver blockDevice)
             throws IOException {
         Partition partition = new Partition();
-        // we currently only support fat32
         int partitionType = entry.getPartitionType();
-        if (partitionType == 0x01 || partitionType == 0x10) {
+        if (partitionType == 0x01) {
             partition.fatType = FAT12;
-            //throw new PartitionException("FAT12 not support", -1);
+            partition.logicalBlockAddress = entry.getLogicalBlockAddress();
+            partition.blockDevice = blockDevice;
+            partition.blockSize = blockDevice.getBlockSize();
+            partition.fileSystem = FileSystemFactory.createFileSystem(entry, partition);
         } else if (partitionType == 0x04 || partitionType == 0x06 || partitionType == 0x0e) {
             partition.fatType = FAT16;
             partition.logicalBlockAddress = entry.getLogicalBlockAddress();
             partition.blockDevice = blockDevice;
             partition.blockSize = blockDevice.getBlockSize();
             partition.fileSystem = FileSystemFactory.createFileSystem(entry, partition);
-            //throw new PartitionException("FAT16 not support", -1);
         } else if (partitionType == 0x0b || partitionType == 0x0c) {
             partition.fatType = FAT32;
-            // partition.partitionTableEntry = entry;
             partition.logicalBlockAddress = entry.getLogicalBlockAddress();
             partition.blockDevice = blockDevice;
             partition.blockSize = blockDevice.getBlockSize();
@@ -93,7 +92,6 @@ public class Partition implements BlockDeviceDriver {
         } else {
             Log.w(TAG, "unsupported partition type: " + entry.getPartitionType());
         }
-
         return partition;
     }
 

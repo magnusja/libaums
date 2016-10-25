@@ -19,6 +19,7 @@ package com.github.mjdev.libaums.fs.fat;
 
 import com.github.mjdev.libaums.fs.BootSector;
 import com.github.mjdev.libaums.fs.fat32.FatDirectory;
+import com.github.mjdev.libaums.partition.FatType;
 import com.github.mjdev.libaums.partition.PartitionException;
 
 import java.nio.ByteBuffer;
@@ -40,13 +41,14 @@ public class Fat16BootSector implements BootSector {
     private static final int TOTAL_SECTORS_16_OFFSET = 19;
     private static final int SECTORS_PER_FAT_OFF = 22;
     private static final int FLAGS_OFF = 40;
-    private static final int VOLUME_LABEL_OFF = 43;
+    private static final int VOLUME_LABEL_OFF = 0x2b;
     private static final int ROOT_DIR_CLUSTER_OFF = 17;
     private static final int EXTENDED_BOOT_SIGNATURE_OFFSET = 0x26;
 
     private boolean fatMirrored;
     private byte validFat;
     private ByteBuffer byteBuffer;
+    private FatType fatType;
 
     private Fat16BootSector() {
 
@@ -60,8 +62,9 @@ public class Fat16BootSector implements BootSector {
      * @param buffer The data where the boot sector is located.
      * @return A newly created boot sector.
      */
-    public static Fat16BootSector read(ByteBuffer buffer) {
+    public static Fat16BootSector read(ByteBuffer buffer, FatType fatType) {
         Fat16BootSector result = new Fat16BootSector();
+        result.setFatType(fatType);
         result.byteBuffer = buffer;
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         short flag = (short) result.get16(FLAGS_OFF);
@@ -237,7 +240,7 @@ public class Fat16BootSector implements BootSector {
     public String getVolumeLabel() {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < 11; i++) {
-            byte b = getByteBuffer().get(VOLUME_LABEL_OFF + i);
+            byte b = (byte) get8(VOLUME_LABEL_OFF + i);
             if (b == 0)
                 break;
             builder.append((char) b);
@@ -248,6 +251,16 @@ public class Fat16BootSector implements BootSector {
     @Override
     public long getNumberRootDirEntries() {
         return get16(ROOT_DIR_CLUSTER_OFF);
+    }
+
+    @Override
+    public FatType getFatType() {
+        return fatType;
+    }
+
+    @Override
+    public void setFatType(FatType fatType) {
+        this.fatType = fatType;
     }
 
 

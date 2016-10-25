@@ -51,7 +51,7 @@ public class Fat32FileSystem implements FileSystem {
     private Fat32FileSystem(BlockDeviceDriver blockDevice, FatType fatType) throws IOException {
         ByteBuffer buffer = ByteBuffer.allocate(512);
         blockDevice.read(0, buffer);
-        bootSector = Fat32BootSector.read(buffer);
+        bootSector = Fat32BootSector.read(buffer, fatType);
         fsInfoStructure = FsInfoStructure.read(blockDevice, bootSector.getFsInfoStartSector()
                 * bootSector.getBytesPerSector());
         fat = new FAT(blockDevice, bootSector, fsInfoStructure, fatType);
