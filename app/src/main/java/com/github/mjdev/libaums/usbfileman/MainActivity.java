@@ -41,6 +41,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.database.Cursor;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
@@ -49,6 +50,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
+import android.provider.OpenableColumns;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -350,12 +352,32 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         private ProgressDialog dialog;
         private CopyToUsbTaskParam param;
 
+        private String name;
+        private int size = -1;
+
         public CopyToUsbTask() {
             dialog = new ProgressDialog(MainActivity.this);
             dialog.setTitle("Copying file");
             dialog.setMessage("Copying a file to the USB drive, this can take some time!");
             dialog.setIndeterminate(true);
             dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        }
+
+        private void queryUriMetaData(Uri uri) {
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null, null);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                name = cursor.getString(
+                        cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                Log.i(TAG, "Display Name: " + name);
+                int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+                if (!cursor.isNull(sizeIndex)) {
+                    size = cursor.getInt(sizeIndex);
+                }
+                Log.i(TAG, "Size: " + size);
+
+                cursor.close();
+            }
         }
 
         @Override
@@ -366,22 +388,36 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         @Override
         protected Void doInBackground(CopyToUsbTaskParam... params) {
             long time = System.currentTimeMillis();
-            ByteBuffer buffer = ByteBuffer.allocate(4096);
             param = params[0];
 
-            String[] segments = param.from.getPath().split("/");
-            String name = segments[segments.length - 1];
+            queryUriMetaData(param.from);
+
+            if (name == null) {
+                String[] segments = param.from.getPath().split("/");
+                name = segments[segments.length - 1];
+                dialog.setIndeterminate(false);
+            }
 
             try {
                 UsbFile file = adapter.getCurrentDir().createFile(name);
+
+                if (size > 0) {
+                    file.setLength(size);
+                }
+
                 InputStream inputStream = getContentResolver().openInputStream(param.from);
                 OutputStream outputStream = new UsbFileOutputStream(file);
 
-                byte[] bytes = new byte[4096];
+                byte[] bytes = new byte[1337]; // very bad size just for testing. Ue 4096 in real apps
                 int count;
+                int total = 0;
 
                 while ((count = inputStream.read(bytes)) != -1){
                     outputStream.write(bytes, 0, count);
+                    if (size > 0) {
+                        total += count;
+                        publishProgress((int) total);
+                    }
                 }
 
                 outputStream.close();
@@ -401,6 +437,12 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
             } catch (IOException e) {
                 Log.e(TAG, "Error refreshing adapter", e);
             }
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            dialog.setMax(size);
+            dialog.setProgress(values[0]);
         }
 
     }
