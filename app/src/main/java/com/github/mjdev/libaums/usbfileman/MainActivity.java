@@ -402,7 +402,6 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
                 if (size > 0) {
                     file.setLength(size);
-                    dialog.setIndeterminate(false);
                 }
 
                 InputStream inputStream = getContentResolver().openInputStream(param.from);
@@ -441,6 +440,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
         @Override
         protected void onProgressUpdate(Integer... values) {
+            dialog.setIndeterminate(false);
             dialog.setMax(size);
             dialog.setProgress(values[0]);
         }
