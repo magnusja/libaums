@@ -42,6 +42,14 @@ public class ScsiRead10 extends CommandBlockWrapper {
 	private short transferBlocks;
 
 	/**
+	 * Constructs a new read command without any information.
+	 * Be sure to call {@link #init(int, int, int)} before transfering command to device.
+	 */
+	public ScsiRead10() {
+		super(0, Direction.IN, (byte) 0, LENGTH);
+	}
+
+	/**
 	 * Constructs a new read command with the given information.
 	 * 
 	 * @param blockAddress
@@ -53,6 +61,11 @@ public class ScsiRead10 extends CommandBlockWrapper {
 	 */
 	public ScsiRead10(int blockAddress, int transferBytes, int blockSize) {
 		super(transferBytes, Direction.IN, (byte) 0, LENGTH);
+		init(blockAddress, transferBytes, blockSize);
+	}
+
+	public void init(int blockAddress, int transferBytes, int blockSize) {
+		super.dCbwDataTransferLength = transferBytes;
 		this.blockAddress = blockAddress;
 		this.transferBytes = transferBytes;
 		this.blockSize = blockSize;

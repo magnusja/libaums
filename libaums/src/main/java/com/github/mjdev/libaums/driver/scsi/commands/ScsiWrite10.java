@@ -41,6 +41,14 @@ public class ScsiWrite10 extends CommandBlockWrapper {
 	private int blockSize;
 	private short transferBlocks;
 
+    /**
+     * Constructs a new write command without any information.
+     * Be sure to call {@link #init(int, int, int)} before transfering command to device.
+     */
+    public ScsiWrite10() {
+        super(0, Direction.OUT, (byte) 0, LENGTH);
+    }
+
 	/**
 	 * Constructs a new write command with the given information.
 	 * 
@@ -53,6 +61,11 @@ public class ScsiWrite10 extends CommandBlockWrapper {
 	 */
 	public ScsiWrite10(int blockAddress, int transferBytes, int blockSize) {
 		super(transferBytes, Direction.OUT, (byte) 0, LENGTH);
+		init(blockAddress, transferBytes, blockSize);
+	}
+
+	public void init(int blockAddress, int transferBytes, int blockSize) {
+        super.dCbwDataTransferLength = transferBytes;
 		this.blockAddress = blockAddress;
 		this.transferBytes = transferBytes;
 		this.blockSize = blockSize;
