@@ -17,6 +17,7 @@
 
 package com.github.mjdev.libaums.usbfileman;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -73,6 +74,7 @@ import android.widget.Toast;
 import com.github.mjdev.libaums.UsbMassStorageDevice;
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.UsbFile;
+import com.github.mjdev.libaums.fs.UsbFileInputStream;
 import com.github.mjdev.libaums.fs.UsbFileOutputStream;
 import com.github.mjdev.libaums.server.http.UsbFileHttpServerService;
 
@@ -287,15 +289,20 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			param = params[0];
 			long length = param.from.getLength();
 			try {
-				FileOutputStream out = new FileOutputStream(param.to);
-				for (long i = 0; i < length; i += buffer.limit()) {
-					buffer.limit((int) Math.min(buffer.capacity(), length - i));
-					param.from.read(i, buffer);
-					out.write(buffer.array(), 0, buffer.limit());
-					publishProgress((int) i);
-					buffer.clear();
-				}
+				OutputStream out = new BufferedOutputStream(new FileOutputStream(param.to));
+                InputStream inputStream = new BufferedInputStream(new UsbFileInputStream(param.from));
+                byte[] bytes = new byte[4096];
+                int count;
+                int total = 0;
+
+                while ((count = inputStream.read(bytes)) != -1){
+                    out.write(bytes, 0, count);
+                    total += count;
+                    publishProgress((int) total);
+                }
+
 				out.close();
+                inputStream.close();
 			} catch (IOException e) {
 				Log.e(TAG, "error copying!", e);
 			}
