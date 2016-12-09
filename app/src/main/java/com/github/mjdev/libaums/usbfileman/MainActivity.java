@@ -17,6 +17,7 @@
 
 package com.github.mjdev.libaums.usbfileman;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -810,14 +811,15 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 		UsbFile file;
 		try {
 			file = dir.createFile("big_file_test.txt");
-			file.write(0, ByteBuffer.wrap("START\n".getBytes()));
+            OutputStream outputStream = new BufferedOutputStream(new UsbFileOutputStream(file), 4096);
+            outputStream.write("START\n".getBytes());
 			int i;
 
 			for (i = 6; i < 9000; i += 5) {
-				file.write(i, ByteBuffer.wrap("TEST\n".getBytes()));
+                outputStream.write("TEST\n".getBytes());
 			}
 
-			file.write(i, ByteBuffer.wrap("END\n".getBytes()));
+            outputStream.write("END\n".getBytes());
 
 			file.close();
 
