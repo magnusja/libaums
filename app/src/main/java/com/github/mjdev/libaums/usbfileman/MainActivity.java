@@ -20,6 +20,8 @@ package com.github.mjdev.libaums.usbfileman;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -68,6 +70,7 @@ import android.widget.Toast;
 import com.github.mjdev.libaums.UsbMassStorageDevice;
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.UsbFile;
+import com.github.mjdev.libaums.fs.UsbFileOutputStream;
 import com.github.mjdev.libaums.server.http.UsbFileHttpServerService;
 
 /**
@@ -85,7 +88,10 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 	private static final String ACTION_USB_PERMISSION = "com.github.mjdev.libaums.USB_PERMISSION";
 	private static final String TAG = MainActivity.class.getSimpleName();
 
-	private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
+    private static final int COPY_STORAGE_PROVIDER_RESULT = 0;
+    private static final int OPEN_STORAGE_PROVIDER_RESULT = 1;
+
+    private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 
@@ -276,12 +282,12 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			long time = System.currentTimeMillis();
 			ByteBuffer buffer = ByteBuffer.allocate(4096);
 			param = params[0];
-			long length = params[0].from.getLength();
+			long length = param.from.getLength();
 			try {
-				FileOutputStream out = new FileOutputStream(params[0].to);
+				FileOutputStream out = new FileOutputStream(param.to);
 				for (long i = 0; i < length; i += buffer.limit()) {
 					buffer.limit((int) Math.min(buffer.capacity(), length - i));
-					params[0].from.read(i, buffer);
+					param.from.read(i, buffer);
 					out.write(buffer.array(), 0, buffer.limit());
 					publishProgress((int) i);
 					buffer.clear();
@@ -320,6 +326,84 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 		}
 
 	}
+
+    /**
+     * Class to hold the files for a copy task. Holds the source and the
+     * destination file.
+     *
+     * @author mjahnen
+     *
+     */
+    private static class CopyToUsbTaskParam {
+        /* package */Uri from;
+    }
+
+    /**
+     * Asynchronous task to copy a file from the mass storage device connected
+     * via USB to the internal storage.
+     *
+     * @author mjahnen
+     *
+     */
+    private class CopyToUsbTask extends AsyncTask<CopyToUsbTaskParam, Integer, Void> {
+
+        private ProgressDialog dialog;
+        private CopyToUsbTaskParam param;
+
+        public CopyToUsbTask() {
+            dialog = new ProgressDialog(MainActivity.this);
+            dialog.setTitle("Copying file");
+            dialog.setMessage("Copying a file to the USB drive, this can take some time!");
+            dialog.setIndeterminate(true);
+            dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(CopyToUsbTaskParam... params) {
+            long time = System.currentTimeMillis();
+            ByteBuffer buffer = ByteBuffer.allocate(4096);
+            param = params[0];
+
+            String[] segments = param.from.getPath().split("/");
+            String name = segments[segments.length - 1];
+
+            try {
+                UsbFile file = adapter.getCurrentDir().createFile(name);
+                InputStream inputStream = getContentResolver().openInputStream(param.from);
+                OutputStream outputStream = new UsbFileOutputStream(file);
+
+                byte[] bytes = new byte[4096];
+                int count;
+
+                while ((count = inputStream.read(bytes)) != -1){
+                    outputStream.write(bytes, 0, count);
+                }
+
+                outputStream.close();
+                inputStream.close();
+            } catch (IOException e) {
+                Log.e(TAG, "error copying!", e);
+            }
+            Log.d(TAG, "copy time: " + (System.currentTimeMillis() - time));
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            dialog.dismiss();
+            try {
+                adapter.refresh();
+            } catch (IOException e) {
+                Log.e(TAG, "Error refreshing adapter", e);
+            }
+        }
+
+    }
 
     ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -490,16 +574,27 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 				String[] extraMimeTypes = {"image/*", "video/*"};
 				intent.putExtra(Intent.EXTRA_MIME_TYPES, extraMimeTypes);
 				intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-				startActivityForResult(intent, 1);
+				startActivityForResult(intent, OPEN_STORAGE_PROVIDER_RESULT);
 			}
 			return true;
+        case R.id.copy_from_storage_provider:
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("*/*");
+
+                startActivityForResult(intent, COPY_STORAGE_PROVIDER_RESULT);
+            }
+            return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
 
 	}
 
-	@Override
+    @Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		MenuInflater inflater = getMenuInflater();
@@ -632,7 +727,12 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 
-		if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
+        if (resultCode != Activity.RESULT_OK) {
+            Log.w(TAG, "Activity result is not ok");
+            return;
+        }
+
+		if (requestCode == OPEN_STORAGE_PROVIDER_RESULT) {
 			Uri uri;
 			if (data != null) {
 				uri = data.getData();
@@ -641,7 +741,18 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 				i.setData(uri);
 				startActivity(i);
 			}
-		}
+		} else if (requestCode == COPY_STORAGE_PROVIDER_RESULT){
+            Uri uri;
+            if (data != null) {
+                uri = data.getData();
+                Log.i(TAG, "Uri: " + uri.toString());
+
+                CopyToUsbTaskParam params = new CopyToUsbTaskParam();
+                params.from = uri;
+
+                new CopyToUsbTask().execute(params);
+            }
+        }
 	}
 
 	/**
