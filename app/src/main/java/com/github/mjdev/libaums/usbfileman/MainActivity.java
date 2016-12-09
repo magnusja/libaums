@@ -828,7 +828,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
             outputStream.write("END\n".getBytes());
 
-			file.close();
+            outputStream.close();
 
 			adapter.refresh();
 		} catch (IOException e) {
