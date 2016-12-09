@@ -31,3 +31,8 @@ compile 'com.github.mjdev:libaums:0.4.0'
 ```
 
 For examples on how to use the library, please have a look at the main activity in the sample application.
+
+#### Hints
+
+1. When copying a file always set the length via `UsbFile.setLength(long)` first. Otherwise the ClusterChain has to be increased for every call to write. This is very inefficent.
+2. Always use 4096 bytes as buffer size, because this alignes with the block sizes drives are using. Everything else is also most likeley a decrease in performance.
