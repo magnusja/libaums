@@ -395,7 +395,6 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
             if (name == null) {
                 String[] segments = param.from.getPath().split("/");
                 name = segments[segments.length - 1];
-                dialog.setIndeterminate(false);
             }
 
             try {
@@ -403,6 +402,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
                 if (size > 0) {
                     file.setLength(size);
+                    dialog.setIndeterminate(false);
                 }
 
                 InputStream inputStream = getContentResolver().openInputStream(param.from);
