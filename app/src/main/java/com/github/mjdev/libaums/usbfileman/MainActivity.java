@@ -374,6 +374,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         private void queryUriMetaData(Uri uri) {
             Cursor cursor = getContentResolver().query(uri, null, null, null, null, null);
 
+            // TODO: query created and modified times to write it USB 
             if (cursor != null && cursor.moveToFirst()) {
                 name = cursor.getString(
                         cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
