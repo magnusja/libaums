@@ -24,7 +24,9 @@ import com.github.mjdev.libaums.fs.UsbFile;
 import com.github.mjdev.libaums.fs.UsbFileInputStream;
 
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Map;
@@ -138,7 +140,7 @@ public class UsbFileHttpServer extends NanoHTTPD {
         String mimeType = getMimeTypeForFile(file.getName());
 
         Response res = newFixedLengthResponse(Response.Status.OK,
-                mimeType, new UsbFileInputStream(file), file.getLength());
+                mimeType, createInputStream(file), file.getLength());
         res.addHeader("Accept-Ranges", "bytes");
 
         return res;
@@ -186,7 +188,7 @@ public class UsbFileHttpServer extends NanoHTTPD {
 
         Log.d(TAG, "Serving file from " + start + " to " + end + ", Content-Length: " + contentLength);
 
-        UsbFileInputStream stream = new UsbFileInputStream(file);
+        InputStream stream = createInputStream(file);
         stream.skip(start);
 
         Response res = newFixedLengthResponse(Response.Status.PARTIAL_CONTENT,
@@ -196,5 +198,9 @@ public class UsbFileHttpServer extends NanoHTTPD {
         res.addHeader("Content-Range", "bytes " + start + "-" + end + "/" + length);
 
         return res;
+    }
+
+    private InputStream createInputStream(UsbFile file) {
+        return new BufferedInputStream(new UsbFileInputStream(file), 4096);
     }
 }
