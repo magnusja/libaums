@@ -561,6 +561,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			Log.d(TAG, "Capacity: " + currentFs.getCapacity());
 			Log.d(TAG, "Occupied Space: " + currentFs.getOccupiedSpace());
 			Log.d(TAG, "Free Space: " + currentFs.getFreeSpace());
+            Log.d(TAG, "Chunk size: " + currentFs.getChunkSize());
 			UsbFile root = currentFs.getRootDirectory();
 
 			ActionBar actionBar = getSupportActionBar();
