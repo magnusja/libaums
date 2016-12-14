@@ -413,9 +413,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                 }
 
                 InputStream inputStream = getContentResolver().openInputStream(param.from);
-                OutputStream outputStream = new UsbFileOutputStream(file);
+                OutputStream outputStream = UsbFileStreamFactory.createBufferedOutputStream(file, currentFs);
 
-                byte[] bytes = new byte[1337]; // very bad size just for testing. Ue 4096 in real apps
+                byte[] bytes = new byte[1337];
                 int count;
                 int total = 0;
 
