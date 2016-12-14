@@ -143,7 +143,7 @@ public class Partition implements BlockDeviceDriver {
 			blockDevice.read(devOffset, buffer);
 
 			if (dest.remaining() % blockSize != 0) {
-				System.arraycopy(dest.array(), 0, dest.array(), dest.position(), dest.remaining());
+                System.arraycopy(buffer.array(), 0, dest.array(), dest.position(), dest.remaining());
 			}
 		}
 	}
