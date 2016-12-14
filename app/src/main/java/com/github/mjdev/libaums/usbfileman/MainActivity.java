@@ -76,6 +76,7 @@ import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.UsbFile;
 import com.github.mjdev.libaums.fs.UsbFileInputStream;
 import com.github.mjdev.libaums.fs.UsbFileOutputStream;
+import com.github.mjdev.libaums.fs.UsbFileStreamFactory;
 import com.github.mjdev.libaums.server.http.UsbFileHttpServerService;
 
 /**
@@ -285,12 +286,11 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 		@Override
 		protected Void doInBackground(CopyTaskParam... params) {
 			long time = System.currentTimeMillis();
-			ByteBuffer buffer = ByteBuffer.allocate(4096);
 			param = params[0];
-			long length = param.from.getLength();
 			try {
 				OutputStream out = new BufferedOutputStream(new FileOutputStream(param.to));
-                InputStream inputStream = new BufferedInputStream(new UsbFileInputStream(param.from));
+                InputStream inputStream =
+						UsbFileStreamFactory.createBufferedInputStream(param.from, currentFs);
                 byte[] bytes = new byte[4096];
                 int count;
                 int total = 0;
@@ -474,6 +474,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 	private UsbMassStorageDevice device;
 	/* package */UsbFileListAdapter adapter;
 	private Deque<UsbFile> dirs = new ArrayDeque<UsbFile>();
+	private FileSystem currentFs;
 
     private Intent serviceIntent = null;
     private UsbFileHttpServerService serverService;
@@ -556,14 +557,14 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			device.init();
 
 			// we always use the first partition of the device
-			FileSystem fs = device.getPartitions().get(0).getFileSystem();
-			Log.d(TAG, "Capacity: " + fs.getCapacity());
-			Log.d(TAG, "Occupied Space: " + fs.getOccupiedSpace());
-			Log.d(TAG, "Free Space: " + fs.getFreeSpace());
-			UsbFile root = fs.getRootDirectory();
+			currentFs = device.getPartitions().get(0).getFileSystem();
+			Log.d(TAG, "Capacity: " + currentFs.getCapacity());
+			Log.d(TAG, "Occupied Space: " + currentFs.getOccupiedSpace());
+			Log.d(TAG, "Free Space: " + currentFs.getFreeSpace());
+			UsbFile root = currentFs.getRootDirectory();
 
 			ActionBar actionBar = getSupportActionBar();
-			actionBar.setTitle(fs.getVolumeLabel());
+			actionBar.setTitle(currentFs.getVolumeLabel());
 
 			listView.setAdapter(adapter = new UsbFileListAdapter(this, root));
 		} catch (IOException e) {
@@ -818,8 +819,8 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 		UsbFile file;
 		try {
 			file = dir.createFile("big_file_test.txt");
-            OutputStream outputStream = new BufferedOutputStream(new UsbFileOutputStream(file), 4096);
-            outputStream.write("START\n".getBytes());
+            OutputStream outputStream = UsbFileStreamFactory.createBufferedOutputStream(file, currentFs);
+			outputStream.write("START\n".getBytes());
 			int i;
 
 			for (i = 6; i < 9000; i += 5) {
