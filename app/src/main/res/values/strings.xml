@@ -34,4 +34,5 @@
     <string name="stop_http_server">Stop HTTP Server</string>
     <string name="run_tests">Run tests</string>
     <string name="run_storage_provider">Run StorageProvider</string>
+    <string name="copy_to_usb">Copy to USB</string>
 </resources>

@@ -103,4 +103,9 @@ public class Fat32FileSystem implements FileSystem {
 	public long getFreeSpace() {
 		return fsInfoStructure.getFreeClusterCount() * bootSector.getBytesPerCluster();
 	}
+
+	@Override
+	public int getChunkSize() {
+		return bootSector.getBytesPerCluster();
+	}
 }

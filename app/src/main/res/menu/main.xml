@@ -49,4 +49,8 @@
         android:id="@+id/open_storage_provider"
         android:title="@string/run_storage_provider"/>
 
+    <item
+        android:id="@+id/copy_from_storage_provider"
+        android:title="@string/copy_to_usb"/>
+
 </menu>

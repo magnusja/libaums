@@ -55,6 +55,9 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	private int blockSize;
 	private int lastBlockAddress;
 
+    private ScsiWrite10 writeCommand = new ScsiWrite10();
+    private ScsiRead10 readCommand = new ScsiRead10();
+
 	public ScsiBlockDevice(UsbCommunication usbCommunication) {
 		this.usbCommunication = usbCommunication;
 		outBuffer = ByteBuffer.allocate(31);
@@ -210,9 +213,9 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 			buffer = dest;
 		}
 
-		ScsiRead10 read = new ScsiRead10((int) devOffset, buffer.remaining(), blockSize);
+        readCommand.init((int) devOffset, buffer.remaining(), blockSize);
 		//Log.d(TAG, "reading: " + read);
-		transferCommand(read, buffer);
+		transferCommand(readCommand, buffer);
 
 		if (dest.remaining() % blockSize != 0) {
 			System.arraycopy(buffer.array(), 0, dest.array(), dest.position(), dest.remaining());
@@ -244,9 +247,9 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 			buffer = src;
 		}
 
-		ScsiWrite10 write = new ScsiWrite10((int) devOffset, buffer.remaining(), blockSize);
+        writeCommand.init((int) devOffset, buffer.remaining(), blockSize);
 		//Log.d(TAG, "writing: " + write);
-		transferCommand(write, buffer);
+		transferCommand(writeCommand, buffer);
 
 		src.position(src.limit());
 
