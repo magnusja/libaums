@@ -167,7 +167,27 @@ import java.util.List;
 	/* package */String getName() {
 		if (lfnName != null)
 			return lfnName;
-		return actualEntry.getShortName().getString();
+
+		// https://en.wikipedia.org/wiki/8.3_filename#Compatibility
+		String sname = actualEntry.getShortName().getString();
+		String name = sname;
+		String ext = "";
+
+		String[] split = sname.split(".");
+		if(split.length == 2) {
+			name = split[0];
+			ext = split[0];
+		}
+
+		if(actualEntry.isShortNameLowerCase())
+			name = name.toLowerCase();
+		if(actualEntry.isShortNameExtLowerCase())
+			ext = ext.toLowerCase();
+
+		if(!ext.isEmpty())
+			name = name + "." + ext;
+
+		return name;
 	}
 
 	/**
