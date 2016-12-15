@@ -201,6 +201,6 @@ public class UsbFileHttpServer extends NanoHTTPD {
     }
 
     private InputStream createInputStream(UsbFile file) {
-        return new BufferedInputStream(new UsbFileInputStream(file), 4096);
+        return new UsbFileInputStream(file);
     }
 }
