@@ -64,6 +64,7 @@ public class ClusterChain {
 		chain = fat.getChain(startCluster);
 		clusterSize = bootSector.getBytesPerCluster();
 		dataAreaOffset = bootSector.getDataAreaOffset();
+		Log.d(TAG, "Finished init of a cluster chain");
 	}
 
 	/**
