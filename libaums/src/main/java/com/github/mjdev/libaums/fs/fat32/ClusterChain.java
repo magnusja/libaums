@@ -58,6 +58,7 @@ public class ClusterChain {
 	 */
 	/* package */ClusterChain(long startCluster, BlockDeviceDriver blockDevice, FAT fat,
 			Fat32BootSector bootSector) throws IOException {
+		Log.d(TAG, "Init a cluster chain, reading from FAT");
 		this.fat = fat;
 		this.blockDevice = blockDevice;
 		chain = fat.getChain(startCluster);
