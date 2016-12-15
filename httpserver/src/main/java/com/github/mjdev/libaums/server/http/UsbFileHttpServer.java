@@ -19,6 +19,7 @@ package com.github.mjdev.libaums.server.http;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.util.LruCache;
 
 import com.github.mjdev.libaums.fs.UsbFile;
 import com.github.mjdev.libaums.fs.UsbFileInputStream;
@@ -44,6 +45,7 @@ public class UsbFileHttpServer extends NanoHTTPD {
 
     private static final String TAG = UsbFile.class.getSimpleName();
     private UsbFile rootFile;
+    private LruCache<String, UsbFile> fileCache = new LruCache<>(100);
 
     public UsbFileHttpServer(String hostname, int port, @NonNull UsbFile file) {
         super(hostname, port);
@@ -72,6 +74,13 @@ public class UsbFileHttpServer extends NanoHTTPD {
     }
 
     @Override
+    public void stop() {
+        super.stop();
+
+        fileCache.evictAll();
+    }
+
+    @Override
     public Response serve(IHTTPSession session) {
         String uri;
         try {
@@ -87,27 +96,33 @@ public class UsbFileHttpServer extends NanoHTTPD {
         Map<String, String> headers = session.getHeaders();
         String range = headers.get("range");
 
-        UsbFile fileToServe;
+        UsbFile fileToServe = fileCache.get(uri);
 
-        if(!rootFile.isDirectory()) {
-            Log.d(TAG, "Serving root file");
-            if(!"/".equals(uri) && !("/" + rootFile.getName()).equals(uri)) {
-                Log.d(TAG, "Invalid request, respond with 404");
-                // return a 404
-                return super.serve(session);
+        if (fileToServe == null) {
+            Log.d(TAG, "Searching file on USB (URI: " + uri + ")");
+            if(!rootFile.isDirectory()) {
+                Log.d(TAG, "Serving root file");
+                if(!"/".equals(uri) && !("/" + rootFile.getName()).equals(uri)) {
+                    Log.d(TAG, "Invalid request, respond with 404");
+                    // return a 404
+                    return super.serve(session);
+                }
+
+
+                fileToServe = rootFile;
+            } else {
+                try {
+                    fileToServe = rootFile.search(uri.substring(1));
+                } catch (IOException e) {
+                    Log.e(TAG, "IOException", e);
+                    return newFixedLengthResponse(Response.Status.FORBIDDEN,
+                            NanoHTTPD.MIME_HTML, "IOException");
+                }
             }
-
-
-            fileToServe = rootFile;
         } else {
-            try {
-                fileToServe = rootFile.search(uri.substring(1));
-            } catch (IOException e) {
-                Log.e(TAG, "IOException", e);
-                return newFixedLengthResponse(Response.Status.FORBIDDEN,
-                        NanoHTTPD.MIME_HTML, "IOException");
-            }
+            Log.d(TAG, "Using lru cache for " + uri);
         }
+
 
         if(fileToServe == null) {
             Log.d(TAG, "fileToServe == null");
@@ -115,6 +130,8 @@ public class UsbFileHttpServer extends NanoHTTPD {
             // return a 404
             return super.serve(session);
         }
+
+        fileCache.put(uri, fileToServe);
 
         if(fileToServe.isDirectory()) {
             return newFixedLengthResponse(Response.Status.BAD_REQUEST,
