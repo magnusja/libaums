@@ -21,6 +21,7 @@ import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Debug;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
@@ -48,12 +49,16 @@ public class UsbFileHttpServerService extends Service {
     public void startServer(UsbFile file) throws IOException {
         startAsForeground();
 
+        Debug.startMethodTracing("serve");
+
         server = new UsbFileHttpServer(file);
         server.start();
     }
 
     public void stopServer() {
         server.stop();
+
+        Debug.stopMethodTracing();
 
         stopForeground();
     }
