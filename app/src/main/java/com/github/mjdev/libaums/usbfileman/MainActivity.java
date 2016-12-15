@@ -29,6 +29,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.NoSuchElementException;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -43,6 +44,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
@@ -53,6 +55,9 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.provider.OpenableColumns;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -97,7 +102,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     private static final int COPY_STORAGE_PROVIDER_RESULT = 0;
     private static final int OPEN_STORAGE_PROVIDER_RESULT = 1;
 
-    private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
+	private static final int REQUEST_EXT_STORAGE_WRITE_PERM = 0;
+
+	private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 
@@ -716,8 +723,23 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			if (entry.isDirectory()) {
 				dirs.push(adapter.getCurrentDir());
 				listView.setAdapter(adapter = new UsbFileListAdapter(this, entry));
-
 			} else {
+
+				if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+						!= PackageManager.PERMISSION_GRANTED) {
+
+					if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+							Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+						Toast.makeText(this, R.string.request_write_storage_perm, Toast.LENGTH_LONG).show();
+					} else {
+						ActivityCompat.requestPermissions(this,
+								new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+								REQUEST_EXT_STORAGE_WRITE_PERM);
+					}
+
+					return;
+				}
+
 				CopyTaskParam param = new CopyTaskParam();
 				param.from = entry;
 				File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath()
@@ -775,6 +797,23 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                     Toast.LENGTH_LONG).show();
         }
     }
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+		switch (requestCode) {
+			case REQUEST_EXT_STORAGE_WRITE_PERM: {
+				// If request is cancelled, the result arrays are empty.
+				if (grantResults.length > 0
+						&& grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+					Toast.makeText(this, R.string.permission_granted, Toast.LENGTH_LONG).show();
+				} else {
+					Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_LONG).show();
+				}
+			}
+
+		}
+	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
