@@ -167,7 +167,7 @@ import java.util.List;
 	/* package */String getName() {
 		if (lfnName != null)
 			return lfnName;
-		return actualEntry.getShortName().getString();
+		return actualEntry.getShortName().getString().toLowerCase();
 	}
 
 	/**
