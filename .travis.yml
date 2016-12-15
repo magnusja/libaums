@@ -3,9 +3,7 @@ jdk: oraclejdk8
 android:
   components:
     - tools
-    - platform-tools
-    - tools
-    - build-tools-25.0.2
+    - build-tools-25.0.1
     - android-25
 
     # Additional components
@@ -13,11 +11,6 @@ android:
     - extra-google-m2repository
     - extra-android-m2repository
     - addon-google_apis-google-19
-
-licenses:
-    - 'android-sdk-preview-license-.+'
-    - 'android-sdk-license-.+'
-    - 'google-gdk-license-.+'
 
 env:
   global:
