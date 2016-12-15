@@ -733,9 +733,11 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 						Toast.makeText(this, R.string.request_write_storage_perm, Toast.LENGTH_LONG).show();
 					} else {
 						ActivityCompat.requestPermissions(this,
-								new String[]{Manifest.permission.READ_CONTACTS},
+								new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
 								REQUEST_EXT_STORAGE_WRITE_PERM);
 					}
+
+					return;
 				}
 
 				CopyTaskParam param = new CopyTaskParam();
