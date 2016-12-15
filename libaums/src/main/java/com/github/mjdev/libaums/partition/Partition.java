@@ -118,7 +118,7 @@ public class Partition implements BlockDeviceDriver {
 		// TODO try to make this more efficient by for example making tmp buffer
 		// global
 		if (offset % blockSize != 0) {
-			Log.w(TAG, "device offset not a multiple of block size");
+			Log.w(TAG, "device offset " + offset + " not a multiple of block size");
 			ByteBuffer tmp = ByteBuffer.allocate(blockSize);
 
 			blockDevice.read(devOffset, tmp);
@@ -154,7 +154,7 @@ public class Partition implements BlockDeviceDriver {
 		// TODO try to make this more efficient by for example making tmp buffer
 		// global
 		if (offset % blockSize != 0) {
-			Log.w(TAG, "device offset not a multiple of block size");
+			Log.w(TAG, "device offset " + offset + " not a multiple of block size");
 			ByteBuffer tmp = ByteBuffer.allocate(blockSize);
 
 			blockDevice.read(devOffset, tmp);
