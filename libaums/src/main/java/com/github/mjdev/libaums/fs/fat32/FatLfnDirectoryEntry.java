@@ -170,17 +170,24 @@ import java.util.List;
 
 		// https://en.wikipedia.org/wiki/8.3_filename#Compatibility
 		String sname = actualEntry.getShortName().getString();
-		String[] split = sname.split(".");
+		String name = sname;
+		String ext = "";
 
-		String name = split[0];
-		String ext = split[0];
+		String[] split = sname.split(".");
+		if(split.length == 2) {
+			name = split[0];
+			ext = split[0];
+		}
 
 		if(actualEntry.isShortNameLowerCase())
 			name = name.toLowerCase();
 		if(actualEntry.isShortNameExtLowerCase())
 			ext = ext.toLowerCase();
 
-		return name + "." + ext;
+		if(!ext.isEmpty())
+			name = name + "." + ext;
+
+		return name;
 	}
 
 	/**
