@@ -118,12 +118,14 @@ public class Partition implements BlockDeviceDriver {
 		// TODO try to make this more efficient by for example making tmp buffer
 		// global
 		if (offset % blockSize != 0) {
-			Log.w(TAG, "device offset " + offset + " not a multiple of block size");
+			//Log.w(TAG, "device offset " + offset + " not a multiple of block size");
 			ByteBuffer tmp = ByteBuffer.allocate(blockSize);
 
 			blockDevice.read(devOffset, tmp);
 			tmp.clear();
 			tmp.position((int) (offset % blockSize));
+			int limit = Math.min(dest.remaining(), tmp.capacity());
+			tmp.limit(limit);
 			dest.put(tmp);
 
 			devOffset++;
@@ -132,7 +134,7 @@ public class Partition implements BlockDeviceDriver {
 		if (dest.remaining() > 0) {
 			ByteBuffer buffer;
 			if (dest.remaining() % blockSize != 0) {
-				Log.w(TAG, "we have to round up size to next block sector");
+				//Log.w(TAG, "we have to round up size to next block sector");
 				int rounded = blockSize - dest.remaining() % blockSize + dest.remaining();
 				buffer = ByteBuffer.allocate(rounded);
 				buffer.limit(rounded);
@@ -154,7 +156,7 @@ public class Partition implements BlockDeviceDriver {
 		// TODO try to make this more efficient by for example making tmp buffer
 		// global
 		if (offset % blockSize != 0) {
-			Log.w(TAG, "device offset " + offset + " not a multiple of block size");
+			//Log.w(TAG, "device offset " + offset + " not a multiple of block size");
 			ByteBuffer tmp = ByteBuffer.allocate(blockSize);
 
 			blockDevice.read(devOffset, tmp);
@@ -174,7 +176,7 @@ public class Partition implements BlockDeviceDriver {
             // blockSize and making it global
             ByteBuffer buffer;
             if (src.remaining() % blockSize != 0) {
-                Log.w(TAG, "we have to round up size to next block sector");
+                //Log.w(TAG, "we have to round up size to next block sector");
                 int rounded = blockSize - src.remaining() % blockSize + src.remaining();
                 buffer = ByteBuffer.allocate(rounded);
                 buffer.limit(rounded);
