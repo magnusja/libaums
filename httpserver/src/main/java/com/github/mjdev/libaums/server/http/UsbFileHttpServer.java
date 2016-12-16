@@ -26,6 +26,7 @@ import com.github.mjdev.libaums.fs.UsbFileInputStream;
 
 
 import java.io.BufferedInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -43,7 +44,7 @@ import fi.iki.elonen.NanoHTTPD;
  */
 public class UsbFileHttpServer extends NanoHTTPD {
 
-    private static final String TAG = UsbFile.class.getSimpleName();
+    private static final String TAG = UsbFileHttpServer.class.getSimpleName();
     private UsbFile rootFile;
     private LruCache<String, UsbFile> fileCache = new LruCache<>(100);
 
@@ -96,46 +97,18 @@ public class UsbFileHttpServer extends NanoHTTPD {
         Map<String, String> headers = session.getHeaders();
         String range = headers.get("range");
 
-        UsbFile fileToServe = fileCache.get(uri);
-
-        if (fileToServe == null) {
-            Log.d(TAG, "Searching file on USB (URI: " + uri + ")");
-            if(!rootFile.isDirectory()) {
-                Log.d(TAG, "Serving root file");
-                if(!"/".equals(uri) && !("/" + rootFile.getName()).equals(uri)) {
-                    Log.d(TAG, "Invalid request, respond with 404");
-                    // return a 404
-                    return super.serve(session);
-                }
-
-
-                fileToServe = rootFile;
-            } else {
-                try {
-                    fileToServe = rootFile.search(uri.substring(1));
-                } catch (IOException e) {
-                    Log.e(TAG, "IOException", e);
-                    return newFixedLengthResponse(Response.Status.FORBIDDEN,
-                            NanoHTTPD.MIME_HTML, "IOException");
-                }
-            }
-        } else {
-            Log.d(TAG, "Using lru cache for " + uri);
-        }
-
-
-        if(fileToServe == null) {
-            Log.d(TAG, "fileToServe == null");
-
-            // return a 404
-            return super.serve(session);
-        }
-
-        fileCache.put(uri, fileToServe);
-
-        if(fileToServe.isDirectory()) {
+        UsbFile fileToServe = null;
+        try {
+            fileToServe = determineFileToServe(uri);
+        } catch (FileNotFoundException e) {
+            return newFixedLengthResponse(Response.Status.NOT_FOUND,
+                    NanoHTTPD.MIME_HTML, e.getMessage());
+        } catch (NotAFileException e) {
             return newFixedLengthResponse(Response.Status.BAD_REQUEST,
-                    NanoHTTPD.MIME_HTML, "Directory listing not supported");
+                    NanoHTTPD.MIME_HTML, e.getMessage());
+        } catch (IOException e) {
+            return newFixedLengthResponse(Response.Status.INTERNAL_ERROR,
+                    NanoHTTPD.MIME_HTML, e.getMessage());
         }
 
         if(range == null) {
@@ -145,10 +118,46 @@ public class UsbFileHttpServer extends NanoHTTPD {
                 return serveRangeOfFile(fileToServe, range);
             } catch (IOException e) {
                 Log.e(TAG, "IOException", e);
-                return newFixedLengthResponse(Response.Status.FORBIDDEN,
-                        NanoHTTPD.MIME_HTML, "IOException");
+                return newFixedLengthResponse(Response.Status.INTERNAL_ERROR,
+                        NanoHTTPD.MIME_HTML, e.getMessage());
             }
         }
+    }
+
+    private UsbFile determineFileToServe(String uri) throws IOException {
+        UsbFile fileToServe = fileCache.get(uri);
+
+        if (fileToServe == null) {
+            Log.d(TAG, "Searching file on USB (URI: " + uri + ")");
+            if(!rootFile.isDirectory()) {
+                Log.d(TAG, "Serving root file");
+                if(!"/".equals(uri) && !("/" + rootFile.getName()).equals(uri)) {
+                    Log.d(TAG, "Invalid request, respond with 404");
+                    throw new FileNotFoundException(uri);
+                }
+
+
+                fileToServe = rootFile;
+            } else {
+                fileToServe = rootFile.search(uri.substring(1));
+            }
+        } else {
+            Log.d(TAG, "Using lru cache for " + uri);
+        }
+
+
+        if(fileToServe == null) {
+            Log.d(TAG, "fileToServe == null");
+            throw new FileNotFoundException(uri);
+        }
+
+        if(fileToServe.isDirectory()) {
+            throw new NotAFileException();
+        }
+
+        fileCache.put(uri, fileToServe);
+
+        return fileToServe;
     }
 
     private Response serveCompleteFile(UsbFile file) {
