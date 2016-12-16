@@ -83,6 +83,7 @@ import com.github.mjdev.libaums.fs.UsbFileInputStream;
 import com.github.mjdev.libaums.fs.UsbFileOutputStream;
 import com.github.mjdev.libaums.fs.UsbFileStreamFactory;
 import com.github.mjdev.libaums.server.http.UsbFileHttpServerService;
+import com.github.mjdev.libaums.server.http.server.NanoHttpdServer;
 
 /**
  * MainActivity of the demo application which shows the contents of the first
@@ -776,7 +777,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
         // now start the server
         try {
-            serverService.startServer(file);
+            serverService.startServer(file, new NanoHttpdServer(8000));
             Toast.makeText(MainActivity.this, "HTTP server up and running", Toast.LENGTH_LONG).show();
         } catch (IOException e) {
             Log.e(TAG, "Error starting HTTP server", e);

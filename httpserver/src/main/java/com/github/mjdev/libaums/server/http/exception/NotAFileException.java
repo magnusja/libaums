@@ -1,4 +1,4 @@
-package com.github.mjdev.libaums.server.http;
+package com.github.mjdev.libaums.server.http.exception;
 
 import java.io.IOException;
 
@@ -7,7 +7,7 @@ import java.io.IOException;
  */
 
 public class NotAFileException extends IOException {
-    NotAFileException() {
+    public NotAFileException() {
         super("Directory listing is not supported, please request a file.");
     }
 }
