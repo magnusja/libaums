@@ -30,12 +30,12 @@ public class AsyncHttpServer implements HttpServer, HttpServerRequestCallback {
     public AsyncHttpServer(int port) {
         this.port = port;
 
-        server.get("/", this);
+        server.get("/.*", this);
     }
 
     @Override
     public void start() throws IOException {
-        server.listen(5000);
+        server.listen(port);
         isAlive = true;
     }
 
