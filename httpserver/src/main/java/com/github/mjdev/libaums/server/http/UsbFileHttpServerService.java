@@ -27,7 +27,6 @@ import android.util.Log;
 
 import com.github.mjdev.libaums.fs.UsbFile;
 import com.github.mjdev.libaums.server.http.server.HttpServer;
-import com.github.mjdev.libaums.server.http.server.NanoHttpdServer;
 
 import java.io.IOException;
 

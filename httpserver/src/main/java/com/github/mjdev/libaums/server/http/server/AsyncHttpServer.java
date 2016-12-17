@@ -13,7 +13,6 @@ import com.koushikdutta.async.http.server.HttpServerRequestCallback;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import fi.iki.elonen.NanoHTTPD;
 
 /**
  * Created by magnusja on 16/12/16.
