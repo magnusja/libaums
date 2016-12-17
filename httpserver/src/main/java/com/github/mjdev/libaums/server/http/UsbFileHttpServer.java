@@ -79,7 +79,7 @@ public class UsbFileHttpServer implements UsbFileProvider {
                 Log.d(TAG, "Serving root file");
                 if(!"/".equals(uri) && !("/" + rootFile.getName()).equals(uri)) {
                     Log.d(TAG, "Invalid request, respond with 404");
-                    throw new FileNotFoundException(uri);
+                    throw new FileNotFoundException("Not found " + uri);
                 }
 
 
@@ -94,7 +94,7 @@ public class UsbFileHttpServer implements UsbFileProvider {
 
         if(fileToServe == null) {
             Log.d(TAG, "fileToServe == null");
-            throw new FileNotFoundException(uri);
+            throw new FileNotFoundException("Not found " + uri);
         }
 
         if(fileToServe.isDirectory()) {
