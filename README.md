@@ -119,11 +119,11 @@ After that apps using the Storage Access Framework will be able to access the fi
 2. When copying a file always set the length via `UsbFile.setLength(long)` first. Otherwise the ClusterChain has to be increased for every call to write. This is very inefficent.
 3. Always use FileSystem.getChunkSize() bytes as buffer size, because this alignes with the block sizes drives are using. Everything else is also most likeley a decrease in performance.
 4. A good idea is to wrap the UsbFileInputStream/UsbFileOutputStream into BufferedInputStream/BufferedOutputStream
-Libaums - Library to access USB Mass Storage Devices  
-License: Apache 2.0 (see license.txt for details)
 
 #### Thesis
 
+Libaums - Library to access USB Mass Storage Devices  
+License: Apache 2.0 (see license.txt for details)
 Author: Magnus Jahnen, jahnen at in.tum.de  
 Advisor: Nils Kannengießer, nils.kannengiesser at tum.de  
 Supervisor: Prof. Uwe Baumgarten, baumgaru at in.tum.de  
