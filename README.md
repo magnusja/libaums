@@ -35,5 +35,5 @@ For examples on how to use the library, please have a look at the main activity 
 #### Hints
 
 1. When copying a file always set the length via `UsbFile.setLength(long)` first. Otherwise the ClusterChain has to be increased for every call to write. This is very inefficent.
-2. Always use 4096 bytes as buffer size, because this alignes with the block sizes drives are using. Everything else is also most likeley a decrease in performance.
+2. Always use FileSystem.getChunkSize() bytes as buffer size, because this alignes with the block sizes drives are using. Everything else is also most likeley a decrease in performance.
 3. A good idea is to wrap the UsbFileInputStream/UsbFileOutputStream into BufferedInputStream/BufferedOutputStream
