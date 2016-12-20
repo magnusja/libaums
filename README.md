@@ -12,14 +12,14 @@ A library to access USB mass storage devices (pen drives, external HDDs, card re
 
 The library can be included into your project like this:
 
-```
+```ruby
 compile 'com.github.mjdev:libaums:0.4.0'
 ```
 
 ### Basics
 #### Getting mass storage devices
 
-```
+```java
 UsbMassStorageDevice[] devices = UsbMassStorageDevice.getMassStorageDevices(this /* Activity */);
 
 for(UsbDevice device: devices) {
@@ -40,7 +40,7 @@ for(UsbDevice device: devices) {
 
 Your app needs to get permission from the user at run time to be able to communicate the device. From a `UsbMassStorageDevice` you can get the underlying `android.usb.UsbDevice` to do so.
 
-```
+```java
 PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Inten(ACTION_USB_PERMISSION), 0);
 usbManager.requestPermission(device.getUsbDevice(), permissionIntent);
 ```
@@ -49,7 +49,7 @@ For more information regarding permissions please check out the Android document
 
 #### Working with files and folders
 
-```
+```java
 UsbFile root = currentFs.getRootDirectory();
 
 UsbFile[] files = root.listFiles();
@@ -77,7 +77,7 @@ is.read(buffer);
 
 #### Using buffered streams for more efficency
 
-```
+```java
 OutputStream os = UsbFileStreamFactory.createBufferedOutputStream(file, currentFs);
 InputStream is = UsbFileStreamFactory.createBufferedInputStream(file, currentFs);
 ```
@@ -92,7 +92,7 @@ To learn more about this visit: https://developer.android.com/guide/topics/provi
 
 To integrate this module in your app the only thing you have to do is add the definition in your AndroidManifest.xml.
 
-```
+```xml
 <provider
     android:name="com.github.mjdev.libaums.storageprovider.UsbDocumentProvider"
     android:authorities="com.github.mjdev.libaums.storageprovider.documents"
