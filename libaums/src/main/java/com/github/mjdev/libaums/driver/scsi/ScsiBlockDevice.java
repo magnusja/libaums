@@ -23,7 +23,7 @@ import java.util.Arrays;
 
 import android.util.Log;
 
-import com.github.mjdev.libaums.UsbCommunication;
+import com.github.mjdev.libaums.usb.UsbCommunication;
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper;
 import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper.Direction;

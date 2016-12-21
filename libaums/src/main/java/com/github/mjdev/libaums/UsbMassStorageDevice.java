@@ -39,6 +39,8 @@ import com.github.mjdev.libaums.partition.Partition;
 import com.github.mjdev.libaums.partition.PartitionTable;
 import com.github.mjdev.libaums.partition.PartitionTableEntry;
 import com.github.mjdev.libaums.partition.PartitionTableFactory;
+import com.github.mjdev.libaums.usb.UsbCommunication;
+import com.github.mjdev.libaums.usb.UsbCommunicationFactory;
 
 /**
  * Class representing a connected USB mass storage device. You can enumerate
@@ -63,83 +65,6 @@ import com.github.mjdev.libaums.partition.PartitionTableFactory;
  */
 public class UsbMassStorageDevice {
 
-	/**
-	 * Usb communication which uses the newer API in Android Jelly Bean MR2 (API
-	 * level 18). It just delegates the calls to the {@link UsbDeviceConnection}
-	 * .
-	 * 
-	 * @author mjahnen
-	 * 
-	 */
-	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-	private class JellyBeanMr2Communication implements UsbCommunication {
-		@Override
-		public int bulkOutTransfer(byte[] buffer, int length) {
-			return deviceConnection.bulkTransfer(outEndpoint, buffer, length, TRANSFER_TIMEOUT);
-		}
-
-		@Override
-		public int bulkOutTransfer(byte[] buffer, int offset, int length) {
-			return deviceConnection.bulkTransfer(outEndpoint, buffer, offset, length,
-					TRANSFER_TIMEOUT);
-		}
-
-		@Override
-		public int bulkInTransfer(byte[] buffer, int length) {
-			return deviceConnection.bulkTransfer(inEndpoint, buffer, length, TRANSFER_TIMEOUT);
-		}
-
-		@Override
-		public int bulkInTransfer(byte[] buffer, int offset, int length) {
-			return deviceConnection.bulkTransfer(inEndpoint, buffer, offset, length,
-					TRANSFER_TIMEOUT);
-		}
-	}
-
-	/**
-	 * On Android API level lower 18 (Jelly Bean MR2) we cannot specify a start
-	 * offset in the source/destination array. Because of that we have to use
-	 * this workaround, where we have to copy the data every time offset is non
-	 * zero.
-	 * 
-	 * @author mjahnen
-	 * 
-	 */
-	private class HoneyCombMr1Communication implements UsbCommunication {
-		@Override
-		public int bulkOutTransfer(byte[] buffer, int length) {
-			return deviceConnection.bulkTransfer(outEndpoint, buffer, length, TRANSFER_TIMEOUT);
-		}
-
-		@Override
-		public int bulkOutTransfer(byte[] buffer, int offset, int length) {
-			if (offset == 0)
-				return deviceConnection.bulkTransfer(outEndpoint, buffer, length, TRANSFER_TIMEOUT);
-
-			byte[] tmpBuffer = new byte[length];
-			System.arraycopy(buffer, offset, tmpBuffer, 0, length);
-			return deviceConnection.bulkTransfer(outEndpoint, tmpBuffer, length,
-					TRANSFER_TIMEOUT);
-		}
-
-		@Override
-		public int bulkInTransfer(byte[] buffer, int length) {
-			return deviceConnection.bulkTransfer(inEndpoint, buffer, length, TRANSFER_TIMEOUT);
-		}
-
-		@Override
-		public int bulkInTransfer(byte[] buffer, int offset, int length) {
-			if (offset == 0)
-				return deviceConnection.bulkTransfer(inEndpoint, buffer, length, TRANSFER_TIMEOUT);
-
-			byte[] tmpBuffer = new byte[length];
-			int result = deviceConnection.bulkTransfer(inEndpoint, tmpBuffer, length,
-					TRANSFER_TIMEOUT);
-			System.arraycopy(tmpBuffer, 0, buffer, offset, length);
-			return result;
-		}
-	}
-
 	private static final String TAG = UsbMassStorageDevice.class.getSimpleName();
 
 	/**
@@ -152,8 +77,6 @@ public class UsbMassStorageDevice {
 	 * protocol 80 means the communication happens only via bulk transfers
 	 */
 	private static final int INTERFACE_PROTOCOL = 80;
-
-	private static int TRANSFER_TIMEOUT = 21000;
 
 	private UsbManager usbManager;
 	private UsbDeviceConnection deviceConnection;
@@ -272,11 +195,11 @@ public class UsbMassStorageDevice {
 
 	/**
 	 * Sets the device up. Claims interface and initiates the device connection.
-	 * Chooses the right{@link com.github.mjdev.libaums.UsbCommunication}
+	 * Chooses the right{@link UsbCommunication}
 	 * depending on the Android version (
-	 * {@link com.github.mjdev.libaums.UsbMassStorageDevice.HoneyCombMr1Communication}
+	 * {@link com.github.mjdev.libaums.usb.HoneyCombMr1Communication}
 	 * or (
-	 * {@link com.github.mjdev.libaums.UsbMassStorageDevice.JellyBeanMr2Communication}
+	 * {@link com.github.mjdev.libaums.usb.JellyBeanMr2Communication}
 	 * ).
 	 * <p>
 	 * Initializes the {@link #blockDevice} and reads the partitions.
@@ -299,14 +222,7 @@ public class UsbMassStorageDevice {
 			return;
 		}
 
-		UsbCommunication communication;
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-			communication = new JellyBeanMr2Communication();
-		} else {
-			Log.i(TAG, "using workaround usb communication");
-			communication = new HoneyCombMr1Communication();
-		}
-
+		UsbCommunication communication = UsbCommunicationFactory.createUsbCommunication(deviceConnection, inEndpoint, outEndpoint);
 		blockDevice = BlockDeviceDriverFactory.createBlockDevice(communication);
 		blockDevice.init();
 		partitionTable = PartitionTableFactory.createPartitionTable(blockDevice);

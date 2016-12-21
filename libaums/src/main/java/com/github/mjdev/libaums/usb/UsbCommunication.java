@@ -15,7 +15,7 @@
  * 
  */
 
-package com.github.mjdev.libaums;
+package com.github.mjdev.libaums.usb;
 
 /**
  * This Interface describes a low level device to perform USB transfers. At the
@@ -27,6 +27,8 @@ package com.github.mjdev.libaums;
  * 
  */
 public interface UsbCommunication {
+	int TRANSFER_TIMEOUT = 21000;
+
 	/**
 	 * Performs a bulk out transfer beginning at offset zero in the
 	 * <code>buffer</code> with the given <code>length</code>.
@@ -41,7 +43,7 @@ public interface UsbCommunication {
 	 * @return Bytes transmitted if successful, or -1.
 	 * @see #bulkInTransfer(byte[], int, int)
 	 */
-	public int bulkOutTransfer(byte[] buffer, int length);
+	int bulkOutTransfer(byte[] buffer, int length);
 
 	/**
 	 * Performs a bulk out transfer beginning at the given offset in the
@@ -57,7 +59,7 @@ public interface UsbCommunication {
 	 * @return Bytes transmitted if successful, or -1.
 	 * @see #bulkInTransfer(byte[], int)
 	 */
-	public int bulkOutTransfer(byte[] buffer, int offset, int length);
+	int bulkOutTransfer(byte[] buffer, int offset, int length);
 
 	/**
 	 * Performs a bulk in transfer beginning at offset zero in the
@@ -73,7 +75,7 @@ public interface UsbCommunication {
 	 * @return Bytes read if successful, or -1.
 	 * @see #bulkInTransfer(byte[], int, int)
 	 */
-	public int bulkInTransfer(byte[] buffer, int length);
+	int bulkInTransfer(byte[] buffer, int length);
 
 	/**
 	 * Performs a bulk in transfer beginning at the given offset in the
@@ -89,5 +91,5 @@ public interface UsbCommunication {
 	 * @return Bytes read if successful, or -1.
 	 * @see #bulkInTransfer(byte[], int)
 	 */
-	public int bulkInTransfer(byte[] buffer, int offset, int length);
+	int bulkInTransfer(byte[] buffer, int offset, int length);
 }
