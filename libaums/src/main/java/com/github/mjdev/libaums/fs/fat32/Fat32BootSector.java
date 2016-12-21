@@ -238,4 +238,21 @@ import java.nio.ByteOrder;
 	/* package */String getVolumeLabel() {
 		return volumeLabel;
 	}
+
+	@Override
+	public String toString() {
+		return "Fat32BootSector{" +
+				"bytesPerSector=" + bytesPerSector +
+				", sectorsPerCluster=" + sectorsPerCluster +
+				", reservedSectors=" + reservedSectors +
+				", fatCount=" + fatCount +
+				", totalNumberOfSectors=" + totalNumberOfSectors +
+				", sectorsPerFat=" + sectorsPerFat +
+				", rootDirStartCluster=" + rootDirStartCluster +
+				", fsInfoStartSector=" + fsInfoStartSector +
+				", fatMirrored=" + fatMirrored +
+				", validFat=" + validFat +
+				", volumeLabel='" + volumeLabel + '\'' +
+				'}';
+	}
 }
