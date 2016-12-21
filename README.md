@@ -111,6 +111,7 @@ After that apps using the Storage Access Framework will be able to access the fi
 ### HTTP server
 
 libaums currently supports two different HTTP server libraries.
+
 1. [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd)
 2. [AsyncHttpServer](https://github.com/koush/AndroidAsync/blob/master/AndroidAsync/src/com/koushikdutta/async/http/server/AsyncHttpServer.java)
 
@@ -183,7 +184,7 @@ See the example app for additional details on that.
 3. Always use FileSystem.getChunkSize()` bytes as buffer size, because this alignes with the block sizes drives are using. Everything else is also most likeley a decrease in performance.
 4. A good idea is to wrap the UsbFileInputStream/UsbFileOutputStream into BufferedInputStream/BufferedOutputStream. Also see `UsbFileStreamFactory`.
 
-#### Thesis
+##### Thesis
 
 Libaums - Library to access USB Mass Storage Devices  
 License: Apache 2.0 (see license.txt for details)
