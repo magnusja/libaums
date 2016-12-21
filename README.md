@@ -22,7 +22,7 @@ compile 'com.github.mjdev:libaums:0.4.0'
 ```java
 UsbMassStorageDevice[] devices = UsbMassStorageDevice.getMassStorageDevices(this /* Context or Activity */);
 
-for(UsbDevice device: devices) {
+for(UsbMassStorageDevice device: devices) {
     
     // before interacting with a device you need to call init()!
     device.init();
