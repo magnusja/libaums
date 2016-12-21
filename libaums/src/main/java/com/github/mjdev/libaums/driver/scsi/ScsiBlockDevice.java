@@ -136,7 +136,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		command.serialize(outBuffer);
 		int written = usbCommunication.bulkOutTransfer(outArray, outArray.length);
 		if (written != outArray.length) {
-			Log.e(TAG, "Writing all bytes on command " + command + " failed!");
+			throw new IOException("Writing all bytes on command " + command + " failed!");
 		}
 
 		int transferLength = command.getdCbwDataTransferLength();
@@ -178,16 +178,16 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		// expecting csw now
 		read = usbCommunication.bulkInTransfer(cswBuffer, cswBuffer.length);
 		if (read != CommandStatusWrapper.SIZE) {
-			Log.e(TAG, "Unexpected command size while expecting csw");
+			throw new IOException("Unexpected command size while expecting csw");
 		}
 
 		CommandStatusWrapper csw = CommandStatusWrapper.read(ByteBuffer.wrap(cswBuffer));
 		if (csw.getbCswStatus() != CommandStatusWrapper.COMMAND_PASSED) {
-			Log.e(TAG, "Unsuccessful Csw status: " + csw.getbCswStatus());
+			throw new IOException("Unsuccessful Csw status: " + csw.getbCswStatus());
 		}
 
 		if (csw.getdCswTag() != command.getdCbwTag()) {
-			Log.e(TAG, "wrong csw tag!");
+			throw new IOException("wrong csw tag!");
 		}
 
 		return csw.getbCswStatus() == CommandStatusWrapper.COMMAND_PASSED;

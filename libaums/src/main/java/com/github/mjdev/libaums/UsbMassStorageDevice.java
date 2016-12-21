@@ -212,14 +212,12 @@ public class UsbMassStorageDevice {
 		Log.d(TAG, "setup device");
 		deviceConnection = usbManager.openDevice(usbDevice);
 		if (deviceConnection == null) {
-			Log.e(TAG, "deviceConnetion is null!");
-			return;
+			throw new IOException("deviceConnection is null!");
 		}
 
 		boolean claim = deviceConnection.claimInterface(usbInterface, true);
 		if (!claim) {
-			Log.e(TAG, "could not claim interface!");
-			return;
+			throw new IOException("could not claim interface!");
 		}
 
 		UsbCommunication communication = UsbCommunicationFactory.createUsbCommunication(deviceConnection, inEndpoint, outEndpoint);
