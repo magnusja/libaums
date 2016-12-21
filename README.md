@@ -85,7 +85,7 @@ InputStream is = UsbFileStreamFactory.createBufferedInputStream(file, currentFs)
 #### Cleaning up
 
 ```java
-// Don't forget to call UsbDevice.close() when you are finished
+// Don't forget to call UsbMassStorageDevice.close() when you are finished
 
 device.close();
 ```
