@@ -20,7 +20,7 @@ compile 'com.github.mjdev:libaums:0.4.0'
 #### Getting mass storage devices
 
 ```java
-UsbMassStorageDevice[] devices = UsbMassStorageDevice.getMassStorageDevices(this /* Activity */);
+UsbMassStorageDevice[] devices = UsbMassStorageDevice.getMassStorageDevices(this /* Context or Activity */);
 
 for(UsbDevice device: devices) {
     
@@ -110,15 +110,78 @@ After that apps using the Storage Access Framework will be able to access the fi
 
 ### HTTP server
 
+libaums currently supports two different HTTP server libraries.
+1. [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd)
+2. [AsyncHttpServer](https://github.com/koush/AndroidAsync/blob/master/AndroidAsync/src/com/koushikdutta/async/http/server/AsyncHttpServer.java)
+
+You can spin up a server pretty easy, you jsut have to decide for a HTTP server implementation.
+
+```java
+UsbFile file = ... // can be directory or file
+
+HttpServer server = AsyncHttpServer(8000); // port 8000
+// or
+HttpServer server = NanoHttpdServer(8000); // port 8000
+
+UsbFileHttpServer fileServer = new UsbFileHttpServer(file, server);
+fileServer.start();
+```
+
+The file you privde can either be an actual file or a directory:
+1. File: Accessible either via "/" or "/FILE_NAME"
+2. Directory: All files in this directory und sub directories are accessable via their names. Directory listing is not supported!
+
+If you want to be able to access these files when your app is in background, you should implement a service for that. There is an example available in the `httpserver` module. You can use it, but should subclass it or create your own to adapt it to your needs.
+
+```java
+private UsbFileHttpServerService serverService;
+
+ServiceConnection serviceConnection = new ServiceConnection() {
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        Log.d(TAG, "on service connected " + name);
+        UsbFileHttpServerService.ServiceBinder binder = (UsbFileHttpServerService.ServiceBinder) service;
+        serverService = binder.getService();
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+        Log.d(TAG, "on service disconnected " + name);
+        serverService = null;
+    }
+};
+
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+...
+    serviceIntent = new Intent(this, UsbFileHttpServerService.class);
+...
+}
+
+ @Override
+protected void onStart() {
+    super.onStart();
+
+    startService(serviceIntent);
+    bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+}
+
+private void startHttpServer(final UsbFile file) {
+...
+    serverService.startServer(file, new AsyncHttpServer(8000));
+...
+}
+```
+
+See the example app for additional details on that.
 
 
+#### Hints
 
-### Hints
-
-1. In the app/ directory you can find an example application using the library.
+1. In the `app/` directory you can find an example application using the library.
 2. When copying a file always set the length via `UsbFile.setLength(long)` first. Otherwise the ClusterChain has to be increased for every call to write. This is very inefficent.
-3. Always use FileSystem.getChunkSize() bytes as buffer size, because this alignes with the block sizes drives are using. Everything else is also most likeley a decrease in performance.
-4. A good idea is to wrap the UsbFileInputStream/UsbFileOutputStream into BufferedInputStream/BufferedOutputStream
+3. Always use FileSystem.getChunkSize()` bytes as buffer size, because this alignes with the block sizes drives are using. Everything else is also most likeley a decrease in performance.
+4. A good idea is to wrap the UsbFileInputStream/UsbFileOutputStream into BufferedInputStream/BufferedOutputStream. Also see `UsbFileStreamFactory`.
 
 #### Thesis
 
