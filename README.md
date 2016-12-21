@@ -82,6 +82,14 @@ OutputStream os = UsbFileStreamFactory.createBufferedOutputStream(file, currentF
 InputStream is = UsbFileStreamFactory.createBufferedInputStream(file, currentFs);
 ```
 
+#### Cleaning up
+
+```java
+// Don't forget to call UsbDevice.close() when you are finished
+
+device.close();
+```
+
 #### Provide access to external apps
 
 Usually third party apps do not have access to the files on a mass storage device if the Android system does mount the device or this app integrates this library itself. To solve this issue there are two additional modules to provide access to other app. One uses the Storage Access Framework feature of Android (API level >= 19) and the other one spins up an HTTP server to allow downloading or streaming.
