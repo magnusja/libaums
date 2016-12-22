@@ -18,7 +18,7 @@ public class UsbCommunicationFactory {
 
     private static final String TAG = UsbCommunicationFactory.class.getSimpleName();
 
-    private static UnderlyingUsbCommunication underlyingUsbCommunication = UnderlyingUsbCommunication.DEVICE_CONNECTION;
+    private static UnderlyingUsbCommunication underlyingUsbCommunication = UnderlyingUsbCommunication.USB_REQUEST;
 
     public static UsbCommunication createUsbCommunication(UsbDeviceConnection deviceConnection, UsbEndpoint outEndpoint, UsbEndpoint inEndpoint) {
         UsbCommunication communication;

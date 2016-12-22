@@ -13,9 +13,9 @@ import java.nio.ByteBuffer;
 
 class UsbRequestCommunication implements UsbCommunication {
 
-    UsbDeviceConnection deviceConnection;
-    UsbRequest outRequest;
-    UsbRequest inRequest;
+    private UsbDeviceConnection deviceConnection;
+    private UsbRequest outRequest;
+    private UsbRequest inRequest;
 
     UsbRequestCommunication(UsbDeviceConnection deviceConnection, UsbEndpoint outEndpoint, UsbEndpoint inEndpoint) {
         this.deviceConnection = deviceConnection;
@@ -31,12 +31,13 @@ class UsbRequestCommunication implements UsbCommunication {
     @Override
     public synchronized int bulkOutTransfer(ByteBuffer src) throws IOException {
         int length = src.remaining();
+        int oldPosition = src.position();
         if (!outRequest.queue(src, length)) {
             throw new IOException("Error queueing request.");
         }
 
         if (deviceConnection.requestWait() == outRequest) {
-            return length;
+            return src.position() - oldPosition;
         }
 
         throw new IOException("requestWait failed!");
@@ -45,12 +46,13 @@ class UsbRequestCommunication implements UsbCommunication {
     @Override
     public synchronized int bulkInTransfer(ByteBuffer dest) throws IOException {
         int length = dest.remaining();
+        int oldPosition = dest.position();
         if(!inRequest.queue(dest, length)) {
             throw new IOException("Error queueing request.");
         }
 
         if (deviceConnection.requestWait() == inRequest) {
-            return length;
+            return dest.position() - oldPosition;
         }
 
         throw new IOException("requestWait failed!");
