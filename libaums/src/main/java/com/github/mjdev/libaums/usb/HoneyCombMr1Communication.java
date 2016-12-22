@@ -65,7 +65,7 @@ class HoneyCombMr1Communication implements UsbCommunication {
                     dest.array(), dest.remaining(), TRANSFER_TIMEOUT);
 
             if (result == -1) {
-                throw new IOException("Could not write to device, result == -1");
+                throw new IOException("Could read from to device, result == -1");
             }
 
             dest.position(dest.position() + result);
@@ -77,7 +77,7 @@ class HoneyCombMr1Communication implements UsbCommunication {
         int result = deviceConnection.bulkTransfer(inEndpoint, tmpBuffer, dest.remaining(), TRANSFER_TIMEOUT);
 
         if (result == -1) {
-            throw new IOException("Could not write to device, result == -1");
+            throw new IOException("Could not read from device, result == -1");
         }
 
         System.arraycopy(tmpBuffer, 0, dest.array(), offset, result);

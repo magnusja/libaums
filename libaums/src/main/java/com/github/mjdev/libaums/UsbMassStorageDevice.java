@@ -220,7 +220,7 @@ public class UsbMassStorageDevice {
 			throw new IOException("could not claim interface!");
 		}
 
-		UsbCommunication communication = UsbCommunicationFactory.createUsbCommunication(deviceConnection, inEndpoint, outEndpoint);
+		UsbCommunication communication = UsbCommunicationFactory.createUsbCommunication(deviceConnection, outEndpoint, inEndpoint);
 		blockDevice = BlockDeviceDriverFactory.createBlockDevice(communication);
 		blockDevice.init();
 		partitionTable = PartitionTableFactory.createPartitionTable(blockDevice);
