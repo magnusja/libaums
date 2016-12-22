@@ -31,27 +31,38 @@ class HoneyCombMr1Communication implements UsbCommunication {
     public int bulkOutTransfer(ByteBuffer src) throws IOException {
         int offset = src.position();
 
-        if (offset == 0)
-            return deviceConnection.bulkTransfer(outEndpoint,
+        if (offset == 0) {
+            int result =  deviceConnection.bulkTransfer(outEndpoint,
                     src.array(), src.remaining(), TRANSFER_TIMEOUT);
+            src.position(src.position() + result);
+            return result;
+        }
 
         byte[] tmpBuffer = new byte[src.remaining()];
         System.arraycopy(src.array(), offset, tmpBuffer, 0, src.remaining());
-        return deviceConnection.bulkTransfer(outEndpoint,
+        int result =  deviceConnection.bulkTransfer(outEndpoint,
                 tmpBuffer, src.remaining(), TRANSFER_TIMEOUT);
+        src.position(src.position() + result);
+        return result;
     }
 
     @Override
     public int bulkInTransfer(ByteBuffer dest) throws IOException {
         int offset = dest.position();
 
-        if (offset == 0)
-            return deviceConnection.bulkTransfer(inEndpoint,
+        if (offset == 0) {
+            int result = deviceConnection.bulkTransfer(inEndpoint,
                     dest.array(), dest.remaining(), TRANSFER_TIMEOUT);
+
+            dest.position(dest.position() + result);
+            return result;
+
+        }
 
         byte[] tmpBuffer = new byte[dest.remaining()];
         int result = deviceConnection.bulkTransfer(inEndpoint, tmpBuffer, dest.remaining(), TRANSFER_TIMEOUT);
-        System.arraycopy(tmpBuffer, 0, dest.array(), offset, dest.remaining());
+        System.arraycopy(tmpBuffer, 0, dest.array(), offset, result);
+        dest.position(dest.position() + result);
         return result;
     }
 }

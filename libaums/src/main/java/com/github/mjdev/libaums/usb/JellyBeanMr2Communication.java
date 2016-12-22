@@ -35,13 +35,17 @@ class JellyBeanMr2Communication implements UsbCommunication {
 
     @Override
     public int bulkOutTransfer(ByteBuffer src) throws IOException {
-        return deviceConnection.bulkTransfer(outEndpoint,
+        int result = deviceConnection.bulkTransfer(outEndpoint,
                 src.array(), src.position(), src.remaining(), TRANSFER_TIMEOUT);
+        src.position(src.position() + result);
+        return result;
     }
 
     @Override
     public int bulkInTransfer(ByteBuffer dest) throws IOException {
-        return deviceConnection.bulkTransfer(inEndpoint,
+        int result = deviceConnection.bulkTransfer(inEndpoint,
                 dest.array(), dest.position(), dest.remaining(), TRANSFER_TIMEOUT);
+        dest.position(dest.position() + result);
+        return result;
     }
 }
