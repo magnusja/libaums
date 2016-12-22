@@ -83,6 +83,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		ByteBuffer inBuffer = ByteBuffer.allocate(36);
 		ScsiInquiry inquiry = new ScsiInquiry((byte) inBuffer.array().length);
 		transferCommand(inquiry, inBuffer);
+		inBuffer.clear();
 		// TODO support multiple luns!
 		ScsiInquiryResponse inquiryResponse = ScsiInquiryResponse.read(inBuffer);
 		Log.d(TAG, "inquiry response: " + inquiryResponse);
@@ -98,7 +99,9 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		}
 
 		ScsiReadCapacity readCapacity = new ScsiReadCapacity();
+		inBuffer.clear();
 		transferCommand(readCapacity, inBuffer);
+		inBuffer.clear();
 		ScsiReadCapacityResponse readCapacityResponse = ScsiReadCapacityResponse.read(inBuffer);
 		blockSize = readCapacityResponse.getBlockLength();
 		lastBlockAddress = readCapacityResponse.getLogicalBlockAddress();
@@ -182,10 +185,6 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 
 		if (csw.getdCswTag() != command.getdCbwTag()) {
 			throw new IOException("wrong csw tag!");
-		}
-
-		if (inBuffer != null) {
-			inBuffer.clear();
 		}
 
 		return csw.getbCswStatus() == CommandStatusWrapper.COMMAND_PASSED;
