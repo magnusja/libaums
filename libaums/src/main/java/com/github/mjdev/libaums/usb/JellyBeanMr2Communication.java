@@ -36,7 +36,7 @@ class JellyBeanMr2Communication implements UsbCommunication {
     @Override
     public int bulkOutTransfer(ByteBuffer src) throws IOException {
         int result = deviceConnection.bulkTransfer(outEndpoint,
-                src.array(), src.position(), src.remaining() - 1, TRANSFER_TIMEOUT);
+                src.array(), src.position(), src.remaining(), TRANSFER_TIMEOUT);
 
         if (result == -1) {
             throw new IOException("Could not write to device, result == -1");

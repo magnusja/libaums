@@ -172,6 +172,8 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 			throw new IOException("Unexpected command size while expecting csw");
 		}
 
+		cswBuffer.clear();
+
 		CommandStatusWrapper csw = CommandStatusWrapper.read(cswBuffer);
 		if (csw.getbCswStatus() != CommandStatusWrapper.COMMAND_PASSED) {
 			throw new IOException("Unsuccessful Csw status: " + csw.getbCswStatus());

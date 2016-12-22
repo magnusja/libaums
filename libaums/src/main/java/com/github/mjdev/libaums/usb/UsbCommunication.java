@@ -30,7 +30,7 @@ import java.nio.ByteBuffer;
  * 
  */
 public interface UsbCommunication {
-	int TRANSFER_TIMEOUT = 21000;
+	int TRANSFER_TIMEOUT = 5000;
 
 	/**
 	 * Performs a bulk out transfer beginning at the offset specified in the
