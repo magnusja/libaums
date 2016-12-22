@@ -36,11 +36,12 @@ class UsbRequestCommunication implements UsbCommunication {
             throw new IOException("Error queueing request.");
         }
 
-        if (deviceConnection.requestWait() == outRequest) {
+        UsbRequest request = deviceConnection.requestWait();
+        if (request == outRequest) {
             return src.position() - oldPosition;
         }
 
-        throw new IOException("requestWait failed!");
+        throw new IOException("requestWait failed! Request: " + request);
     }
 
     @Override
@@ -51,10 +52,11 @@ class UsbRequestCommunication implements UsbCommunication {
             throw new IOException("Error queueing request.");
         }
 
-        if (deviceConnection.requestWait() == inRequest) {
+        UsbRequest request = deviceConnection.requestWait();
+        if (request == inRequest) {
             return dest.position() - oldPosition;
         }
 
-        throw new IOException("requestWait failed!");
+        throw new IOException("requestWait failed! Request: " + request);
     }
 }
