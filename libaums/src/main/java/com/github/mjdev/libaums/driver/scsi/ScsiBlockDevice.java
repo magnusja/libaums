@@ -166,12 +166,13 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 			}
 		}
 
+
 		// expecting csw now
+		cswBuffer.clear();
 		read = usbCommunication.bulkInTransfer(cswBuffer);
 		if (read != CommandStatusWrapper.SIZE) {
 			throw new IOException("Unexpected command size while expecting csw");
 		}
-
 		cswBuffer.clear();
 
 		CommandStatusWrapper csw = CommandStatusWrapper.read(cswBuffer);
