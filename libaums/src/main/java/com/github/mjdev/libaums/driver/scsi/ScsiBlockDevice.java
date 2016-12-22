@@ -57,6 +57,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 
     private ScsiWrite10 writeCommand = new ScsiWrite10();
     private ScsiRead10 readCommand = new ScsiRead10();
+	private CommandStatusWrapper csw = new CommandStatusWrapper();
 
 	public ScsiBlockDevice(UsbCommunication usbCommunication) {
 		this.usbCommunication = usbCommunication;
@@ -178,7 +179,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		}
 		cswBuffer.clear();
 
-		CommandStatusWrapper csw = CommandStatusWrapper.read(cswBuffer);
+		csw.read(cswBuffer);
 		if (csw.getbCswStatus() != CommandStatusWrapper.COMMAND_PASSED) {
 			throw new IOException("Unsuccessful Csw status: " + csw.getbCswStatus());
 		}

@@ -64,24 +64,21 @@ public class CommandStatusWrapper {
 	private byte bCswStatus;
 
 	/**
-	 * Constructs a command block wrapper from the specified buffer.
+	 * Reads command block wrapper from the specified buffer and stores it into this object.
 	 * 
 	 * @param buffer
 	 *            The data where the command block wrapper is located.
-	 * @return A new command block wrapper.
 	 */
-	public static CommandStatusWrapper read(ByteBuffer buffer) {
+	public void read(ByteBuffer buffer) {
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 
-		CommandStatusWrapper csw = new CommandStatusWrapper();
-		csw.dCswSignature = buffer.getInt();
-		if (csw.dCswSignature != D_CSW_SIGNATURE) {
-			Log.e(TAG, "unexpected dCSWSignature " + csw.dCswSignature);
+		dCswSignature = buffer.getInt();
+		if (dCswSignature != D_CSW_SIGNATURE) {
+			Log.e(TAG, "unexpected dCSWSignature " + dCswSignature);
 		}
-		csw.dCswTag = buffer.getInt();
-		csw.dCswDataResidue = buffer.getInt();
-		csw.bCswStatus = buffer.get();
-		return csw;
+		dCswTag = buffer.getInt();
+		dCswDataResidue = buffer.getInt();
+		bCswStatus = buffer.get();
 	}
 
 	/**
