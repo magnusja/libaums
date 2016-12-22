@@ -48,6 +48,9 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 
 	private static final String TAG = ScsiBlockDevice.class.getSimpleName();
 
+	// libusb
+	private static final int MAX_TRANSFER_LENGTH = 16384;
+
 	private UsbCommunication usbCommunication;
 	private ByteBuffer outBuffer;
 	private ByteBuffer cswBuffer;
@@ -203,13 +206,19 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 			throw new IllegalArgumentException("dest.remaining() must be multiple of blockSize!");
 		}
 
-        readCommand.init((int) devOffset, dest.remaining(), blockSize);
-		//Log.d(TAG, "reading: " + read);
+		int toRead = dest.remaining();
 
-		transferCommand(readCommand, dest);
-		dest.position(dest.limit());
+		do {
+			int limit = Math.min(MAX_TRANSFER_LENGTH, toRead);
+			dest.limit(dest.position() + limit);
 
-		//Log.d(TAG, "read time: " + (System.currentTimeMillis() - time));
+			readCommand.init((int) devOffset, limit, blockSize);
+			transferCommand(readCommand, dest);
+
+			devOffset += limit / blockSize;
+			toRead -= limit;
+			dest.position(dest.limit());
+		} while (toRead > 0);
 	}
 
 	/**
@@ -219,18 +228,23 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	 */
 	@Override
 	public synchronized void write(long devOffset, ByteBuffer src) throws IOException {
-		//long time = System.currentTimeMillis();
 		if (src.remaining() % blockSize != 0) {
 			throw new IllegalArgumentException("src.remaining() must be multiple of blockSize!");
 		}
 
-        writeCommand.init((int) devOffset, src.remaining(), blockSize);
-		//Log.d(TAG, "writing: " + write);
+		int toWrite = src.remaining();
 
-		transferCommand(writeCommand, src);
-		src.position(src.limit());
+		do {
+			int limit = Math.min(MAX_TRANSFER_LENGTH, toWrite);
+			src.limit(src.position() + limit);
 
-		//Log.d(TAG, "write time: " + (System.currentTimeMillis() - time));
+			writeCommand.init((int) devOffset, limit, blockSize);
+			transferCommand(writeCommand, src);
+
+			devOffset += limit / blockSize;
+			toWrite -= limit;
+			src.position(src.limit());
+		} while (toWrite > 0);
 	}
 
 	@Override
