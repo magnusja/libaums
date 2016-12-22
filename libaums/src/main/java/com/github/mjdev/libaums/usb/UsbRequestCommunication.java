@@ -11,13 +11,13 @@ import java.nio.ByteBuffer;
  * Created by magnusja on 21/12/16.
  */
 
-public class UsbRequestCommunication implements UsbCommunication {
+class UsbRequestCommunication implements UsbCommunication {
 
     UsbDeviceConnection deviceConnection;
     UsbRequest outRequest;
     UsbRequest inRequest;
 
-    public UsbRequestCommunication(UsbDeviceConnection deviceConnection, UsbEndpoint outEndpoint, UsbEndpoint inEndpoint) {
+    UsbRequestCommunication(UsbDeviceConnection deviceConnection, UsbEndpoint outEndpoint, UsbEndpoint inEndpoint) {
         this.deviceConnection = deviceConnection;
         UsbRequest request = new UsbRequest();
         request.initialize(deviceConnection, outEndpoint);
@@ -31,7 +31,9 @@ public class UsbRequestCommunication implements UsbCommunication {
     @Override
     public synchronized int bulkOutTransfer(ByteBuffer src) throws IOException {
         int length = src.remaining();
-        outRequest.queue(src, length);
+        if (!outRequest.queue(src, length)) {
+            throw new IOException("Error queueing request.");
+        }
 
         if (deviceConnection.requestWait() == outRequest) {
             return length;
@@ -43,7 +45,9 @@ public class UsbRequestCommunication implements UsbCommunication {
     @Override
     public synchronized int bulkInTransfer(ByteBuffer dest) throws IOException {
         int length = dest.remaining();
-        inRequest.queue(dest, length);
+        if(!inRequest.queue(dest, length)) {
+            throw new IOException("Error queueing request.");
+        }
 
         if (deviceConnection.requestWait() == inRequest) {
             return length;
