@@ -155,7 +155,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 				} while (read < transferLength);
 
 				if (read != transferLength) {
-					throw new IOException("Unexpected command size (" + read + ") on response to "
+					throw new IOException("Unexpected command size (" + read + " instead of " + transferLength + ") on response to "
 							+ command);
 				}
 			} else {
