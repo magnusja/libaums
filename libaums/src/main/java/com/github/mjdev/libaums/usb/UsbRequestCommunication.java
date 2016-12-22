@@ -31,14 +31,18 @@ class UsbRequestCommunication implements UsbCommunication {
     @Override
     public synchronized int bulkOutTransfer(ByteBuffer src) throws IOException {
         int length = src.remaining();
-        int oldPosition = src.position();
-        if (!outRequest.queue(src, length)) {
+
+        // workaround: UsbRequest.queue always reads at position 0 :/
+        ByteBuffer tmp = ByteBuffer.wrap(src.array(), src.position(), length);
+
+        if (!outRequest.queue(tmp, length)) {
             throw new IOException("Error queueing request.");
         }
 
         UsbRequest request = deviceConnection.requestWait();
         if (request == outRequest) {
-            return src.position() - oldPosition;
+            src.position(src.position() + tmp.position());
+            return tmp.position();
         }
 
         throw new IOException("requestWait failed! Request: " + request);
@@ -47,14 +51,17 @@ class UsbRequestCommunication implements UsbCommunication {
     @Override
     public synchronized int bulkInTransfer(ByteBuffer dest) throws IOException {
         int length = dest.remaining();
-        int oldPosition = dest.position();
-        if(!inRequest.queue(dest, length)) {
+
+        // workaround: UsbRequest.queue always writes at position 0 :/
+        ByteBuffer tmp = ByteBuffer.wrap(dest.array(), dest.position(), length);
+        if(!inRequest.queue(tmp, length)) {
             throw new IOException("Error queueing request.");
         }
 
         UsbRequest request = deviceConnection.requestWait();
         if (request == inRequest) {
-            return dest.position() - oldPosition;
+            dest.position(dest.position() + tmp.position());
+            return tmp.position();
         }
 
         throw new IOException("requestWait failed! Request: " + request);
