@@ -123,7 +123,7 @@ libaums currently supports two different HTTP server libraries.
 1. [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd)
 2. [AsyncHttpServer](https://github.com/koush/AndroidAsync/blob/master/AndroidAsync/src/com/koushikdutta/async/http/server/AsyncHttpServer.java)
 
-You can spin up a server pretty easy, you jsut have to decide for a HTTP server implementation.
+You can spin up a server pretty easy, you just have to decide for a HTTP server implementation. If you do not have special requirements, you can just go for one, it should not make much of a difference.
 
 ```java
 UsbFile file = ... // can be directory or file
@@ -189,7 +189,7 @@ See the example app for additional details on that.
 
 1. In the `app/` directory you can find an example application using the library.
 2. When copying a file always set the length via `UsbFile.setLength(long)` first. Otherwise the ClusterChain has to be increased for every call to write. This is very inefficent.
-3. Always use FileSystem.getChunkSize()` bytes as buffer size, because this alignes with the block sizes drives are using. Everything else is also most likeley a decrease in performance.
+3. Always use `FileSystem.getChunkSize()` bytes as buffer size, because this alignes with the block sizes drives are using. Everything else is also most likeley a decrease in performance.
 4. A good idea is to wrap the UsbFileInputStream/UsbFileOutputStream into BufferedInputStream/BufferedOutputStream. Also see `UsbFileStreamFactory`.
 
 ##### Thesis
