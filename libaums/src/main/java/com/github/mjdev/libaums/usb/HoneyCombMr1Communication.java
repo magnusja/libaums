@@ -3,6 +3,9 @@ package com.github.mjdev.libaums.usb;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
 /**
  * On Android API level lower 18 (Jelly Bean MR2) we cannot specify a start
  * offset in the source/destination array. Because of that we have to use
@@ -25,35 +28,30 @@ class HoneyCombMr1Communication implements UsbCommunication {
     }
 
     @Override
-    public int bulkOutTransfer(byte[] buffer, int length) {
-        return deviceConnection.bulkTransfer(outEndpoint, buffer, length, TRANSFER_TIMEOUT);
-    }
+    public int bulkOutTransfer(ByteBuffer src) throws IOException {
+        int offset = src.position();
 
-    @Override
-    public int bulkOutTransfer(byte[] buffer, int offset, int length) {
         if (offset == 0)
-            return deviceConnection.bulkTransfer(outEndpoint, buffer, length, TRANSFER_TIMEOUT);
+            return deviceConnection.bulkTransfer(outEndpoint,
+                    src.array(), src.remaining(), TRANSFER_TIMEOUT);
 
-        byte[] tmpBuffer = new byte[length];
-        System.arraycopy(buffer, offset, tmpBuffer, 0, length);
-        return deviceConnection.bulkTransfer(outEndpoint, tmpBuffer, length,
-                TRANSFER_TIMEOUT);
+        byte[] tmpBuffer = new byte[src.remaining()];
+        System.arraycopy(src.array(), offset, tmpBuffer, 0, src.remaining());
+        return deviceConnection.bulkTransfer(outEndpoint,
+                tmpBuffer, src.remaining(), TRANSFER_TIMEOUT);
     }
 
     @Override
-    public int bulkInTransfer(byte[] buffer, int length) {
-        return deviceConnection.bulkTransfer(inEndpoint, buffer, length, TRANSFER_TIMEOUT);
-    }
+    public int bulkInTransfer(ByteBuffer dest) throws IOException {
+        int offset = dest.position();
 
-    @Override
-    public int bulkInTransfer(byte[] buffer, int offset, int length) {
         if (offset == 0)
-            return deviceConnection.bulkTransfer(inEndpoint, buffer, length, TRANSFER_TIMEOUT);
+            return deviceConnection.bulkTransfer(inEndpoint,
+                    dest.array(), dest.remaining(), TRANSFER_TIMEOUT);
 
-        byte[] tmpBuffer = new byte[length];
-        int result = deviceConnection.bulkTransfer(inEndpoint, tmpBuffer, length,
-                TRANSFER_TIMEOUT);
-        System.arraycopy(tmpBuffer, 0, buffer, offset, length);
+        byte[] tmpBuffer = new byte[dest.remaining()];
+        int result = deviceConnection.bulkTransfer(inEndpoint, tmpBuffer, dest.remaining(), TRANSFER_TIMEOUT);
+        System.arraycopy(tmpBuffer, 0, dest.array(), offset, dest.remaining());
         return result;
     }
 }

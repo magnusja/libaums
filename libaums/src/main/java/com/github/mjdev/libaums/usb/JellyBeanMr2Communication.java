@@ -9,6 +9,9 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.os.Build;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
 /**
  * Usb communication which uses the newer API in Android Jelly Bean MR2 (API
  * level 18). It just delegates the calls to the {@link UsbDeviceConnection}
@@ -31,24 +34,14 @@ class JellyBeanMr2Communication implements UsbCommunication {
     }
 
     @Override
-    public int bulkOutTransfer(byte[] buffer, int length) {
-        return deviceConnection.bulkTransfer(outEndpoint, buffer, length, TRANSFER_TIMEOUT);
+    public int bulkOutTransfer(ByteBuffer src) throws IOException {
+        return deviceConnection.bulkTransfer(outEndpoint,
+                src.array(), src.position(), src.remaining(), TRANSFER_TIMEOUT);
     }
 
     @Override
-    public int bulkOutTransfer(byte[] buffer, int offset, int length) {
-        return deviceConnection.bulkTransfer(outEndpoint, buffer, offset, length,
-                TRANSFER_TIMEOUT);
-    }
-
-    @Override
-    public int bulkInTransfer(byte[] buffer, int length) {
-        return deviceConnection.bulkTransfer(inEndpoint, buffer, length, TRANSFER_TIMEOUT);
-    }
-
-    @Override
-    public int bulkInTransfer(byte[] buffer, int offset, int length) {
-        return deviceConnection.bulkTransfer(inEndpoint, buffer, offset, length,
-                TRANSFER_TIMEOUT);
+    public int bulkInTransfer(ByteBuffer dest) throws IOException {
+        return deviceConnection.bulkTransfer(inEndpoint,
+                dest.array(), dest.position(), dest.remaining(), TRANSFER_TIMEOUT);
     }
 }

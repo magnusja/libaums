@@ -17,6 +17,9 @@
 
 package com.github.mjdev.libaums.usb;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
 /**
  * This Interface describes a low level device to perform USB transfers. At the
  * moment only bulk IN and OUT transfer are supported. Every class that follows
@@ -30,66 +33,22 @@ public interface UsbCommunication {
 	int TRANSFER_TIMEOUT = 21000;
 
 	/**
-	 * Performs a bulk out transfer beginning at offset zero in the
-	 * <code>buffer</code> with the given <code>length</code>.
-	 * <p>
-	 * This is mostly equivalent to the call
-	 * <code>bulkOutTransfer(buffer, 0, length)</code>.
+	 * Performs a bulk out transfer beginning at the offset specified in the
+	 * <code>buffer</code> of length <code>buffer#remaining()</code>.
 	 * 
-	 * @param buffer
+	 * @param src
 	 *            The data to transfer.
-	 * @param length
-	 *            Amount of bytes to transfer.
 	 * @return Bytes transmitted if successful, or -1.
-	 * @see #bulkInTransfer(byte[], int, int)
 	 */
-	int bulkOutTransfer(byte[] buffer, int length);
-
-	/**
-	 * Performs a bulk out transfer beginning at the given offset in the
-	 * <code>buffer</code> with the given <code>length</code>.
-	 * 
-	 * @param buffer
-	 *            The data to transfer.
-	 * @param offset
-	 *            Starting point to transfer data in the <code>buffer</code>
-	 *            array.
-	 * @param length
-	 *            Amount of bytes to transfer.
-	 * @return Bytes transmitted if successful, or -1.
-	 * @see #bulkInTransfer(byte[], int)
-	 */
-	int bulkOutTransfer(byte[] buffer, int offset, int length);
+	int bulkOutTransfer(ByteBuffer src) throws IOException;
 
 	/**
 	 * Performs a bulk in transfer beginning at offset zero in the
-	 * <code>buffer</code> with the given <code>length</code>.
-	 * <p>
-	 * This is mostly equivalent to the call
-	 * <code>bulkInTransfer(buffer, 0, length)</code>.
+	 * <code>buffer</code> of length <code>buffer#remaining()</code>.
 	 * 
-	 * @param buffer
+	 * @param dest
 	 *            The buffer where data should be transferred.
-	 * @param length
-	 *            Amount of bytes to transfer.
 	 * @return Bytes read if successful, or -1.
-	 * @see #bulkInTransfer(byte[], int, int)
 	 */
-	int bulkInTransfer(byte[] buffer, int length);
-
-	/**
-	 * Performs a bulk in transfer beginning at the given offset in the
-	 * <code>buffer</code> with the given <code>length</code>.
-	 * 
-	 * @param buffer
-	 *            The buffer where data should be transferred.
-	 * @param offset
-	 *            Starting point to transfer data into the <code>buffer</code>
-	 *            array.
-	 * @param length
-	 *            Amount of bytes to transfer.
-	 * @return Bytes read if successful, or -1.
-	 * @see #bulkInTransfer(byte[], int)
-	 */
-	int bulkInTransfer(byte[] buffer, int offset, int length);
+	int bulkInTransfer(ByteBuffer dest) throws IOException;
 }

@@ -50,7 +50,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 
 	private UsbCommunication usbCommunication;
 	private ByteBuffer outBuffer;
-	private byte[] cswBuffer;
+	private ByteBuffer cswBuffer;
 
 	private int blockSize;
 	private int lastBlockAddress;
@@ -61,7 +61,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	public ScsiBlockDevice(UsbCommunication usbCommunication) {
 		this.usbCommunication = usbCommunication;
 		outBuffer = ByteBuffer.allocate(31);
-		cswBuffer = new byte[CommandStatusWrapper.SIZE];
+		cswBuffer = ByteBuffer.allocate(CommandStatusWrapper.SIZE);
 	}
 
 	/**
@@ -134,7 +134,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		Arrays.fill(outArray, (byte) 0);
 
 		command.serialize(outBuffer);
-		int written = usbCommunication.bulkOutTransfer(outArray, outArray.length);
+		int written = usbCommunication.bulkOutTransfer(outBuffer);
 		if (written != outArray.length) {
 			throw new IOException("Writing all bytes on command " + command + " failed!");
 		}
@@ -142,12 +142,10 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		int transferLength = command.getdCbwDataTransferLength();
 		int read = 0;
 		if (transferLength > 0) {
-			byte[] inArray = inBuffer.array();
 
 			if (command.getDirection() == Direction.IN) {
 				do {
-					int tmp = usbCommunication.bulkInTransfer(inArray, read + inBuffer.position(),
-							inBuffer.remaining() - read);
+					int tmp = usbCommunication.bulkInTransfer(inBuffer);
 					if (tmp == -1) {
 						throw new IOException("reading failed!");
 					}
@@ -161,8 +159,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 			} else {
 				written = 0;
 				do {
-					int tmp = usbCommunication.bulkOutTransfer(inArray,
-							written + inBuffer.position(), inBuffer.remaining() - written);
+					int tmp = usbCommunication.bulkOutTransfer(inBuffer);
 					if (tmp == -1) {
 						throw new IOException("writing failed!");
 					}
@@ -176,12 +173,12 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		}
 
 		// expecting csw now
-		read = usbCommunication.bulkInTransfer(cswBuffer, cswBuffer.length);
+		read = usbCommunication.bulkInTransfer(cswBuffer);
 		if (read != CommandStatusWrapper.SIZE) {
 			throw new IOException("Unexpected command size while expecting csw");
 		}
 
-		CommandStatusWrapper csw = CommandStatusWrapper.read(ByteBuffer.wrap(cswBuffer));
+		CommandStatusWrapper csw = CommandStatusWrapper.read(cswBuffer);
 		if (csw.getbCswStatus() != CommandStatusWrapper.COMMAND_PASSED) {
 			throw new IOException("Unsuccessful Csw status: " + csw.getbCswStatus());
 		}
