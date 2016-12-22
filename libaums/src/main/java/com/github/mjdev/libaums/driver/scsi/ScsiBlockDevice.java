@@ -40,16 +40,13 @@ import com.github.mjdev.libaums.driver.scsi.commands.ScsiWrite10;
  * This class is responsible for handling mass storage devices which follow the
  * SCSI standard. This class communicates with the mass storage device via the
  * different SCSI commands.
- * 
+ *
  * @author mjahnen
  * @see com.github.mjdev.libaums.driver.scsi.commands
  */
 public class ScsiBlockDevice implements BlockDeviceDriver {
 
 	private static final String TAG = ScsiBlockDevice.class.getSimpleName();
-
-	// libusb
-	private static final int MAX_TRANSFER_LENGTH = 16384;
 
 	private UsbCommunication usbCommunication;
 	private ByteBuffer outBuffer;
@@ -58,8 +55,8 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	private int blockSize;
 	private int lastBlockAddress;
 
-    private ScsiWrite10 writeCommand = new ScsiWrite10();
-    private ScsiRead10 readCommand = new ScsiRead10();
+	private ScsiWrite10 writeCommand = new ScsiWrite10();
+	private ScsiRead10 readCommand = new ScsiRead10();
 	private CommandStatusWrapper csw = new CommandStatusWrapper();
 
 	public ScsiBlockDevice(UsbCommunication usbCommunication) {
@@ -72,7 +69,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	 * Issues a SCSI Inquiry to determine the connected device. After that it is
 	 * checked if the unit is ready. Logs a warning if the unit is not ready.
 	 * Finally the capacity of the mass storage device is read.
-	 * 
+	 *
 	 * @throws IOException
 	 *             If initialing fails due to an unsupported device or if
 	 *             reading fails.
@@ -125,7 +122,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	 * successful (
 	 * {@link com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper #getbCswStatus()}
 	 * ).
-	 * 
+	 *
 	 * @param command
 	 *            The command which should be transferred.
 	 * @param inBuffer
@@ -158,7 +155,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 				} while (read < transferLength);
 
 				if (read != transferLength) {
-					throw new IOException("Unexpected command size (" + read + " instead of " + transferLength + ") on response to "
+					throw new IOException("Unexpected command size (" + read + ") on response to "
 							+ command);
 				}
 			} else {
@@ -206,19 +203,13 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 			throw new IllegalArgumentException("dest.remaining() must be multiple of blockSize!");
 		}
 
-		int toRead = dest.remaining();
+		readCommand.init((int) devOffset, dest.remaining(), blockSize);
+		//Log.d(TAG, "reading: " + read);
 
-		do {
-			int limit = Math.min(MAX_TRANSFER_LENGTH, toRead);
-			dest.limit(dest.position() + limit);
+		transferCommand(readCommand, dest);
+		dest.position(dest.limit());
 
-			readCommand.init((int) devOffset, limit, blockSize);
-			transferCommand(readCommand, dest);
-
-			devOffset += limit / blockSize;
-			toRead -= limit;
-			dest.position(dest.limit());
-		} while (toRead > 0);
+		//Log.d(TAG, "read time: " + (System.currentTimeMillis() - time));
 	}
 
 	/**
@@ -228,23 +219,18 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	 */
 	@Override
 	public synchronized void write(long devOffset, ByteBuffer src) throws IOException {
+		//long time = System.currentTimeMillis();
 		if (src.remaining() % blockSize != 0) {
 			throw new IllegalArgumentException("src.remaining() must be multiple of blockSize!");
 		}
 
-		int toWrite = src.remaining();
+		writeCommand.init((int) devOffset, src.remaining(), blockSize);
+		//Log.d(TAG, "writing: " + write);
 
-		do {
-			int limit = Math.min(MAX_TRANSFER_LENGTH, toWrite);
-			src.limit(src.position() + limit);
+		transferCommand(writeCommand, src);
+		src.position(src.limit());
 
-			writeCommand.init((int) devOffset, limit, blockSize);
-			transferCommand(writeCommand, src);
-
-			devOffset += limit / blockSize;
-			toWrite -= limit;
-			src.position(src.limit());
-		} while (toWrite > 0);
+		//Log.d(TAG, "write time: " + (System.currentTimeMillis() - time));
 	}
 
 	@Override
