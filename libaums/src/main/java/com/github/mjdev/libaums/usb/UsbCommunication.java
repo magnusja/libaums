@@ -38,7 +38,7 @@ public interface UsbCommunication {
 	 * 
 	 * @param src
 	 *            The data to transfer.
-	 * @return Bytes transmitted if successful, or -1.
+	 * @return Bytes transmitted if successful.
 	 */
 	int bulkOutTransfer(ByteBuffer src) throws IOException;
 
@@ -48,7 +48,7 @@ public interface UsbCommunication {
 	 * 
 	 * @param dest
 	 *            The buffer where data should be transferred.
-	 * @return Bytes read if successful, or -1.
+	 * @return Bytes read if successful.
 	 */
 	int bulkInTransfer(ByteBuffer dest) throws IOException;
 }

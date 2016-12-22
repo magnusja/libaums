@@ -130,10 +130,12 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	private boolean transferCommand(CommandBlockWrapper command, ByteBuffer inBuffer)
 			throws IOException {
 		byte[] outArray = outBuffer.array();
-		outBuffer.clear();
 		Arrays.fill(outArray, (byte) 0);
 
+		outBuffer.clear();
 		command.serialize(outBuffer);
+		outBuffer.clear();
+
 		int written = usbCommunication.bulkOutTransfer(outBuffer);
 		if (written != outArray.length) {
 			throw new IOException("Writing all bytes on command " + command + " failed!");
@@ -145,11 +147,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 
 			if (command.getDirection() == Direction.IN) {
 				do {
-					int tmp = usbCommunication.bulkInTransfer(inBuffer);
-					if (tmp == -1) {
-						throw new IOException("reading failed!");
-					}
-					read += tmp;
+					read += usbCommunication.bulkInTransfer(inBuffer);
 				} while (read < transferLength);
 
 				if (read != transferLength) {
@@ -159,11 +157,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 			} else {
 				written = 0;
 				do {
-					int tmp = usbCommunication.bulkOutTransfer(inBuffer);
-					if (tmp == -1) {
-						throw new IOException("writing failed!");
-					}
-					written += tmp;
+					written += usbCommunication.bulkOutTransfer(inBuffer);
 				} while (written < transferLength);
 
 				if (written != transferLength) {
