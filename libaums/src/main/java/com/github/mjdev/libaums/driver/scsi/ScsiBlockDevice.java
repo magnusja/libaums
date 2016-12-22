@@ -183,6 +183,8 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 			throw new IOException("wrong csw tag!");
 		}
 
+		inBuffer.clear();
+
 		return csw.getbCswStatus() == CommandStatusWrapper.COMMAND_PASSED;
 	}
 
