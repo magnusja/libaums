@@ -12,18 +12,18 @@ import android.util.Log;
 public class UsbCommunicationFactory {
 
     enum UnderlyingUsbCommunication {
-        USB_REQUEST,
-        DEVICE_CONNECTION
+        USB_REQUEST_ASYNC,
+        DEVICE_CONNECTION_SYNC
     }
 
     private static final String TAG = UsbCommunicationFactory.class.getSimpleName();
 
-    private static UnderlyingUsbCommunication underlyingUsbCommunication = UnderlyingUsbCommunication.USB_REQUEST;
+    private static UnderlyingUsbCommunication underlyingUsbCommunication = UnderlyingUsbCommunication.DEVICE_CONNECTION_SYNC;
 
     public static UsbCommunication createUsbCommunication(UsbDeviceConnection deviceConnection, UsbEndpoint outEndpoint, UsbEndpoint inEndpoint) {
         UsbCommunication communication;
 
-        if (underlyingUsbCommunication == UnderlyingUsbCommunication.DEVICE_CONNECTION) {
+        if (underlyingUsbCommunication == UnderlyingUsbCommunication.DEVICE_CONNECTION_SYNC) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                 communication = new JellyBeanMr2Communication(deviceConnection, outEndpoint, inEndpoint);
             } else {
