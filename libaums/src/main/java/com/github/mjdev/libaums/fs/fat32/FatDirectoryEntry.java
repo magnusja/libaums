@@ -74,6 +74,8 @@ import java.util.Calendar;
 	private static final int FLAG_DIRECTORY = 0x10;
 	private static final int FLAG_ARCHIVE = 0x20;
 
+	private static final int SHORTNAME_CASE_OFF = 0x0c;
+
 	/* package */static final int ENTRY_DELETED = 0xe5;
 
 	/**
@@ -208,6 +210,14 @@ import java.util.Calendar;
 	 */
 	private boolean isFlagSet(int flag) {
 		return (getFlags() & flag) != 0;
+	}
+
+	/* package */boolean isShortNameLowerCase() {
+		return (data.get(SHORTNAME_CASE_OFF) & (byte) 0x8) != 0;
+	}
+
+	/* package */boolean isShortNameExtLowerCase() {
+		return (data.get(SHORTNAME_CASE_OFF) & (byte) 0x10) != 0;
 	}
 
 	/**

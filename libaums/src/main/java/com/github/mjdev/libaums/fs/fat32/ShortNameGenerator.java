@@ -89,6 +89,24 @@ import java.util.Locale;
 	}
 
 	/**
+	 * Generate the next possible hex part for using in SFN. We are using a
+	 * similar approach as what Windows 2000 did.
+	 */
+	static String getNextHexPart(String hexPart, int limit) {
+		long hexValue = Long.parseLong(hexPart, 16);
+		hexValue += 1;
+		String tempHexString = Long.toHexString(hexValue);
+		if (tempHexString.length() <= limit) {
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < limit - tempHexString.length(); i++) {
+				sb.append("0");
+			}
+			return sb.toString() + tempHexString;
+		}
+		return null;
+	}
+
+	/**
 	 * Generates an 8.3 short name for a given long file name. It creates a
 	 * suffix at the end of the short name if there is already a existing entry
 	 * in the directory with an equal short name.
@@ -111,63 +129,89 @@ import java.util.Locale;
 		}
 
 		lfnName = lfnName.substring(i);
+		lfnName = lfnName.replace(" ", "");
 
-		final int periodIndex = lfnName.lastIndexOf('.');
-		String name;
-		String extension;
-		// suffix is needed if invalid chars have been replaced
-		boolean losslyConversion = false;
+		String filenamePart = "";
+		String extensionPart = "";
 
-		if (periodIndex == -1) {
-			// no extension given
-			if (containsInvalidChars(lfnName)) {
-				// suffix is needed
-				losslyConversion = true;
-				name = replaceInvalidChars(lfnName);
-			} else {
-				name = lfnName;
-			}
-			extension = "";
+		int indexOfDot = lfnName.lastIndexOf(".");
+		if (indexOfDot == -1) {
+			// no extension
+			filenamePart = lfnName;
+			extensionPart = "";
+
 		} else {
-			// extension given
-			String tmp = lfnName.substring(0, periodIndex);
-			if (containsInvalidChars(tmp)) {
-				// suffix is needed
-				losslyConversion = true;
-				name = replaceInvalidChars(lfnName);
-			} else {
-				name = tmp;
-			}
-
-			extension = replaceInvalidChars(lfnName.substring(periodIndex + 1));
-			// extension maximum is 3
-			if (extension.length() > 3) {
-				extension = extension.substring(0, 3);
+			// has extension
+			filenamePart = lfnName.substring(0, indexOfDot);
+			extensionPart = lfnName.substring(indexOfDot + 1);
+			if (extensionPart.length() > 3) {
+				extensionPart = extensionPart.substring(0, 3);
 			}
 		}
 
-		name = name.replace(" ", "");
-		extension = extension.replace(" ", "");
+		// remove invalid chars
+		if (containsInvalidChars(filenamePart)) {
+			filenamePart = replaceInvalidChars(filenamePart);
+		}
 
-		ShortName result = new ShortName(name, extension);
+		// remove invalid chars
+		if (containsInvalidChars(extensionPart)) {
+			extensionPart = replaceInvalidChars(extensionPart);
+		}
 
-		// also create the suffix if the length is bigger than 8 or the short
-		// name already exists
-		if (losslyConversion || name.length() > 8 || existingShortNames.contains(result)) {
-			int maxLen = Math.min(name.length(), 8);
-			// 999999 is highest value specified by Microsoft
-			for (i = 1; i < 999999; i++) {
-				final String suffix = "~" + i;
-				final int suffixLen = suffix.length();
-				final String newName = name.substring(0, Math.min(maxLen, 8 - suffixLen)) + suffix;
-				result = new ShortName(newName, extension);
+		String filePrefix = filenamePart;
+		if (filenamePart.length() == 0) {
+			filePrefix = "__";
+		} else if (filenamePart.length() == 1) {
+			filePrefix = filePrefix + "_";
+		} else if (filenamePart.length() == 2) {
+			// Do nothing
+		} else if (filenamePart.length() > 2) {
+			filePrefix = filenamePart.substring(0, 2);
+		}
 
-				if (!existingShortNames.contains(result))
-					break;
+		String extSuffix = extensionPart;
+		// The extensionPart must be at least 1 here
+		if (extensionPart.length() == 0) {
+			extSuffix = "000";
+		} else if (extensionPart.length() == 1) {
+			extSuffix = extensionPart + "00";
+		} else if (extensionPart.length() == 2) {
+			extSuffix = extensionPart + "0";
+		}
+
+		String hexPart = "0000";
+		int tildeDigit = 0;
+
+		ShortName result = new ShortName(filePrefix + hexPart + "~" + tildeDigit, extSuffix);
+		while (containShortName(existingShortNames, result)) {
+			if (getNextHexPart(hexPart, 4) != null) {
+				hexPart = getNextHexPart(hexPart, 4);
 			}
+			// HexPart is used up
+			else {
+				if (tildeDigit + 1 < 10) {
+					tildeDigit += 1;
+					hexPart = "0000";
+				} else {
+					// This should not happen
+					break;
+				}
+			}
+			result = new ShortName(filePrefix + hexPart + "~" + tildeDigit, extSuffix);
 		}
 
 		return result;
 	}
 
+	public static boolean containShortName(Collection<ShortName> shortNames, ShortName shortName) {
+		boolean contain = false;
+		for (ShortName temp : shortNames) {
+			if (temp.getString().equalsIgnoreCase(shortName.getString())) {
+				contain = true;
+				break;
+			}
+		}
+		return contain;
+	}
 }

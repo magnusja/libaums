@@ -17,14 +17,19 @@
 
 package com.github.mjdev.libaums.usbfileman;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.NoSuchElementException;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -39,6 +44,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
@@ -47,6 +54,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
+import android.provider.OpenableColumns;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -68,7 +79,12 @@ import android.widget.Toast;
 import com.github.mjdev.libaums.UsbMassStorageDevice;
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.UsbFile;
+import com.github.mjdev.libaums.fs.UsbFileInputStream;
+import com.github.mjdev.libaums.fs.UsbFileOutputStream;
+import com.github.mjdev.libaums.fs.UsbFileStreamFactory;
 import com.github.mjdev.libaums.server.http.UsbFileHttpServerService;
+import com.github.mjdev.libaums.server.http.server.AsyncHttpServer;
+import com.github.mjdev.libaums.server.http.server.NanoHttpdServer;
 
 /**
  * MainActivity of the demo application which shows the contents of the first
@@ -84,6 +100,11 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 	 */
 	private static final String ACTION_USB_PERMISSION = "com.github.mjdev.libaums.USB_PERMISSION";
 	private static final String TAG = MainActivity.class.getSimpleName();
+
+    private static final int COPY_STORAGE_PROVIDER_RESULT = 0;
+    private static final int OPEN_STORAGE_PROVIDER_RESULT = 1;
+
+	private static final int REQUEST_EXT_STORAGE_WRITE_PERM = 0;
 
 	private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
 		@Override
@@ -274,19 +295,23 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 		@Override
 		protected Void doInBackground(CopyTaskParam... params) {
 			long time = System.currentTimeMillis();
-			ByteBuffer buffer = ByteBuffer.allocate(4096);
 			param = params[0];
-			long length = params[0].from.getLength();
 			try {
-				FileOutputStream out = new FileOutputStream(params[0].to);
-				for (long i = 0; i < length; i += buffer.limit()) {
-					buffer.limit((int) Math.min(buffer.capacity(), length - i));
-					params[0].from.read(i, buffer);
-					out.write(buffer.array(), 0, buffer.limit());
-					publishProgress((int) i);
-					buffer.clear();
-				}
+				OutputStream out = new BufferedOutputStream(new FileOutputStream(param.to));
+                InputStream inputStream =
+						UsbFileStreamFactory.createBufferedInputStream(param.from, currentFs);
+                byte[] bytes = new byte[4096];
+                int count;
+                int total = 0;
+
+                while ((count = inputStream.read(bytes)) != -1){
+                    out.write(bytes, 0, count);
+                    total += count;
+                    publishProgress((int) total);
+                }
+
 				out.close();
+                inputStream.close();
 			} catch (IOException e) {
 				Log.e(TAG, "error copying!", e);
 			}
@@ -321,6 +346,125 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
 	}
 
+    /**
+     * Class to hold the files for a copy task. Holds the source and the
+     * destination file.
+     *
+     * @author mjahnen
+     *
+     */
+    private static class CopyToUsbTaskParam {
+        /* package */Uri from;
+    }
+
+    /**
+     * Asynchronous task to copy a file from the mass storage device connected
+     * via USB to the internal storage.
+     *
+     * @author mjahnen
+     *
+     */
+    private class CopyToUsbTask extends AsyncTask<CopyToUsbTaskParam, Integer, Void> {
+
+        private ProgressDialog dialog;
+        private CopyToUsbTaskParam param;
+
+        private String name;
+        private int size = -1;
+
+        public CopyToUsbTask() {
+            dialog = new ProgressDialog(MainActivity.this);
+            dialog.setTitle("Copying file");
+            dialog.setMessage("Copying a file to the USB drive, this can take some time!");
+            dialog.setIndeterminate(true);
+            dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        }
+
+        private void queryUriMetaData(Uri uri) {
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null, null);
+
+            // TODO: query created and modified times to write it USB 
+            if (cursor != null && cursor.moveToFirst()) {
+                name = cursor.getString(
+                        cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                Log.i(TAG, "Display Name: " + name);
+                int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+                if (!cursor.isNull(sizeIndex)) {
+                    size = cursor.getInt(sizeIndex);
+                }
+                Log.i(TAG, "Size: " + size);
+
+                cursor.close();
+            }
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(CopyToUsbTaskParam... params) {
+            long time = System.currentTimeMillis();
+            param = params[0];
+
+            queryUriMetaData(param.from);
+
+            if (name == null) {
+                String[] segments = param.from.getPath().split("/");
+                name = segments[segments.length - 1];
+            }
+
+            try {
+                UsbFile file = adapter.getCurrentDir().createFile(name);
+
+                if (size > 0) {
+                    file.setLength(size);
+                }
+
+                InputStream inputStream = getContentResolver().openInputStream(param.from);
+                OutputStream outputStream = UsbFileStreamFactory.createBufferedOutputStream(file, currentFs);
+
+                byte[] bytes = new byte[1337];
+                int count;
+                int total = 0;
+
+                while ((count = inputStream.read(bytes)) != -1){
+                    outputStream.write(bytes, 0, count);
+                    if (size > 0) {
+                        total += count;
+                        publishProgress((int) total);
+                    }
+                }
+
+                outputStream.close();
+                inputStream.close();
+            } catch (IOException e) {
+                Log.e(TAG, "error copying!", e);
+            }
+            Log.d(TAG, "copy time: " + (System.currentTimeMillis() - time));
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            dialog.dismiss();
+            try {
+                adapter.refresh();
+            } catch (IOException e) {
+                Log.e(TAG, "Error refreshing adapter", e);
+            }
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            dialog.setIndeterminate(false);
+            dialog.setMax(size);
+            dialog.setProgress(values[0]);
+        }
+
+    }
+
     ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -340,6 +484,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 	private UsbMassStorageDevice device;
 	/* package */UsbFileListAdapter adapter;
 	private Deque<UsbFile> dirs = new ArrayDeque<UsbFile>();
+	private FileSystem currentFs;
 
     private Intent serviceIntent = null;
     private UsbFileHttpServerService serverService;
@@ -422,14 +567,15 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			device.init();
 
 			// we always use the first partition of the device
-			FileSystem fs = device.getPartitions().get(0).getFileSystem();
-			Log.d(TAG, "Capacity: " + fs.getCapacity());
-			Log.d(TAG, "Occupied Space: " + fs.getOccupiedSpace());
-			Log.d(TAG, "Free Space: " + fs.getFreeSpace());
-			UsbFile root = fs.getRootDirectory();
+			currentFs = device.getPartitions().get(0).getFileSystem();
+			Log.d(TAG, "Capacity: " + currentFs.getCapacity());
+			Log.d(TAG, "Occupied Space: " + currentFs.getOccupiedSpace());
+			Log.d(TAG, "Free Space: " + currentFs.getFreeSpace());
+            Log.d(TAG, "Chunk size: " + currentFs.getChunkSize());
+			UsbFile root = currentFs.getRootDirectory();
 
 			ActionBar actionBar = getSupportActionBar();
-			actionBar.setTitle(fs.getVolumeLabel());
+			actionBar.setTitle(currentFs.getVolumeLabel());
 
 			listView.setAdapter(adapter = new UsbFileListAdapter(this, root));
 		} catch (IOException e) {
@@ -490,16 +636,27 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 				String[] extraMimeTypes = {"image/*", "video/*"};
 				intent.putExtra(Intent.EXTRA_MIME_TYPES, extraMimeTypes);
 				intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-				startActivityForResult(intent, 1);
+				startActivityForResult(intent, OPEN_STORAGE_PROVIDER_RESULT);
 			}
 			return true;
+        case R.id.copy_from_storage_provider:
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("*/*");
+
+                startActivityForResult(intent, COPY_STORAGE_PROVIDER_RESULT);
+            }
+            return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
 
 	}
 
-	@Override
+    @Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		MenuInflater inflater = getMenuInflater();
@@ -568,8 +725,23 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			if (entry.isDirectory()) {
 				dirs.push(adapter.getCurrentDir());
 				listView.setAdapter(adapter = new UsbFileListAdapter(this, entry));
-
 			} else {
+
+				if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+						!= PackageManager.PERMISSION_GRANTED) {
+
+					if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+							Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+						Toast.makeText(this, R.string.request_write_storage_perm, Toast.LENGTH_LONG).show();
+					} else {
+						ActivityCompat.requestPermissions(this,
+								new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+								REQUEST_EXT_STORAGE_WRITE_PERM);
+					}
+
+					return;
+				}
+
 				CopyTaskParam param = new CopyTaskParam();
 				param.from = entry;
 				File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath()
@@ -606,7 +778,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
         // now start the server
         try {
-            serverService.startServer(file);
+            serverService.startServer(file, new AsyncHttpServer(8000));
             Toast.makeText(MainActivity.this, "HTTP server up and running", Toast.LENGTH_LONG).show();
         } catch (IOException e) {
             Log.e(TAG, "Error starting HTTP server", e);
@@ -629,10 +801,32 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     }
 
 	@Override
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+		switch (requestCode) {
+			case REQUEST_EXT_STORAGE_WRITE_PERM: {
+				// If request is cancelled, the result arrays are empty.
+				if (grantResults.length > 0
+						&& grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+					Toast.makeText(this, R.string.permission_granted, Toast.LENGTH_LONG).show();
+				} else {
+					Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_LONG).show();
+				}
+			}
+
+		}
+	}
+
+	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 
-		if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
+        if (resultCode != Activity.RESULT_OK) {
+            Log.w(TAG, "Activity result is not ok");
+            return;
+        }
+
+		if (requestCode == OPEN_STORAGE_PROVIDER_RESULT) {
 			Uri uri;
 			if (data != null) {
 				uri = data.getData();
@@ -641,7 +835,18 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 				i.setData(uri);
 				startActivity(i);
 			}
-		}
+		} else if (requestCode == COPY_STORAGE_PROVIDER_RESULT){
+            Uri uri;
+            if (data != null) {
+                uri = data.getData();
+                Log.i(TAG, "Uri: " + uri.toString());
+
+                CopyToUsbTaskParam params = new CopyToUsbTaskParam();
+                params.from = uri;
+
+                new CopyToUsbTask().execute(params);
+            }
+        }
 	}
 
 	/**
@@ -657,16 +862,17 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 		UsbFile file;
 		try {
 			file = dir.createFile("big_file_test.txt");
-			file.write(0, ByteBuffer.wrap("START\n".getBytes()));
+            OutputStream outputStream = UsbFileStreamFactory.createBufferedOutputStream(file, currentFs);
+			outputStream.write("START\n".getBytes());
 			int i;
 
 			for (i = 6; i < 9000; i += 5) {
-				file.write(i, ByteBuffer.wrap("TEST\n".getBytes()));
+                outputStream.write("TEST\n".getBytes());
 			}
 
-			file.write(i, ByteBuffer.wrap("END\n".getBytes()));
+            outputStream.write("END\n".getBytes());
 
-			file.close();
+            outputStream.close();
 
 			adapter.refresh();
 		} catch (IOException e) {

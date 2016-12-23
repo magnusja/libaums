@@ -63,4 +63,9 @@ public interface FileSystem {
      */
     long getFreeSpace();
 
+	/**
+	 *
+	 * @return returns the optimal chuck size in bytes (you should read and write in multiples of that)
+     */
+	int getChunkSize();
 }

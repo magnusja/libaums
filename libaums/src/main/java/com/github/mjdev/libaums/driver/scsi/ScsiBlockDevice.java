@@ -23,7 +23,7 @@ import java.util.Arrays;
 
 import android.util.Log;
 
-import com.github.mjdev.libaums.UsbCommunication;
+import com.github.mjdev.libaums.usb.UsbCommunication;
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper;
 import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper.Direction;
@@ -50,15 +50,19 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 
 	private UsbCommunication usbCommunication;
 	private ByteBuffer outBuffer;
-	private byte[] cswBuffer;
+	private ByteBuffer cswBuffer;
 
 	private int blockSize;
 	private int lastBlockAddress;
 
+    private ScsiWrite10 writeCommand = new ScsiWrite10();
+    private ScsiRead10 readCommand = new ScsiRead10();
+	private CommandStatusWrapper csw = new CommandStatusWrapper();
+
 	public ScsiBlockDevice(UsbCommunication usbCommunication) {
 		this.usbCommunication = usbCommunication;
 		outBuffer = ByteBuffer.allocate(31);
-		cswBuffer = new byte[CommandStatusWrapper.SIZE];
+		cswBuffer = ByteBuffer.allocate(CommandStatusWrapper.SIZE);
 	}
 
 	/**
@@ -80,6 +84,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		ByteBuffer inBuffer = ByteBuffer.allocate(36);
 		ScsiInquiry inquiry = new ScsiInquiry((byte) inBuffer.array().length);
 		transferCommand(inquiry, inBuffer);
+		inBuffer.clear();
 		// TODO support multiple luns!
 		ScsiInquiryResponse inquiryResponse = ScsiInquiryResponse.read(inBuffer);
 		Log.d(TAG, "inquiry response: " + inquiryResponse);
@@ -95,7 +100,9 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 		}
 
 		ScsiReadCapacity readCapacity = new ScsiReadCapacity();
+		inBuffer.clear();
 		transferCommand(readCapacity, inBuffer);
+		inBuffer.clear();
 		ScsiReadCapacityResponse readCapacityResponse = ScsiReadCapacityResponse.read(inBuffer);
 		blockSize = readCapacityResponse.getBlockLength();
 		lastBlockAddress = readCapacityResponse.getLogicalBlockAddress();
@@ -127,28 +134,24 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	private boolean transferCommand(CommandBlockWrapper command, ByteBuffer inBuffer)
 			throws IOException {
 		byte[] outArray = outBuffer.array();
-		outBuffer.clear();
 		Arrays.fill(outArray, (byte) 0);
 
+		outBuffer.clear();
 		command.serialize(outBuffer);
-		int written = usbCommunication.bulkOutTransfer(outArray, outArray.length);
+		outBuffer.clear();
+
+		int written = usbCommunication.bulkOutTransfer(outBuffer);
 		if (written != outArray.length) {
-			Log.e(TAG, "Writing all bytes on command " + command + " failed!");
+			throw new IOException("Writing all bytes on command " + command + " failed!");
 		}
 
 		int transferLength = command.getdCbwDataTransferLength();
 		int read = 0;
 		if (transferLength > 0) {
-			byte[] inArray = inBuffer.array();
 
 			if (command.getDirection() == Direction.IN) {
 				do {
-					int tmp = usbCommunication.bulkInTransfer(inArray, read + inBuffer.position(),
-							inBuffer.remaining() - read);
-					if (tmp == -1) {
-						throw new IOException("reading failed!");
-					}
-					read += tmp;
+					read += usbCommunication.bulkInTransfer(inBuffer);
 				} while (read < transferLength);
 
 				if (read != transferLength) {
@@ -158,12 +161,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 			} else {
 				written = 0;
 				do {
-					int tmp = usbCommunication.bulkOutTransfer(inArray,
-							written + inBuffer.position(), inBuffer.remaining() - written);
-					if (tmp == -1) {
-						throw new IOException("writing failed!");
-					}
-					written += tmp;
+					written += usbCommunication.bulkOutTransfer(inBuffer);
 				} while (written < transferLength);
 
 				if (written != transferLength) {
@@ -172,19 +170,22 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 			}
 		}
 
-		// expecting csw now
-		read = usbCommunication.bulkInTransfer(cswBuffer, cswBuffer.length);
-		if (read != CommandStatusWrapper.SIZE) {
-			Log.e(TAG, "Unexpected command size while expecting csw");
-		}
 
-		CommandStatusWrapper csw = CommandStatusWrapper.read(ByteBuffer.wrap(cswBuffer));
+		// expecting csw now
+		cswBuffer.clear();
+		read = usbCommunication.bulkInTransfer(cswBuffer);
+		if (read != CommandStatusWrapper.SIZE) {
+			throw new IOException("Unexpected command size while expecting csw");
+		}
+		cswBuffer.clear();
+
+		csw.read(cswBuffer);
 		if (csw.getbCswStatus() != CommandStatusWrapper.COMMAND_PASSED) {
-			Log.e(TAG, "Unsuccessful Csw status: " + csw.getbCswStatus());
+			throw new IOException("Unsuccessful Csw status: " + csw.getbCswStatus());
 		}
 
 		if (csw.getdCswTag() != command.getdCbwTag()) {
-			Log.e(TAG, "wrong csw tag!");
+			throw new IOException("wrong csw tag!");
 		}
 
 		return csw.getbCswStatus() == CommandStatusWrapper.COMMAND_PASSED;
@@ -198,26 +199,14 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	@Override
 	public synchronized void read(long devOffset, ByteBuffer dest) throws IOException {
 		//long time = System.currentTimeMillis();
-		// TODO try to make this more efficient by for example only allocating
-		// blockSize and making it global
-		ByteBuffer buffer;
 		if (dest.remaining() % blockSize != 0) {
-			Log.w(TAG, "we have to round up size to next block sector");
-			int rounded = blockSize - dest.remaining() % blockSize + dest.remaining();
-			buffer = ByteBuffer.allocate(rounded);
-			buffer.limit(rounded);
-		} else {
-			buffer = dest;
+			throw new IllegalArgumentException("dest.remaining() must be multiple of blockSize!");
 		}
 
-		ScsiRead10 read = new ScsiRead10((int) devOffset, buffer.remaining(), blockSize);
+        readCommand.init((int) devOffset, dest.remaining(), blockSize);
 		//Log.d(TAG, "reading: " + read);
-		transferCommand(read, buffer);
 
-		if (dest.remaining() % blockSize != 0) {
-			System.arraycopy(buffer.array(), 0, dest.array(), dest.position(), dest.remaining());
-		}
-
+		transferCommand(readCommand, dest);
 		dest.position(dest.limit());
 
 		//Log.d(TAG, "read time: " + (System.currentTimeMillis() - time));
@@ -231,23 +220,14 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	@Override
 	public synchronized void write(long devOffset, ByteBuffer src) throws IOException {
 		//long time = System.currentTimeMillis();
-		// TODO try to make this more efficient by for example only allocating
-		// blockSize and making it global
-		ByteBuffer buffer;
 		if (src.remaining() % blockSize != 0) {
-			Log.w(TAG, "we have to round up size to next block sector");
-			int rounded = blockSize - src.remaining() % blockSize + src.remaining();
-			buffer = ByteBuffer.allocate(rounded);
-			buffer.limit(rounded);
-			System.arraycopy(src.array(), src.position(), buffer.array(), 0, src.remaining());
-		} else {
-			buffer = src;
+			throw new IllegalArgumentException("src.remaining() must be multiple of blockSize!");
 		}
 
-		ScsiWrite10 write = new ScsiWrite10((int) devOffset, buffer.remaining(), blockSize);
+        writeCommand.init((int) devOffset, src.remaining(), blockSize);
 		//Log.d(TAG, "writing: " + write);
-		transferCommand(write, buffer);
 
+		transferCommand(writeCommand, src);
 		src.position(src.limit());
 
 		//Log.d(TAG, "write time: " + (System.currentTimeMillis() - time));

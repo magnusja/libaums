@@ -23,8 +23,10 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.github.mjdev.libaums.fs.UsbFile;
+import com.github.mjdev.libaums.server.http.server.HttpServer;
 
 import java.io.IOException;
 
@@ -34,6 +36,8 @@ import java.io.IOException;
  * on each individual application.
  */
 public class UsbFileHttpServerService extends Service {
+
+    private static final String TAG = UsbFileHttpServerService.class.getSimpleName();
 
     public class ServiceBinder extends Binder {
         public UsbFileHttpServerService getService() {
@@ -45,15 +49,19 @@ public class UsbFileHttpServerService extends Service {
 
     protected UsbFileHttpServer server;
 
-    public void startServer(UsbFile file) throws IOException {
+    public void startServer(UsbFile file, HttpServer server) throws IOException {
         startAsForeground();
 
-        server = new UsbFileHttpServer(file);
-        server.start();
+        this.server = new UsbFileHttpServer(file, server);
+        this.server.start();
     }
 
     public void stopServer() {
-        server.stop();
+        try {
+            server.stop();
+        } catch (IOException e) {
+            Log.e(TAG, "exception stopping server", e);
+        }
 
         stopForeground();
     }

@@ -118,19 +118,36 @@ public class Partition implements BlockDeviceDriver {
 		// TODO try to make this more efficient by for example making tmp buffer
 		// global
 		if (offset % blockSize != 0) {
-			Log.w(TAG, "device offset not a multiple of block size");
+			//Log.w(TAG, "device offset " + offset + " not a multiple of block size");
 			ByteBuffer tmp = ByteBuffer.allocate(blockSize);
 
 			blockDevice.read(devOffset, tmp);
 			tmp.clear();
 			tmp.position((int) (offset % blockSize));
+			int limit = Math.min(dest.remaining(), tmp.capacity());
+			tmp.limit(limit);
 			dest.put(tmp);
 
 			devOffset++;
 		}
 
-		if (dest.remaining() > 0)
-			blockDevice.read(devOffset, dest);
+		if (dest.remaining() > 0) {
+			ByteBuffer buffer;
+			if (dest.remaining() % blockSize != 0) {
+				//Log.w(TAG, "we have to round up size to next block sector");
+				int rounded = blockSize - dest.remaining() % blockSize + dest.remaining();
+				buffer = ByteBuffer.allocate(rounded);
+				buffer.limit(rounded);
+			} else {
+				buffer = dest;
+			}
+
+			blockDevice.read(devOffset, buffer);
+
+			if (dest.remaining() % blockSize != 0) {
+                System.arraycopy(buffer.array(), 0, dest.array(), dest.position(), dest.remaining());
+			}
+		}
 	}
 
 	@Override
@@ -139,7 +156,7 @@ public class Partition implements BlockDeviceDriver {
 		// TODO try to make this more efficient by for example making tmp buffer
 		// global
 		if (offset % blockSize != 0) {
-			Log.w(TAG, "device offset not a multiple of block size");
+			//Log.w(TAG, "device offset " + offset + " not a multiple of block size");
 			ByteBuffer tmp = ByteBuffer.allocate(blockSize);
 
 			blockDevice.read(devOffset, tmp);
@@ -154,8 +171,25 @@ public class Partition implements BlockDeviceDriver {
 			devOffset++;
 		}
 
-		if (src.remaining() > 0)
-			blockDevice.write(devOffset, src);
+		if (src.remaining() > 0) {
+            // TODO try to make this more efficient by for example only allocating
+            // blockSize and making it global
+            ByteBuffer buffer;
+            if (src.remaining() % blockSize != 0) {
+                //Log.w(TAG, "we have to round up size to next block sector");
+                int rounded = blockSize - src.remaining() % blockSize + src.remaining();
+                buffer = ByteBuffer.allocate(rounded);
+                buffer.limit(rounded);
+
+                // TODO: instead of just writing 0s at the end of the buffer do we need to read what
+                // is currently on the disk and save that then?
+                System.arraycopy(src.array(), src.position(), buffer.array(), 0, src.remaining());
+            } else {
+                buffer = src;
+            }
+
+            blockDevice.write(devOffset, buffer);
+        }
 	}
 
 	@Override

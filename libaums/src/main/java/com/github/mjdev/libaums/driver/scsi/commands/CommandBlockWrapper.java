@@ -58,7 +58,7 @@ public abstract class CommandBlockWrapper {
 	private static final int D_CBW_SIGNATURE = 0x43425355;
 
 	private int dCbwTag;
-	private int dCbwDataTransferLength;
+	protected int dCbwDataTransferLength;
 	private byte bmCbwFlags;
 	private byte bCbwLun;
 	private byte bCbwcbLength;
