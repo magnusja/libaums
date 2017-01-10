@@ -58,6 +58,7 @@ import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -329,7 +330,17 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 					.fromFile(file).toString());
 			String mimetype = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(
 					extension);
-			myIntent.setDataAndType(Uri.fromFile(file), mimetype);
+
+            Uri uri;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                myIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                uri = FileProvider.getUriForFile(MainActivity.this,
+                        MainActivity.this.getApplicationContext().getPackageName() + ".provider",
+                        file);
+            } else {
+                uri = Uri.fromFile(file);
+            }
+			myIntent.setDataAndType(uri, mimetype);
 			try {
 				startActivity(myIntent);
 			} catch (ActivityNotFoundException e) {
@@ -747,7 +758,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 				File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath()
 						+ "/usbfileman/cache");
 				f.mkdirs();
-				int index = entry.getName().lastIndexOf(".");
+				int index = entry.getName().lastIndexOf(".") > 0
+						? entry.getName().lastIndexOf(".")
+						: entry.getName().length();
 				String prefix = entry.getName().substring(0, index);
 				String ext = entry.getName().substring(index);
 				// prefix must be at least 3 characters
