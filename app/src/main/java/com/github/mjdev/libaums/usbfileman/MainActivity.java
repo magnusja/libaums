@@ -747,7 +747,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 				File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath()
 						+ "/usbfileman/cache");
 				f.mkdirs();
-				int index = entry.getName().lastIndexOf(".");
+				int index = entry.getName().lastIndexOf(".") > 0
+						? entry.getName().lastIndexOf(".")
+						: entry.getName().length();
 				String prefix = entry.getName().substring(0, index);
 				String ext = entry.getName().substring(index);
 				// prefix must be at least 3 characters
