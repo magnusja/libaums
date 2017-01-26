@@ -1,5 +1,15 @@
 apply plugin: 'com.android.library'
 
+
+ext {
+    artifact = 'libaums-storageprovider'
+    bintrayName = 'libaums-storageprovider'
+}
+
+configurations {
+    javadocDeps
+}
+
 android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
@@ -25,4 +35,10 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'org.apache.commons:commons-io:1.3.2'
     compile project(':libaums')
+}
+
+
+task bintray {
+    apply from: '../install.gradle'
+    apply from: '../bintray.gradle'
 }
