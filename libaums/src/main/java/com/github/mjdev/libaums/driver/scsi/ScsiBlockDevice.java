@@ -40,7 +40,7 @@ import com.github.mjdev.libaums.driver.scsi.commands.ScsiWrite10;
  * This class is responsible for handling mass storage devices which follow the
  * SCSI standard. This class communicates with the mass storage device via the
  * different SCSI commands.
- * 
+ *
  * @author mjahnen
  * @see com.github.mjdev.libaums.driver.scsi.commands
  */
@@ -55,8 +55,8 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	private int blockSize;
 	private int lastBlockAddress;
 
-    private ScsiWrite10 writeCommand = new ScsiWrite10();
-    private ScsiRead10 readCommand = new ScsiRead10();
+	private ScsiWrite10 writeCommand = new ScsiWrite10();
+	private ScsiRead10 readCommand = new ScsiRead10();
 	private CommandStatusWrapper csw = new CommandStatusWrapper();
 
 	public ScsiBlockDevice(UsbCommunication usbCommunication) {
@@ -69,7 +69,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	 * Issues a SCSI Inquiry to determine the connected device. After that it is
 	 * checked if the unit is ready. Logs a warning if the unit is not ready.
 	 * Finally the capacity of the mass storage device is read.
-	 * 
+	 *
 	 * @throws IOException
 	 *             If initialing fails due to an unsupported device or if
 	 *             reading fails.
@@ -122,7 +122,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	 * successful (
 	 * {@link com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper #getbCswStatus()}
 	 * ).
-	 * 
+	 *
 	 * @param command
 	 *            The command which should be transferred.
 	 * @param inBuffer
@@ -203,7 +203,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 			throw new IllegalArgumentException("dest.remaining() must be multiple of blockSize!");
 		}
 
-        readCommand.init((int) devOffset, dest.remaining(), blockSize);
+		readCommand.init((int) devOffset, dest.remaining(), blockSize);
 		//Log.d(TAG, "reading: " + read);
 
 		transferCommand(readCommand, dest);
@@ -224,7 +224,7 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 			throw new IllegalArgumentException("src.remaining() must be multiple of blockSize!");
 		}
 
-        writeCommand.init((int) devOffset, src.remaining(), blockSize);
+		writeCommand.init((int) devOffset, src.remaining(), blockSize);
 		//Log.d(TAG, "writing: " + write);
 
 		transferCommand(writeCommand, src);

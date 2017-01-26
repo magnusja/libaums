@@ -7,12 +7,37 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:2.2.3'
 
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.4'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
+}
+
+ext {
+    bintrayRepo = 'maven'
+
+    publishedGroupId = 'com.github.mjdev'
+    libraryName = 'libaums'
+
+    // artifact comes from module
+    //artifact = 'libaums'
+
+    libraryDescription = 'Android USB mass storage library with FAT32 support.'
+
+    siteUrl = 'https://github.com/mjdev/libaums'
+    gitUrl = 'https://github.com/mjdev/libaums.git'
+
+    libraryVersion = '0.5.0'
+
+    developerId = 'mjdev'
+    developerName = 'mjahnen'
+    developerEmail = 'jahnen@in.tum.de'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
 }
 
 allprojects {

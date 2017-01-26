@@ -16,6 +16,13 @@ The library can be included into your project like this:
 compile 'com.github.mjdev:libaums:0.5.0'
 ```
 
+If you need the HTTP or the storage provider module:
+
+```ruby
+compile 'com.github.mjdev:libaums-httpserver:0.5.0'
+compile 'com.github.mjdev:libaums-storageprovider:0.5.0'
+```
+
 ### Basics
 #### Getting mass storage devices
 
