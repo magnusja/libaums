@@ -26,4 +26,4 @@ before_script:
 
 script:
   - android list target
-  - ./gradlew build connectedCheck --stacktrace --info
+  - ./gradlew build -x bintray connectedCheck --stacktrace --info
