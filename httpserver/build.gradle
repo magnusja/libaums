@@ -1,5 +1,9 @@
 apply plugin: 'com.android.library'
 
+ext {
+    artifact = 'libaums-http'
+}
+
 configurations {
     javadocDeps
 }
@@ -34,4 +38,9 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:support-annotations:25.1.0'
     compile project(':libaums')
+}
+
+task bintray {
+    apply from: '../install.gradle'
+    apply from: '../bintray.gradle'
 }
