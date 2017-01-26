@@ -17,7 +17,6 @@ buildscript {
 
 ext {
     bintrayRepo = 'maven'
-    bintrayName = 'libaums'
 
     publishedGroupId = 'com.github.mjdev'
     libraryName = 'libaums'

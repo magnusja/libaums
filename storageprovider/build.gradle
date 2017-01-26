@@ -2,7 +2,8 @@ apply plugin: 'com.android.library'
 
 
 ext {
-    artifact = 'libaums:storageprovider'
+    artifact = 'libaums-storageprovider'
+    bintrayName = 'libaums-storageprovider'
 }
 
 configurations {

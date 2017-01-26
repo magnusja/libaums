@@ -1,7 +1,8 @@
 apply plugin: 'com.android.library'
 
 ext {
-    artifact = 'libaums:http'
+    artifact = 'libaums-httpserver'
+    bintrayName = 'libaums-httpserver'
 }
 
 configurations {
