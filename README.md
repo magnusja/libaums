@@ -144,6 +144,7 @@ fileServer.start();
 ```
 
 The file you privde can either be an actual file or a directory:
+
 1. File: Accessible either via "/" or "/FILE_NAME"
 2. Directory: All files in this directory und sub directories are accessable via their names. Directory listing is not supported!
 
