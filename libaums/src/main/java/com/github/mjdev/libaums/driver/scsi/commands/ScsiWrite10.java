@@ -33,7 +33,7 @@ import java.nio.ByteOrder;
 public class ScsiWrite10 extends CommandBlockWrapper {
 
 	// private static final String TAG = ScsiWrite10.class.getSimpleName();
-	private static final byte LENGTH = 0x10;
+	private static final byte LENGTH = 10;
 	private static final byte OPCODE = 0x2a;
 
 	private int blockAddress;
