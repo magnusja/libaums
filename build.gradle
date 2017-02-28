@@ -29,7 +29,7 @@ ext {
     siteUrl = 'https://github.com/mjdev/libaums'
     gitUrl = 'https://github.com/mjdev/libaums.git'
 
-    libraryVersion = '0.5.0'
+    libraryVersion = '0.5.1'
 
     developerId = 'mjdev'
     developerName = 'mjahnen'

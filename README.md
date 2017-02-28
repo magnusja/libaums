@@ -13,14 +13,14 @@ A library to access USB mass storage devices (pen drives, external HDDs, card re
 The library can be included into your project like this:
 
 ```ruby
-compile 'com.github.mjdev:libaums:0.5.0'
+compile 'com.github.mjdev:libaums:0.5.1'
 ```
 
 If you need the HTTP or the storage provider module:
 
 ```ruby
-compile 'com.github.mjdev:libaums-httpserver:0.5.0'
-compile 'com.github.mjdev:libaums-storageprovider:0.5.0'
+compile 'com.github.mjdev:libaums-httpserver:0.5.1'
+compile 'com.github.mjdev:libaums-storageprovider:0.5.1'
 ```
 
 ### Basics
@@ -144,6 +144,7 @@ fileServer.start();
 ```
 
 The file you privde can either be an actual file or a directory:
+
 1. File: Accessible either via "/" or "/FILE_NAME"
 2. Directory: All files in this directory und sub directories are accessable via their names. Directory listing is not supported!
 
