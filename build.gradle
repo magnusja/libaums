@@ -21,7 +21,7 @@ ext {
     publishedGroupId = 'com.github.mjdev'
     libraryName = 'libaums'
 
-    // artifact comes from module
+    // artifact comes from module as well as libraryVersion
     //artifact = 'libaums'
 
     libraryDescription = 'Android USB mass storage library with FAT32 support.'
@@ -29,7 +29,6 @@ ext {
     siteUrl = 'https://github.com/mjdev/libaums'
     gitUrl = 'https://github.com/mjdev/libaums.git'
 
-    libraryVersion = '0.5.1'
 
     developerId = 'mjdev'
     developerName = 'mjahnen'

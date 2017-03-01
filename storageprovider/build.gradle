@@ -5,6 +5,7 @@ project.archivesBaseName = 'libaums-storageprovider'
 ext {
     artifact = 'libaums-storageprovider'
     bintrayName = 'libaums-storageprovider'
+    libraryVersion = '0.5.1'
 }
 
 configurations {
