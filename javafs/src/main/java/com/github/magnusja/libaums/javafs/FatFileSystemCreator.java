@@ -9,11 +9,10 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.FileSystemCreator;
 import com.github.mjdev.libaums.partition.PartitionTableEntry;
-import com.github.mjdev.libaums.partition.PartitionTypes;
 
 import org.jnode.fs.FileSystemException;
 import org.jnode.fs.FileSystemType;
-import org.jnode.fs.fat.FatFileSystemType;
+import org.jnode.fs.jfat.FatFileSystemType;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
