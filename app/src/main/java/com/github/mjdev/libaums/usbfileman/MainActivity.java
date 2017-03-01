@@ -77,8 +77,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.magnusja.libaums.javafs.FatFileSystemCreator;
 import com.github.mjdev.libaums.UsbMassStorageDevice;
 import com.github.mjdev.libaums.fs.FileSystem;
+import com.github.mjdev.libaums.fs.FileSystemFactory;
 import com.github.mjdev.libaums.fs.UsbFile;
 import com.github.mjdev.libaums.fs.UsbFileInputStream;
 import com.github.mjdev.libaums.fs.UsbFileOutputStream;
@@ -95,6 +97,10 @@ import com.github.mjdev.libaums.server.http.server.NanoHttpdServer;
  * 
  */
 public class MainActivity extends AppCompatActivity implements OnItemClickListener {
+
+	static {
+		FileSystemFactory.registerFileSystem(new FatFileSystemCreator());
+	}
 
 	/**
 	 * Action string to request the permission to communicate with an UsbDevice.
