@@ -1,5 +1,7 @@
 package com.github.magnusja.libaums.javafs.wrapper;
 
+import android.util.Log;
+
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.UsbFile;
 
@@ -13,6 +15,8 @@ import java.io.IOException;
  */
 
 public class FileSystemWrapper implements FileSystem {
+
+    private static final String TAG = FileSystemWrapper.class.getSimpleName();
 
     private org.jnode.fs.FileSystem wrappedFs;
 
@@ -30,6 +34,7 @@ public class FileSystemWrapper implements FileSystem {
         try {
             return wrappedFs.getVolumeName();
         } catch (IOException e) {
+            Log.e(TAG, "error getting volume label", e);
             return "";
         }
     }
@@ -39,6 +44,7 @@ public class FileSystemWrapper implements FileSystem {
         try {
             return wrappedFs.getTotalSpace();
         } catch (IOException e) {
+            Log.e(TAG, "error getting capacity", e);
             return 0;
         }
     }
@@ -48,6 +54,7 @@ public class FileSystemWrapper implements FileSystem {
         try {
             return wrappedFs.getTotalSpace() - wrappedFs.getFreeSpace();
         } catch (IOException e) {
+            Log.e(TAG, "error getting total - free space", e);
             return 0;
         }
     }
@@ -57,6 +64,7 @@ public class FileSystemWrapper implements FileSystem {
         try {
             return wrappedFs.getFreeSpace();
         } catch (IOException e) {
+            Log.e(TAG, "error getting free space", e);
             return 0;
         }
     }
@@ -64,10 +72,13 @@ public class FileSystemWrapper implements FileSystem {
     @Override
     public int getChunkSize() {
         try {
+            // TODO this is wrong
             return wrappedFs.getDevice().getAPI(FSBlockDeviceAPI.class).getSectorSize();
         } catch (IOException e) {
+            Log.e(TAG, "error getting sector size", e);
             return 4096;
         } catch (ApiNotFoundException e) {
+            Log.e(TAG, "api not found (this should not happen)", e);
             return 4096;
         }
     }
