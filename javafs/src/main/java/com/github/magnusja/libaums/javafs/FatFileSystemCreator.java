@@ -10,6 +10,7 @@ import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.FileSystemCreator;
 import com.github.mjdev.libaums.partition.PartitionTableEntry;
 
+import org.apache.log4j.Logger;
 import org.jnode.fs.FileSystemException;
 import org.jnode.fs.FileSystemType;
 import org.jnode.fs.jfat.FatFileSystemType;
@@ -17,11 +18,20 @@ import org.jnode.fs.jfat.FatFileSystemType;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import de.mindpipe.android.logging.log4j.LogCatAppender;
+
 /**
  * Created by magnusja on 3/1/17.
  */
 
 public class FatFileSystemCreator implements FileSystemCreator {
+    static {
+
+        final Logger root = Logger.getRootLogger();
+        final LogCatAppender logCatAppender = new LogCatAppender();
+        root.addAppender(logCatAppender);
+    }
+
     @Override
     public FileSystem read(PartitionTableEntry entry, BlockDeviceDriver blockDevice) throws IOException {
 
