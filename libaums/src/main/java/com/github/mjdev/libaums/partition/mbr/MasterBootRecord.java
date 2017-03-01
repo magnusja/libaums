@@ -98,7 +98,11 @@ public class MasterBootRecord implements PartitionTable {
 				continue;
 			}
 
-			int type = partitionTypes.get(partitionType) != null ? partitionTypes.get(partitionType) : PartitionTypes.UNKNOWN;
+			Integer type = partitionTypes.get((int) partitionType);
+
+			if(type == null) {
+				type = PartitionTypes.UNKNOWN;
+			}
 
 			PartitionTableEntry entry = new PartitionTableEntry(type,
 					buffer.getInt(offset + 8), buffer.getInt(offset + 12));

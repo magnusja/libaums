@@ -75,7 +75,11 @@ public class Partition implements BlockDeviceDriver {
 		partition.logicalBlockAddress = entry.getLogicalBlockAddress();
 		partition.blockDevice = blockDevice;
 		partition.blockSize = blockDevice.getBlockSize();
-		partition.fileSystem = FileSystemFactory.createFileSystem(entry, partition);
+		try {
+			partition.fileSystem = FileSystemFactory.createFileSystem(entry, partition);
+		} catch (FileSystemFactory.UnsupportedFileSystemException e) {
+			Log.w(TAG, "Unsupported fs on partition");
+		}
 
 		return (partition.fileSystem != null ? partition : null);
 	}
