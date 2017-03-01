@@ -71,20 +71,13 @@ public class Partition implements BlockDeviceDriver {
 			throws IOException {
 		Partition partition = null;
 
-		// we currently only support fat32
-		int partitionType = entry.getPartitionType();
-		if (partitionType == 0x0b || partitionType == 0x0c) {
-			partition = new Partition();
-			// partition.partitionTableEntry = entry;
-			partition.logicalBlockAddress = entry.getLogicalBlockAddress();
-			partition.blockDevice = blockDevice;
-			partition.blockSize = blockDevice.getBlockSize();
-			partition.fileSystem = FileSystemFactory.createFileSystem(entry, partition);
-		} else {
-			Log.w(TAG, "unsupported partition type: " + entry.getPartitionType());
-		}
+		partition = new Partition();
+		partition.logicalBlockAddress = entry.getLogicalBlockAddress();
+		partition.blockDevice = blockDevice;
+		partition.blockSize = blockDevice.getBlockSize();
+		partition.fileSystem = FileSystemFactory.createFileSystem(entry, partition);
 
-		return partition;
+		return (partition.fileSystem != null ? partition : null);
 	}
 
 	/**

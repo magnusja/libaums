@@ -10,18 +10,11 @@ public class PartitionTypes {
     public static final int FAT16 = 1;
     public static final int FAT32 = 2;
 
-    public static final int EXFAT = 3;
+    public static final int LINUX_EXT = 3;
 
-    public static final int EXT2 = 4;
-    public static final int EXT3 = 5;
-    public static final int EXT4 = 6;
+    public static final int APPLE_HFS_HFS_PLUS = 4;
 
-    public static final int HFS = 7;
-    public static final int HFS_PLUS = 8;
+    public static final int ISO9660 = 5;
 
-    public static final int ISO9660 = 9;
-
-    public static final int NTFS = 10;
-
-    public static final int XFS = 11;
+    public static final int NTFS_EXFAT = 6;
 }

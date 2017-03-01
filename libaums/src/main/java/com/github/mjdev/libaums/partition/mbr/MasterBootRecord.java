@@ -21,12 +21,15 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.util.Log;
 
 import com.github.mjdev.libaums.partition.PartitionTable;
 import com.github.mjdev.libaums.partition.PartitionTableEntry;
+import com.github.mjdev.libaums.partition.PartitionTypes;
 
 /**
  * This class represents the Master Boot Record (MBR), which is a partition
@@ -36,6 +39,25 @@ import com.github.mjdev.libaums.partition.PartitionTableEntry;
  * 
  */
 public class MasterBootRecord implements PartitionTable {
+
+	private static Map<Integer, Integer> partitionTypes = new HashMap<Integer, Integer>() {{
+		put(0x0b, PartitionTypes.FAT32);
+		put(0x0c, PartitionTypes.FAT32);
+		put(0x1b, PartitionTypes.FAT32);
+		put(0x1c, PartitionTypes.FAT32);
+
+		put(0x01, PartitionTypes.FAT12);
+
+		put(0x04, PartitionTypes.FAT16);
+		put(0x06, PartitionTypes.FAT16);
+		put(0x0e, PartitionTypes.FAT16);
+
+		put(0x83, PartitionTypes.LINUX_EXT);
+
+		put(0x07, PartitionTypes.NTFS_EXFAT);
+
+		put(0xaf, PartitionTypes.APPLE_HFS_HFS_PLUS);
+	}};
 
 	private static final String TAG = MasterBootRecord.class.getSimpleName();
 	private static final int TABLE_OFFSET = 446;
@@ -76,7 +98,9 @@ public class MasterBootRecord implements PartitionTable {
 				continue;
 			}
 
-			PartitionTableEntry entry = new PartitionTableEntry(partitionType,
+			int type = partitionTypes.get(partitionType) != null ? partitionTypes.get(partitionType) : PartitionTypes.UNKNOWN;
+
+			PartitionTableEntry entry = new PartitionTableEntry(type,
 					buffer.getInt(offset + 8), buffer.getInt(offset + 12));
 
 			result.partitions.add(entry);
