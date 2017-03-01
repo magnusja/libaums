@@ -26,7 +26,7 @@ package com.github.mjdev.libaums.partition;
  */
 public class PartitionTableEntry {
 
-	byte partitionType;
+	int partitionType;
 	int logicalBlockAddress;
 	int totalNumberOfSectors;
 
@@ -41,7 +41,7 @@ public class PartitionTableEntry {
 	 * @param totalNumberOfSectors
 	 *            The total numbers of sectors occupied by the partition.
 	 */
-	public PartitionTableEntry(byte partitionType, int logicalBlockAddress, int totalNumberOfSectors) {
+	public PartitionTableEntry(int partitionType, int logicalBlockAddress, int totalNumberOfSectors) {
 		this.partitionType = partitionType;
 		this.logicalBlockAddress = logicalBlockAddress;
 		this.totalNumberOfSectors = totalNumberOfSectors;
@@ -51,7 +51,7 @@ public class PartitionTableEntry {
 	 * 
 	 * @return The file system type of the partition.
 	 */
-	public byte getPartitionType() {
+	public int getPartitionType() {
 		return partitionType;
 	}
 
