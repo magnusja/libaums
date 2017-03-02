@@ -58,7 +58,6 @@ public class FSBlockDeviceWrapper implements FSBlockDeviceAPI {
 
     @Override
     public void read(long l, ByteBuffer byteBuffer) throws IOException {
-        Log.d(TAG, "reading at " + l + " with size " + byteBuffer.remaining());
         blockDevice.read(l, byteBuffer);
     }
 

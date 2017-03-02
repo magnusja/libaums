@@ -8,6 +8,8 @@ import com.github.mjdev.libaums.fs.UsbFile;
 
 import org.jnode.fs.FSDirectory;
 import org.jnode.fs.FSEntry;
+import org.jnode.fs.FSEntryCreated;
+import org.jnode.fs.FSEntryLastAccessed;
 import org.jnode.fs.FSFile;
 
 import java.io.IOException;
@@ -65,7 +67,15 @@ public class UsbFileWrapper implements UsbFile {
 
     @Override
     public long createdAt() {
-        return 0;
+        if(entry instanceof FSEntryCreated) {
+            try {
+                return ((FSEntryCreated) entry).getCreated();
+            } catch (IOException e) {
+                Log.e(TAG, "error getting last accessed", e);
+                return -1;
+            }
+        }
+        return -2;
     }
 
     @Override
@@ -80,12 +90,21 @@ public class UsbFileWrapper implements UsbFile {
 
     @Override
     public long lastAccessed() {
-        return 0;
+        if(entry instanceof FSEntryLastAccessed) {
+            try {
+                return ((FSEntryLastAccessed) entry).getLastAccessed();
+            } catch (IOException e) {
+                Log.e(TAG, "error getting last accessed", e);
+                return -1;
+            }
+        }
+        return -2;
     }
 
     @Override
     public UsbFile getParent() {
-        return null;
+        // TODO implement me
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
@@ -154,7 +173,7 @@ public class UsbFileWrapper implements UsbFile {
             throw new UnsupportedOperationException("This is a directory!");
         }
 
-        file.write(offset, destination);
+        file.read(offset, destination);
     }
 
     @Override
@@ -199,7 +218,8 @@ public class UsbFileWrapper implements UsbFile {
 
     @Override
     public void moveTo(UsbFile destination) throws IOException {
-
+        // TODO implement me
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
