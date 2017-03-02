@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.github.mjdev.libaums.fs.AbstractUsbFile;
 import com.github.mjdev.libaums.fs.UsbFile;
 
 import org.jnode.fs.FSDirectory;
@@ -22,7 +23,7 @@ import java.util.List;
  * Created by magnusja on 01/03/17.
  */
 
-public class UsbFileWrapper implements UsbFile {
+public class UsbFileWrapper extends AbstractUsbFile {
 
     private static final String TAG = UsbFileWrapper.class.getSimpleName();
 
@@ -42,12 +43,6 @@ public class UsbFileWrapper implements UsbFile {
 
     public UsbFileWrapper(FSDirectory dir) {
         this.dir = dir;
-    }
-
-    @Nullable
-    @Override
-    public UsbFile search(@NonNull String path) throws IOException {
-        return null;
     }
 
     @Override
