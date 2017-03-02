@@ -199,7 +199,7 @@ public class UsbFileWrapper extends AbstractUsbFile {
         if(dir == null) {
             throw new UnsupportedOperationException("This is a file!");
         }
-        return new UsbFileWrapper(dir.addFile(name));
+        return new UsbFileWrapper(dir.addDirectory(name));
     }
 
     @Override
@@ -208,7 +208,7 @@ public class UsbFileWrapper extends AbstractUsbFile {
             throw new UnsupportedOperationException("This is a file!");
         }
 
-        return new UsbFileWrapper(dir.addDirectory(name));
+        return new UsbFileWrapper(dir.addFile(name));
     }
 
     @Override
