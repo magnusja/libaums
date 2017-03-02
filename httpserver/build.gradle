@@ -5,6 +5,7 @@ project.archivesBaseName = 'libaums-httpserver'
 ext {
     artifact = 'libaums-httpserver'
     bintrayName = 'libaums-httpserver'
+    libraryVersion = '0.5.2'
 }
 
 configurations {

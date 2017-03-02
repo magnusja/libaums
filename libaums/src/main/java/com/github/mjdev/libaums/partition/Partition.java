@@ -71,20 +71,17 @@ public class Partition implements BlockDeviceDriver {
 			throws IOException {
 		Partition partition = null;
 
-		// we currently only support fat32
-		int partitionType = entry.getPartitionType();
-		if (partitionType == 0x0b || partitionType == 0x0c) {
-			partition = new Partition();
-			// partition.partitionTableEntry = entry;
-			partition.logicalBlockAddress = entry.getLogicalBlockAddress();
-			partition.blockDevice = blockDevice;
-			partition.blockSize = blockDevice.getBlockSize();
+		partition = new Partition();
+		partition.logicalBlockAddress = entry.getLogicalBlockAddress();
+		partition.blockDevice = blockDevice;
+		partition.blockSize = blockDevice.getBlockSize();
+		try {
 			partition.fileSystem = FileSystemFactory.createFileSystem(entry, partition);
-		} else {
-			Log.w(TAG, "unsupported partition type: " + entry.getPartitionType());
+		} catch (FileSystemFactory.UnsupportedFileSystemException e) {
+			Log.w(TAG, "Unsupported fs on partition");
 		}
 
-		return partition;
+		return (partition.fileSystem != null ? partition : null);
 	}
 
 	/**
@@ -124,8 +121,8 @@ public class Partition implements BlockDeviceDriver {
 			blockDevice.read(devOffset, tmp);
 			tmp.clear();
 			tmp.position((int) (offset % blockSize));
-			int limit = Math.min(dest.remaining(), tmp.capacity());
-			tmp.limit(limit);
+			int limit = Math.min(dest.remaining(), tmp.remaining());
+			tmp.limit(tmp.position() + limit);
 			dest.put(tmp);
 
 			devOffset++;

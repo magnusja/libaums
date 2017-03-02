@@ -12,6 +12,8 @@ import com.koushikdutta.async.http.server.HttpServerRequestCallback;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 
 /**
@@ -66,7 +68,16 @@ public class AsyncHttpServer implements HttpServer, HttpServerRequestCallback {
 
     @Override
     public void onRequest(AsyncHttpServerRequest request, AsyncHttpServerResponse response) {
-        String uri = request.getPath();
+        String uri;
+        try {
+            uri = URLDecoder.decode(request.getPath(), "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            Log.e(TAG, "could not decode URL", e);
+            response.code(404);
+            response.send(e.getMessage());
+            return;
+        }
+
         Log.d(TAG, "Uri: " + uri);
 
         try {

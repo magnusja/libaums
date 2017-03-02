@@ -18,9 +18,10 @@
 package com.github.mjdev.libaums.fs;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
-import com.github.mjdev.libaums.fs.fat32.Fat32FileSystem;
 import com.github.mjdev.libaums.partition.PartitionTableEntry;
 
 /**
@@ -32,9 +33,30 @@ import com.github.mjdev.libaums.partition.PartitionTableEntry;
  * 
  */
 public class FileSystemFactory {
+
+    public static class UnsupportedFileSystemException extends Exception {
+
+    }
+
+    private static List<FileSystemCreator> fileSystems = new ArrayList<>();
+
+    static {
+        FileSystemFactory.registerFileSystem(new Fat32FileSystemCreator());
+    }
+
 	public static FileSystem createFileSystem(PartitionTableEntry entry,
-			BlockDeviceDriver blockDevice) throws IOException {
-		// we currently only support FAT32
-		return Fat32FileSystem.read(blockDevice);
+			BlockDeviceDriver blockDevice) throws IOException, UnsupportedFileSystemException {
+		for(FileSystemCreator creator : fileSystems) {
+            FileSystem fs = creator.read(entry, blockDevice);
+            if(fs != null) {
+                return fs;
+            }
+        }
+
+        throw new UnsupportedFileSystemException();
 	}
+
+    public static synchronized void registerFileSystem(FileSystemCreator creator) {
+        fileSystems.add(creator);
+    }
 }
