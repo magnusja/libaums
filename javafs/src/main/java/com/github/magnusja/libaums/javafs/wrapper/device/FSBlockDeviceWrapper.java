@@ -1,5 +1,7 @@
 package com.github.magnusja.libaums.javafs.wrapper.device;
 
+import android.util.Log;
+
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 
 import org.jnode.driver.block.FSBlockDeviceAPI;
@@ -15,6 +17,7 @@ import java.nio.ByteBuffer;
 
 public class FSBlockDeviceWrapper implements FSBlockDeviceAPI {
 
+    private static final String TAG = FSBlockDeviceWrapper.class.getSimpleName();
     private BlockDeviceDriver blockDevice;
     private com.github.mjdev.libaums.partition.PartitionTableEntry partitionTableEntry;
 
@@ -55,6 +58,7 @@ public class FSBlockDeviceWrapper implements FSBlockDeviceAPI {
 
     @Override
     public void read(long l, ByteBuffer byteBuffer) throws IOException {
+        Log.d(TAG, "reading at " + l + " with size " + byteBuffer.remaining());
         blockDevice.read(l, byteBuffer);
     }
 
