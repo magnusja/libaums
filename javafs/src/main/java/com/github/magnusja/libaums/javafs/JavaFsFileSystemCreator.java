@@ -2,14 +2,13 @@ package com.github.magnusja.libaums.javafs;
 
 import android.util.Log;
 
-import com.github.magnusja.libaums.javafs.wrapper.DeviceWrapper;
-import com.github.magnusja.libaums.javafs.wrapper.FSBlockDeviceWrapper;
-import com.github.magnusja.libaums.javafs.wrapper.FileSystemWrapper;
+import com.github.magnusja.libaums.javafs.wrapper.device.DeviceWrapper;
+import com.github.magnusja.libaums.javafs.wrapper.device.FSBlockDeviceWrapper;
+import com.github.magnusja.libaums.javafs.wrapper.fs.FileSystemWrapper;
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.FileSystemCreator;
 import com.github.mjdev.libaums.partition.PartitionTableEntry;
-import com.github.mjdev.libaums.partition.PartitionTypes;
 
 import org.apache.log4j.Logger;
 import org.jnode.fs.FileSystemException;
@@ -26,9 +25,7 @@ import org.jnode.fs.xfs.XfsFileSystemType;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import de.mindpipe.android.logging.log4j.LogCatAppender;
 

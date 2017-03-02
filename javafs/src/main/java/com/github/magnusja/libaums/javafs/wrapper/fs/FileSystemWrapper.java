@@ -1,4 +1,4 @@
-package com.github.magnusja.libaums.javafs.wrapper;
+package com.github.magnusja.libaums.javafs.wrapper.fs;
 
 import android.util.Log;
 
