@@ -6,6 +6,7 @@ import com.github.mjdev.libaums.fs.UsbFile;
 import com.github.mjdev.libaums.fs.UsbFileInputStream;
 import com.github.mjdev.libaums.server.http.UsbFileProvider;
 import com.github.mjdev.libaums.server.http.exception.NotAFileException;
+import com.koushikdutta.async.AsyncServer;
 import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 import com.koushikdutta.async.http.server.HttpServerRequestCallback;
@@ -43,6 +44,8 @@ public class AsyncHttpServer implements HttpServer, HttpServerRequestCallback {
     @Override
     public void stop() throws IOException {
         server.stop();
+        // force the server to stop even if there are ongoing connections
+        AsyncServer.getDefault().stop();
         isAlive = false;
     }
 
