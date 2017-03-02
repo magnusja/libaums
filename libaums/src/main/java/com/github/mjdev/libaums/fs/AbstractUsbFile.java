@@ -29,7 +29,7 @@ public abstract class AbstractUsbFile implements UsbFile {
 
             UsbFile file = searchThis(dirName);
             if(file != null && file.isDirectory()) {
-                Log.d(TAG, "found directory" + dirName);
+                Log.d(TAG, "found directory " + dirName);
                 return file.search(subPath);
             }
         }
