@@ -12,6 +12,9 @@ import org.jnode.fs.FSFile;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by magnusja on 01/03/17.
@@ -87,12 +90,44 @@ public class UsbFileWrapper implements UsbFile {
 
     @Override
     public String[] list() throws IOException {
-        return new String[0];
+        if(dir == null) {
+            throw new UnsupportedOperationException("This is a file!");
+        }
+
+        List<String> list = new ArrayList<>();
+
+        Iterator<? extends FSEntry> iterator = dir.iterator();
+
+        while(iterator.hasNext()) {
+            FSEntry entry = iterator.next();
+            list.add(entry.getName());
+        }
+
+        String[] array = new String[list.size()];
+        array = list.toArray(array);
+
+        return array;
     }
 
     @Override
     public UsbFile[] listFiles() throws IOException {
-        return new UsbFile[0];
+        if(dir == null) {
+            throw new UnsupportedOperationException("This is a file!");
+        }
+
+        List<UsbFile> list = new ArrayList<>();
+
+        Iterator<? extends FSEntry> iterator = dir.iterator();
+
+        while(iterator.hasNext()) {
+            FSEntry entry = iterator.next();
+            list.add(new UsbFileWrapper(entry));
+        }
+
+        UsbFile[] array = new UsbFile[list.size()];
+        array = list.toArray(array);
+
+        return array;
     }
 
     @Override

@@ -26,7 +26,12 @@ public class FileSystemWrapper implements FileSystem {
 
     @Override
     public UsbFile getRootDirectory() {
-        return null;
+        try {
+            return new UsbFileWrapper(wrappedFs.getRootEntry());
+        } catch (IOException e) {
+            Log.e(TAG, "error getting root entry", e);
+            return null;
+        }
     }
 
     @Override
