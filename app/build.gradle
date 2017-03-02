@@ -31,4 +31,5 @@ dependencies {
     compile project(':libaums')
     compile project(':httpserver')
     compile project(':storageprovider')
+    compile project(':javafs')
 }
