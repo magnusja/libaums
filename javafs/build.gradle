@@ -26,8 +26,8 @@ dependencies {
 
     compile('log4j:log4j:1.2.17')
     compile('de.mindpipe.android:android-logging-log4j:1.0.3')
+    compile 'com.github.magnusja:java-fs:0.1.1'
 
-    compile files('libs/java-fs-0.1-SNAPSHOT.jar')
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
