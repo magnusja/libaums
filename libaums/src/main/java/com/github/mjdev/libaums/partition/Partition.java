@@ -122,7 +122,7 @@ public class Partition implements BlockDeviceDriver {
 			tmp.clear();
 			tmp.position((int) (offset % blockSize));
 			int limit = Math.min(dest.remaining(), tmp.remaining());
-			tmp.limit(limit);
+			tmp.limit(tmp.position() + limit);
 			dest.put(tmp);
 
 			devOffset++;
