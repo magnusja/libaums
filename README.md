@@ -19,7 +19,7 @@ compile 'com.github.mjdev:libaums:0.5.2'
 If you need the HTTP or the storage provider module:
 
 ```ruby
-compile 'com.github.mjdev:libaums-httpserver:0.5.1'
+compile 'com.github.mjdev:libaums-httpserver:0.5.2'
 compile 'com.github.mjdev:libaums-storageprovider:0.5.1'
 ```
 
