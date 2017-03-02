@@ -41,7 +41,7 @@ public class FileSystemFactory {
     private static List<FileSystemCreator> fileSystems = new ArrayList<>();
 
     static {
-        //FileSystemFactory.registerFileSystem(new Fat32FileSystemCreator());
+        FileSystemFactory.registerFileSystem(new Fat32FileSystemCreator());
     }
 
 	public static FileSystem createFileSystem(PartitionTableEntry entry,
