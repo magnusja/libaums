@@ -221,6 +221,9 @@ public class UsbMassStorageDevice {
 		}
 
 		UsbCommunication communication = UsbCommunicationFactory.createUsbCommunication(deviceConnection, outEndpoint, inEndpoint);
+		byte[] b = new byte[1];
+		deviceConnection.controlTransfer(0b10100001, 0b11111110, 0, usbInterface.getId(), b, 1, 5000);
+		Log.e(TAG, "asdasdasdasd " + (int)b[0]);
 		blockDevice = BlockDeviceDriverFactory.createBlockDevice(communication);
 		blockDevice.init();
 		partitionTable = PartitionTableFactory.createPartitionTable(blockDevice);
