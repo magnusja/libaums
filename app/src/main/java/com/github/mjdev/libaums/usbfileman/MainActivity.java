@@ -290,6 +290,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			dialog.setMessage("Copying a file to the internal storage, this can take some time!");
 			dialog.setIndeterminate(false);
 			dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            dialog.setCancelable(false);
 		}
 
 		@Override
@@ -393,6 +394,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
             dialog.setMessage("Copying a file to the USB drive, this can take some time!");
             dialog.setIndeterminate(true);
             dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            dialog.setCancelable(false);
         }
 
         private void queryUriMetaData(Uri uri) {
@@ -501,6 +503,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
             dialog.setMessage("Copying a folder to the USB drive, this can take some time!");
             dialog.setIndeterminate(true);
             dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            dialog.setCancelable(false);
         }
 
         @Override
@@ -512,8 +515,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
             for (DocumentFile file : dir.listFiles()) {
                 Log.d(TAG, "Found file " + file.getName() + " with size " + file.length());
                 if(file.isDirectory()) {
-                    currentUsbDir.createDirectory(file.getName());
-                    copyDir(file, currentUsbDir);
+                    copyDir(file, currentUsbDir.createDirectory(file.getName()));
                 } else {
                     copyFile(file, currentUsbDir);
                 }
