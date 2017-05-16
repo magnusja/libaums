@@ -58,6 +58,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v4.provider.DocumentFile;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -106,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
     private static final int COPY_STORAGE_PROVIDER_RESULT = 0;
     private static final int OPEN_STORAGE_PROVIDER_RESULT = 1;
+    private static final int OPEN_DOCUMENT_TREE_RESULT = 2;
 
 	private static final int REQUEST_EXT_STORAGE_WRITE_PERM = 0;
 
@@ -478,6 +480,109 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
     }
 
+    /**
+     * Asynchronous task to copy a file from the mass storage device connected
+     * via USB to the internal storage.
+     *
+     * @author mjahnen
+     *
+     */
+    private class CopyFolderToUsbTask extends AsyncTask<CopyToUsbTaskParam, Integer, Void> {
+
+        private ProgressDialog dialog;
+        private CopyToUsbTaskParam param;
+
+        private long size = -1;
+        private DocumentFile pickedDir;
+
+        public CopyFolderToUsbTask() {
+            dialog = new ProgressDialog(MainActivity.this);
+            dialog.setTitle("Copying a folder");
+            dialog.setMessage("Copying a folder to the USB drive, this can take some time!");
+            dialog.setIndeterminate(true);
+            dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog.show();
+        }
+
+        private void copyDir(DocumentFile dir, UsbFile currentUsbDir) throws IOException {
+            for (DocumentFile file : dir.listFiles()) {
+                Log.d(TAG, "Found file " + file.getName() + " with size " + file.length());
+                if(file.isDirectory()) {
+                    currentUsbDir.createDirectory(file.getName());
+                    copyDir(file, currentUsbDir);
+                } else {
+                    copyFile(file, currentUsbDir);
+                }
+            }
+        }
+
+        private void copyFile(DocumentFile file, UsbFile currentUsbDir) {
+            try {
+                UsbFile usbFile = currentUsbDir.createFile(file.getName());
+                size = file.length();
+                usbFile.setLength(file.length());
+
+                InputStream inputStream = getContentResolver().openInputStream(file.getUri());
+                OutputStream outputStream = UsbFileStreamFactory.createBufferedOutputStream(usbFile, currentFs);
+
+                byte[] bytes = new byte[1337];
+                int count;
+                int total = 0;
+
+                while ((count = inputStream.read(bytes)) != -1){
+                    outputStream.write(bytes, 0, count);
+                    if (size > 0) {
+                        total += count;
+                        publishProgress((int) total);
+                    }
+                }
+
+                outputStream.close();
+                inputStream.close();
+            } catch (IOException e) {
+                Log.e(TAG, "error copying!", e);
+            }
+        }
+
+        @Override
+        protected Void doInBackground(CopyToUsbTaskParam... params) {
+            long time = System.currentTimeMillis();
+            param = params[0];
+            pickedDir = DocumentFile.fromTreeUri(MainActivity.this, param.from);
+
+            try {
+                copyDir(pickedDir, adapter.getCurrentDir().createDirectory(pickedDir.getName()));
+            } catch (IOException e) {
+                Log.e(TAG, "could not copy directory", e);
+            }
+
+            Log.d(TAG, "copy time: " + (System.currentTimeMillis() - time));
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            dialog.dismiss();
+            try {
+                adapter.refresh();
+            } catch (IOException e) {
+                Log.e(TAG, "Error refreshing adapter", e);
+            }
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            dialog.setIndeterminate(false);
+            dialog.setMax((int) size);
+            dialog.setProgress(values[0]);
+        }
+
+    }
+
     ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -661,6 +766,14 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                 intent.setType("*/*");
 
                 startActivityForResult(intent, COPY_STORAGE_PROVIDER_RESULT);
+            }
+            return true;
+		case R.id.copy_folder_from_storage_provider:
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_OPEN_DOCUMENT_TREE);
+
+                startActivityForResult(intent, OPEN_DOCUMENT_TREE_RESULT);
             }
             return true;
 		default:
@@ -850,7 +963,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 				i.setData(uri);
 				startActivity(i);
 			}
-		} else if (requestCode == COPY_STORAGE_PROVIDER_RESULT){
+		} else if (requestCode == COPY_STORAGE_PROVIDER_RESULT) {
             Uri uri;
             if (data != null) {
                 uri = data.getData();
@@ -860,6 +973,17 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                 params.from = uri;
 
                 new CopyToUsbTask().execute(params);
+            }
+        } else if (requestCode == OPEN_DOCUMENT_TREE_RESULT) {
+            Uri uri;
+            if (data != null) {
+                uri = data.getData();
+                Log.i(TAG, "Uri: " + uri.toString());
+
+                CopyToUsbTaskParam params = new CopyToUsbTaskParam();
+                params.from = uri;
+
+                new CopyFolderToUsbTask().execute(params);
             }
         }
 	}

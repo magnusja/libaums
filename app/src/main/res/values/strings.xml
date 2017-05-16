@@ -38,4 +38,5 @@
     <string name="request_write_storage_perm">Please let this app access your storage to copy files from USB</string>
     <string name="permission_granted">Permission granted. Please try again now.</string>
     <string name="permission_denied">Permission denied. Cannot copy from USB.</string>
+    <string name="copy_folder_to_usb">Copy folder to USB</string>
 </resources>
