@@ -9,6 +9,7 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.os.Build;
+import android.util.Log;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -42,7 +43,7 @@ class JellyBeanMr2Communication implements UsbCommunication {
                 src.array(), src.position(), src.remaining(), TRANSFER_TIMEOUT);
 
         if (result == -1) {
-            deviceConnection.controlTransfer(0b00100001, 0b11111111, 0, usbInterface.getId(), null, 0, 5000);
+            Log.d("asdqweasdasd", "control transfer: " + deviceConnection.controlTransfer(0b00100001, 0b11111111, 0, usbInterface.getId(), null, 0, 5000));
             result = deviceConnection.bulkTransfer(outEndpoint,
                     src.array(), src.position(), src.remaining(), TRANSFER_TIMEOUT);
             if (result == -1) {
@@ -58,9 +59,11 @@ class JellyBeanMr2Communication implements UsbCommunication {
     public int bulkInTransfer(ByteBuffer dest) throws IOException {
         int result = deviceConnection.bulkTransfer(inEndpoint,
                 dest.array(), dest.position(), dest.remaining(), TRANSFER_TIMEOUT);
+        Log.d("asdasdasdasd", "device connetion: " + deviceConnection);
 
         if (result == -1) {
-            deviceConnection.controlTransfer(0b00100001, 0b11111111, 0, usbInterface.getId(), null, 0, 5000);
+            Log.d("asdasdasdasd", "device connetion: " + deviceConnection);
+            Log.d("asdqweasdasd", "control transfer: " + deviceConnection.controlTransfer(0b00100001, 0b11111111, 0, usbInterface.getId(), null, 0, 5000));
             result = deviceConnection.bulkTransfer(inEndpoint,
                     dest.array(), dest.position(), dest.remaining(), TRANSFER_TIMEOUT);
             if (result == -1) {
