@@ -144,8 +144,8 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
 				// determine if connected device is a mass storage devuce
 				if (device != null) {
-					if (MainActivity.this.device != null) {
-						MainActivity.this.device.close();
+					if (MainActivity.this.currentDevice != -1) {
+						MainActivity.this.massStorageDevices[currentDevice].close();
 					}
 					// check if there are other devices or set action bar title
 					// to no device if not
@@ -607,8 +607,6 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle drawerToggle;
 
-
-    private UsbMassStorageDevice device;
 	/* package */UsbFileListAdapter adapter;
 	private Deque<UsbFile> dirs = new ArrayDeque<UsbFile>();
 	private FileSystem currentFs;
@@ -616,6 +614,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     private Intent serviceIntent = null;
     private UsbFileHttpServerService serverService;
     UsbMassStorageDevice[] massStorageDevices;
+    private int currentDevice = -1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -638,7 +637,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
-                getSupportActionBar().setTitle(device.getPartitions().get(0).getVolumeLabel());
+                getSupportActionBar().setTitle(massStorageDevices[currentDevice].getPartitions().get(0).getVolumeLabel());
             }
 
             /** Called when a drawer has settled in a completely open state. */
@@ -649,6 +648,15 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         };
         // Set the drawer toggle as the DrawerListener
         drawerLayout.addDrawerListener(drawerToggle);
+
+        drawerListView.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                selectDevice(position);
+                drawerLayout.closeDrawer(drawerListView);
+                drawerListView.setItemChecked(position, true);
+            }
+        });
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -678,6 +686,11 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         unbindService(serviceConnection);
     }
 
+    private void selectDevice(int position) {
+        currentDevice = position;
+        setupDevice();
+    }
+
     /**
 	 * Searches for connected mass storage devices, and initializes them if it
 	 * could find some.
@@ -695,9 +708,8 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 		}
 
         drawerListView.setAdapter(new DrawerListAdapter(this, R.layout.drawer_list_item, massStorageDevices));
-
-		// we only use the first device
-		device = massStorageDevices[0];
+        drawerListView.setItemChecked(0, true);
+        currentDevice = 0;
 
 		UsbDevice usbDevice = (UsbDevice) getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
 
@@ -711,7 +723,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			// UsbDevice
 			PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(
 					ACTION_USB_PERMISSION), 0);
-			usbManager.requestPermission(device.getUsbDevice(), permissionIntent);
+			usbManager.requestPermission(massStorageDevices[currentDevice].getUsbDevice(), permissionIntent);
 		}
 	}
 
@@ -720,10 +732,10 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 	 */
 	private void setupDevice() {
 		try {
-			device.init();
+            massStorageDevices[currentDevice].init();
 
 			// we always use the first partition of the device
-			currentFs = device.getPartitions().get(0).getFileSystem();
+			currentFs = massStorageDevices[currentDevice].getPartitions().get(0).getFileSystem();
 			Log.d(TAG, "Capacity: " + currentFs.getCapacity());
 			Log.d(TAG, "Occupied Space: " + currentFs.getOccupiedSpace());
 			Log.d(TAG, "Free Space: " + currentFs.getFreeSpace());
@@ -785,9 +797,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			return true;
 		case R.id.open_storage_provider:
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-				if(device != null) {
+				if(currentDevice != -1) {
                     Log.d(TAG, "Closing device first");
-					device.close();
+                    massStorageDevices[currentDevice].close();
 				}
 				Intent intent = new Intent();
 				intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
@@ -1098,10 +1110,10 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
             Log.d(TAG, "Stopping service");
             stopService(serviceIntent);
 
-            if (device != null) {
+            if (currentDevice != -1) {
                 Log.d(TAG, "Closing device");
 
-                device.close();
+                massStorageDevices[currentDevice].close();
             }
         }
 	}
