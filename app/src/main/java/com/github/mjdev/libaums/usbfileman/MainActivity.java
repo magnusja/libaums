@@ -59,7 +59,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.provider.DocumentFile;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -601,13 +603,19 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     };
 
 	private ListView listView;
-	private UsbMassStorageDevice device;
+    private ListView drawerListView;
+    private DrawerLayout drawerLayout;
+    private ActionBarDrawerToggle drawerToggle;
+
+
+    private UsbMassStorageDevice device;
 	/* package */UsbFileListAdapter adapter;
 	private Deque<UsbFile> dirs = new ArrayDeque<UsbFile>();
 	private FileSystem currentFs;
 
     private Intent serviceIntent = null;
     private UsbFileHttpServerService serverService;
+    UsbMassStorageDevice[] massStorageDevices;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -618,8 +626,34 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 		setContentView(R.layout.activity_main);
 
 		listView = (ListView) findViewById(R.id.listview);
+        drawerListView = (ListView) findViewById(R.id.left_drawer);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerToggle = new ActionBarDrawerToggle(
+                this,                  /* host Activity */
+                drawerLayout,         /* DrawerLayout object */
+                R.string.drawer_open,  /* "open drawer" description */
+                R.string.drawer_close  /* "close drawer" description */
+        ) {
 
-		listView.setOnItemClickListener(this);
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                getSupportActionBar().setTitle(device.getPartitions().get(0).getVolumeLabel());
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                getSupportActionBar().setTitle("Devices");
+            }
+        };
+        // Set the drawer toggle as the DrawerListener
+        drawerLayout.addDrawerListener(drawerToggle);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
+        listView.setOnItemClickListener(this);
 		registerForContextMenu(listView);
 
 		IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
@@ -650,9 +684,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 	 */
 	private void discoverDevice() {
 		UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-		UsbMassStorageDevice[] devices = UsbMassStorageDevice.getMassStorageDevices(this);
+		massStorageDevices = UsbMassStorageDevice.getMassStorageDevices(this);
 
-		if (devices.length == 0) {
+		if (massStorageDevices.length == 0) {
 			Log.w(TAG, "no device found!");
 			android.support.v7.app.ActionBar actionBar = getSupportActionBar();
 			actionBar.setTitle("No device");
@@ -660,8 +694,10 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			return;
 		}
 
+        drawerListView.setAdapter(new DrawerListAdapter(this, R.layout.drawer_list_item, massStorageDevices));
+
 		// we only use the first device
-		device = devices[0];
+		device = massStorageDevices[0];
 
 		UsbDevice usbDevice = (UsbDevice) getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
 
@@ -721,6 +757,10 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+        if (drawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+
 		// Handle item selection
 		switch (item.getItemId()) {
 		case R.id.create_file:
