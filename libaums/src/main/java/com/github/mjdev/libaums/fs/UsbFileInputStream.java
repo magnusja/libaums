@@ -30,7 +30,7 @@ public class UsbFileInputStream extends InputStream {
 
     private static final String TAG = UsbFileInputStream.class.getSimpleName();
     private UsbFile file;
-    private int currentByteOffset = 0;
+    private long currentByteOffset = 0;
 
     public UsbFileInputStream(UsbFile file) {
 

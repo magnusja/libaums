@@ -30,7 +30,7 @@ import java.nio.ByteBuffer;
 public class UsbFileOutputStream extends OutputStream {
 
     private UsbFile file;
-    private int currentByteOffset = 0;
+    private long currentByteOffset = 0;
 
     public UsbFileOutputStream(@NonNull UsbFile file) {
 
