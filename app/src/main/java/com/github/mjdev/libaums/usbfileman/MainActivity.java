@@ -84,6 +84,7 @@ import com.github.mjdev.libaums.UsbMassStorageDevice;
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.FileSystemFactory;
 import com.github.mjdev.libaums.fs.UsbFile;
+import com.github.mjdev.libaums.fs.UsbFileInputStream;
 import com.github.mjdev.libaums.fs.UsbFileStreamFactory;
 import com.github.mjdev.libaums.server.http.UsbFileHttpServerService;
 import com.github.mjdev.libaums.server.http.server.AsyncHttpServer;
@@ -306,16 +307,21 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			param = params[0];
 			try {
 				OutputStream out = new BufferedOutputStream(new FileOutputStream(param.to));
-                InputStream inputStream =
-						UsbFileStreamFactory.createBufferedInputStream(param.from, currentFs);
-                byte[] bytes = new byte[4096];
+                InputStream inputStream = new UsbFileInputStream(param.from);
+                byte[] bytes = new byte[currentFs.getChunkSize()];
                 int count;
-                int total = 0;
+                long total = 0;
+
+                Log.d(TAG, "Copy file with length: " + param.from.getLength());
 
                 while ((count = inputStream.read(bytes)) != -1){
                     out.write(bytes, 0, count);
                     total += count;
-                    publishProgress((int) total);
+                    int progress = (int) total;
+                    if(param.from.getLength() > Integer.MAX_VALUE) {
+                        progress = (int) (total / 1024);
+                    }
+                    publishProgress(progress);
                 }
 
 				out.close();
@@ -358,7 +364,11 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
 		@Override
 		protected void onProgressUpdate(Integer... values) {
-			dialog.setMax((int) param.from.getLength());
+            int max = (int) param.from.getLength();
+            if(param.from.getLength() > Integer.MAX_VALUE) {
+                max = (int) (param.from.getLength() / 1024);
+            }
+			dialog.setMax(max);
 			dialog.setProgress(values[0]);
 		}
 
@@ -388,7 +398,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         private CopyToUsbTaskParam param;
 
         private String name;
-        private int size = -1;
+        private long size = -1;
 
         public CopyToUsbTask() {
             dialog = new ProgressDialog(MainActivity.this);
@@ -409,7 +419,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                 Log.i(TAG, "Display Name: " + name);
                 int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
                 if (!cursor.isNull(sizeIndex)) {
-                    size = cursor.getInt(sizeIndex);
+                    size = cursor.getLong(sizeIndex);
                 }
                 Log.i(TAG, "Size: " + size);
 
@@ -446,13 +456,17 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
                 byte[] bytes = new byte[1337];
                 int count;
-                int total = 0;
+                long total = 0;
 
                 while ((count = inputStream.read(bytes)) != -1){
                     outputStream.write(bytes, 0, count);
                     if (size > 0) {
                         total += count;
-                        publishProgress((int) total);
+                        int progress = (int) total;
+                        if(size > Integer.MAX_VALUE) {
+                            progress = (int) (total / 1024);
+                        }
+                        publishProgress(progress);
                     }
                 }
 
@@ -478,7 +492,11 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         @Override
         protected void onProgressUpdate(Integer... values) {
             dialog.setIndeterminate(false);
-            dialog.setMax(size);
+            int max = (int) size;
+            if(size > Integer.MAX_VALUE) {
+                max = (int) (size / 1024);
+            }
+            dialog.setMax(max);
             dialog.setProgress(values[0]);
         }
 
@@ -535,13 +553,17 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
                 byte[] bytes = new byte[1337];
                 int count;
-                int total = 0;
+                long total = 0;
 
                 while ((count = inputStream.read(bytes)) != -1){
                     outputStream.write(bytes, 0, count);
                     if (size > 0) {
                         total += count;
-                        publishProgress((int) total);
+                        int progress = (int) total;
+                        if(file.length() > Integer.MAX_VALUE) {
+                            progress = (int) (total / 1024);
+                        }
+                        publishProgress(progress);
                     }
                 }
 
@@ -581,7 +603,11 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         @Override
         protected void onProgressUpdate(Integer... values) {
             dialog.setIndeterminate(false);
-            dialog.setMax((int) size);
+            int max = (int) size;
+            if(size > Integer.MAX_VALUE) {
+                max = (int) (size / 1024);
+            }
+            dialog.setMax(max);
             dialog.setProgress(values[0]);
         }
 
