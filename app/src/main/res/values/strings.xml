@@ -39,4 +39,6 @@
     <string name="permission_granted">Permission granted. Please try again now.</string>
     <string name="permission_denied">Permission denied. Cannot copy from USB.</string>
     <string name="copy_folder_to_usb">Copy folder to USB</string>
+    <string name="drawer_open">Show Devices</string>
+    <string name="drawer_close">Close</string>
 </resources>
