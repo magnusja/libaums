@@ -3,12 +3,12 @@
 #include <jni.h>
 
 JNIEXPORT jint JNICALL
-Java_com_github_mjdev_libaums_ErrNo_getErrno(JNIEnv *env, jobject thiz) {
+Java_com_github_mjdev_libaums_ErrNo_getErrnoNative(JNIEnv *env, jobject thiz) {
     return errno;
 }
 
 JNIEXPORT jstring JNICALL
-        Java_com_github_mjdev_libaums_ErrNo_getErrstr(JNIEnv *env, jobject thiz) {
+        Java_com_github_mjdev_libaums_ErrNo_getErrstrNative(JNIEnv *env, jobject thiz) {
     char *error = strerror(errno);
     return (*env)->NewStringUTF(env, error);
 }
