@@ -8,6 +8,9 @@ import android.annotation.TargetApi;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.os.Build;
+import android.system.ErrnoException;
+
+import com.github.mjdev.libaums.ErrNo;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -39,7 +42,7 @@ class JellyBeanMr2Communication implements UsbCommunication {
                 src.array(), src.position(), src.remaining(), TRANSFER_TIMEOUT);
 
         if (result == -1) {
-            throw new IOException("Could not write to device, result == -1");
+            throw new IOException("Could not write to device, result == -1 errno " + ErrNo.getErrno() + " " + ErrNo.getErrstr());
         }
 
         src.position(src.position() + result);
@@ -52,7 +55,7 @@ class JellyBeanMr2Communication implements UsbCommunication {
                 dest.array(), dest.position(), dest.remaining(), TRANSFER_TIMEOUT);
 
         if (result == -1) {
-            throw new IOException("Could not read from device, result == -1");
+            throw new IOException("Could not read from device, result == -1 errno " + ErrNo.getErrno() + " " + ErrNo.getErrstr());
         }
 
         dest.position(dest.position() + result);
