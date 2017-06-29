@@ -17,6 +17,8 @@
 
 package com.github.mjdev.libaums.driver.scsi.commands;
 
+import java.nio.ByteBuffer;
+
 /**
  * This class is used to issue a SCSI request sense when a command has failed.
  * 
@@ -24,6 +26,25 @@ package com.github.mjdev.libaums.driver.scsi.commands;
  * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper
  *      #getbCswStatus()
  */
-public class ScsiRequestSense {
+public class ScsiRequestSense extends CommandBlockWrapper {
+    private static final byte OPCODE = 0x3;
+    private static final byte LENGTH = 0x6;
+
+    private byte allocationLength;
+
+    public ScsiRequestSense(byte allocationLength) {
+        super(0, Direction.NONE, (byte) 0, LENGTH);
+        this.allocationLength = allocationLength;
+    }
+
+    @Override
+    public void serialize(ByteBuffer buffer) {
+        super.serialize(buffer);
+        buffer.put(OPCODE);
+        buffer.put((byte) 0);
+        buffer.put((byte) 0);
+        buffer.put((byte) 0);
+        buffer.put(allocationLength);
+    }
 
 }
