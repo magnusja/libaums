@@ -314,7 +314,7 @@ public class FatDirectory extends AbstractUsbFile {
 
 		if (totalBytes % bootSector.getBytesPerCluster() != 0 || totalBytes == 0) {
 			// add dummy entry filled with zeros to mark end of entries
-			buffer.put(new byte[32]);
+			buffer.put(new byte[buffer.remaining()]);
 		}
 
 		buffer.flip();

@@ -58,7 +58,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v4.provider.DocumentFile;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -81,6 +84,7 @@ import com.github.mjdev.libaums.UsbMassStorageDevice;
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.FileSystemFactory;
 import com.github.mjdev.libaums.fs.UsbFile;
+import com.github.mjdev.libaums.fs.UsbFileInputStream;
 import com.github.mjdev.libaums.fs.UsbFileStreamFactory;
 import com.github.mjdev.libaums.server.http.UsbFileHttpServerService;
 import com.github.mjdev.libaums.server.http.server.AsyncHttpServer;
@@ -106,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
     private static final int COPY_STORAGE_PROVIDER_RESULT = 0;
     private static final int OPEN_STORAGE_PROVIDER_RESULT = 1;
+    private static final int OPEN_DOCUMENT_TREE_RESULT = 2;
 
 	private static final int REQUEST_EXT_STORAGE_WRITE_PERM = 0;
 
@@ -140,8 +145,8 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
 				// determine if connected device is a mass storage devuce
 				if (device != null) {
-					if (MainActivity.this.device != null) {
-						MainActivity.this.device.close();
+					if (MainActivity.this.currentDevice != -1) {
+						MainActivity.this.massStorageDevices[currentDevice].close();
 					}
 					// check if there are other devices or set action bar title
 					// to no device if not
@@ -288,6 +293,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			dialog.setMessage("Copying a file to the internal storage, this can take some time!");
 			dialog.setIndeterminate(false);
 			dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            dialog.setCancelable(false);
 		}
 
 		@Override
@@ -301,16 +307,21 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			param = params[0];
 			try {
 				OutputStream out = new BufferedOutputStream(new FileOutputStream(param.to));
-                InputStream inputStream =
-						UsbFileStreamFactory.createBufferedInputStream(param.from, currentFs);
-                byte[] bytes = new byte[4096];
+                InputStream inputStream = new UsbFileInputStream(param.from);
+                byte[] bytes = new byte[currentFs.getChunkSize()];
                 int count;
-                int total = 0;
+                long total = 0;
+
+                Log.d(TAG, "Copy file with length: " + param.from.getLength());
 
                 while ((count = inputStream.read(bytes)) != -1){
                     out.write(bytes, 0, count);
                     total += count;
-                    publishProgress((int) total);
+                    int progress = (int) total;
+                    if(param.from.getLength() > Integer.MAX_VALUE) {
+                        progress = (int) (total / 1024);
+                    }
+                    publishProgress(progress);
                 }
 
 				out.close();
@@ -353,7 +364,11 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
 		@Override
 		protected void onProgressUpdate(Integer... values) {
-			dialog.setMax((int) param.from.getLength());
+            int max = (int) param.from.getLength();
+            if(param.from.getLength() > Integer.MAX_VALUE) {
+                max = (int) (param.from.getLength() / 1024);
+            }
+			dialog.setMax(max);
 			dialog.setProgress(values[0]);
 		}
 
@@ -383,7 +398,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         private CopyToUsbTaskParam param;
 
         private String name;
-        private int size = -1;
+        private long size = -1;
 
         public CopyToUsbTask() {
             dialog = new ProgressDialog(MainActivity.this);
@@ -391,6 +406,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
             dialog.setMessage("Copying a file to the USB drive, this can take some time!");
             dialog.setIndeterminate(true);
             dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            dialog.setCancelable(false);
         }
 
         private void queryUriMetaData(Uri uri) {
@@ -403,7 +419,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                 Log.i(TAG, "Display Name: " + name);
                 int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
                 if (!cursor.isNull(sizeIndex)) {
-                    size = cursor.getInt(sizeIndex);
+                    size = cursor.getLong(sizeIndex);
                 }
                 Log.i(TAG, "Size: " + size);
 
@@ -440,13 +456,17 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
                 byte[] bytes = new byte[1337];
                 int count;
-                int total = 0;
+                long total = 0;
 
                 while ((count = inputStream.read(bytes)) != -1){
                     outputStream.write(bytes, 0, count);
                     if (size > 0) {
                         total += count;
-                        publishProgress((int) total);
+                        int progress = (int) total;
+                        if(size > Integer.MAX_VALUE) {
+                            progress = (int) (total / 1024);
+                        }
+                        publishProgress(progress);
                     }
                 }
 
@@ -472,7 +492,122 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         @Override
         protected void onProgressUpdate(Integer... values) {
             dialog.setIndeterminate(false);
-            dialog.setMax(size);
+            int max = (int) size;
+            if(size > Integer.MAX_VALUE) {
+                max = (int) (size / 1024);
+            }
+            dialog.setMax(max);
+            dialog.setProgress(values[0]);
+        }
+
+    }
+
+    /**
+     * Asynchronous task to copy a file from the mass storage device connected
+     * via USB to the internal storage.
+     *
+     * @author mjahnen
+     *
+     */
+    private class CopyFolderToUsbTask extends AsyncTask<CopyToUsbTaskParam, Integer, Void> {
+
+        private ProgressDialog dialog;
+        private CopyToUsbTaskParam param;
+
+        private long size = -1;
+        private DocumentFile pickedDir;
+
+        public CopyFolderToUsbTask() {
+            dialog = new ProgressDialog(MainActivity.this);
+            dialog.setTitle("Copying a folder");
+            dialog.setMessage("Copying a folder to the USB drive, this can take some time!");
+            dialog.setIndeterminate(true);
+            dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            dialog.setCancelable(false);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            dialog.show();
+        }
+
+        private void copyDir(DocumentFile dir, UsbFile currentUsbDir) throws IOException {
+            for (DocumentFile file : dir.listFiles()) {
+                Log.d(TAG, "Found file " + file.getName() + " with size " + file.length());
+                if(file.isDirectory()) {
+                    copyDir(file, currentUsbDir.createDirectory(file.getName()));
+                } else {
+                    copyFile(file, currentUsbDir);
+                }
+            }
+        }
+
+        private void copyFile(DocumentFile file, UsbFile currentUsbDir) {
+            try {
+                UsbFile usbFile = currentUsbDir.createFile(file.getName());
+                size = file.length();
+                usbFile.setLength(file.length());
+
+                InputStream inputStream = getContentResolver().openInputStream(file.getUri());
+                OutputStream outputStream = UsbFileStreamFactory.createBufferedOutputStream(usbFile, currentFs);
+
+                byte[] bytes = new byte[1337];
+                int count;
+                long total = 0;
+
+                while ((count = inputStream.read(bytes)) != -1){
+                    outputStream.write(bytes, 0, count);
+                    if (size > 0) {
+                        total += count;
+                        int progress = (int) total;
+                        if(file.length() > Integer.MAX_VALUE) {
+                            progress = (int) (total / 1024);
+                        }
+                        publishProgress(progress);
+                    }
+                }
+
+                outputStream.close();
+                inputStream.close();
+            } catch (IOException e) {
+                Log.e(TAG, "error copying!", e);
+            }
+        }
+
+        @Override
+        protected Void doInBackground(CopyToUsbTaskParam... params) {
+            long time = System.currentTimeMillis();
+            param = params[0];
+            pickedDir = DocumentFile.fromTreeUri(MainActivity.this, param.from);
+
+            try {
+                copyDir(pickedDir, adapter.getCurrentDir().createDirectory(pickedDir.getName()));
+            } catch (IOException e) {
+                Log.e(TAG, "could not copy directory", e);
+            }
+
+            Log.d(TAG, "copy time: " + (System.currentTimeMillis() - time));
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            dialog.dismiss();
+            try {
+                adapter.refresh();
+            } catch (IOException e) {
+                Log.e(TAG, "Error refreshing adapter", e);
+            }
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            dialog.setIndeterminate(false);
+            int max = (int) size;
+            if(size > Integer.MAX_VALUE) {
+                max = (int) (size / 1024);
+            }
+            dialog.setMax(max);
             dialog.setProgress(values[0]);
         }
 
@@ -494,13 +629,18 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
     };
 
 	private ListView listView;
-	private UsbMassStorageDevice device;
+    private ListView drawerListView;
+    private DrawerLayout drawerLayout;
+    private ActionBarDrawerToggle drawerToggle;
+
 	/* package */UsbFileListAdapter adapter;
 	private Deque<UsbFile> dirs = new ArrayDeque<UsbFile>();
 	private FileSystem currentFs;
 
     private Intent serviceIntent = null;
     private UsbFileHttpServerService serverService;
+    UsbMassStorageDevice[] massStorageDevices;
+    private int currentDevice = -1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -511,8 +651,43 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 		setContentView(R.layout.activity_main);
 
 		listView = (ListView) findViewById(R.id.listview);
+        drawerListView = (ListView) findViewById(R.id.left_drawer);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerToggle = new ActionBarDrawerToggle(
+                this,                  /* host Activity */
+                drawerLayout,         /* DrawerLayout object */
+                R.string.drawer_open,  /* "open drawer" description */
+                R.string.drawer_close  /* "close drawer" description */
+        ) {
 
-		listView.setOnItemClickListener(this);
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                getSupportActionBar().setTitle(massStorageDevices[currentDevice].getPartitions().get(0).getVolumeLabel());
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                getSupportActionBar().setTitle("Devices");
+            }
+        };
+        // Set the drawer toggle as the DrawerListener
+        drawerLayout.addDrawerListener(drawerToggle);
+
+        drawerListView.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                selectDevice(position);
+                drawerLayout.closeDrawer(drawerListView);
+                drawerListView.setItemChecked(position, true);
+            }
+        });
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
+        listView.setOnItemClickListener(this);
 		registerForContextMenu(listView);
 
 		IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
@@ -537,15 +712,20 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
         unbindService(serviceConnection);
     }
 
+    private void selectDevice(int position) {
+        currentDevice = position;
+        setupDevice();
+    }
+
     /**
 	 * Searches for connected mass storage devices, and initializes them if it
 	 * could find some.
 	 */
 	private void discoverDevice() {
 		UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-		UsbMassStorageDevice[] devices = UsbMassStorageDevice.getMassStorageDevices(this);
+		massStorageDevices = UsbMassStorageDevice.getMassStorageDevices(this);
 
-		if (devices.length == 0) {
+		if (massStorageDevices.length == 0) {
 			Log.w(TAG, "no device found!");
 			android.support.v7.app.ActionBar actionBar = getSupportActionBar();
 			actionBar.setTitle("No device");
@@ -553,8 +733,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			return;
 		}
 
-		// we only use the first device
-		device = devices[0];
+        drawerListView.setAdapter(new DrawerListAdapter(this, R.layout.drawer_list_item, massStorageDevices));
+        drawerListView.setItemChecked(0, true);
+        currentDevice = 0;
 
 		UsbDevice usbDevice = (UsbDevice) getIntent().getParcelableExtra(UsbManager.EXTRA_DEVICE);
 
@@ -568,7 +749,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			// UsbDevice
 			PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(
 					ACTION_USB_PERMISSION), 0);
-			usbManager.requestPermission(device.getUsbDevice(), permissionIntent);
+			usbManager.requestPermission(massStorageDevices[currentDevice].getUsbDevice(), permissionIntent);
 		}
 	}
 
@@ -577,10 +758,10 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 	 */
 	private void setupDevice() {
 		try {
-			device.init();
+            massStorageDevices[currentDevice].init();
 
 			// we always use the first partition of the device
-			currentFs = device.getPartitions().get(0).getFileSystem();
+			currentFs = massStorageDevices[currentDevice].getPartitions().get(0).getFileSystem();
 			Log.d(TAG, "Capacity: " + currentFs.getCapacity());
 			Log.d(TAG, "Occupied Space: " + currentFs.getOccupiedSpace());
 			Log.d(TAG, "Free Space: " + currentFs.getFreeSpace());
@@ -614,6 +795,10 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+        if (drawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+
 		// Handle item selection
 		switch (item.getItemId()) {
 		case R.id.create_file:
@@ -638,9 +823,9 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 			return true;
 		case R.id.open_storage_provider:
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-				if(device != null) {
+				if(currentDevice != -1) {
                     Log.d(TAG, "Closing device first");
-					device.close();
+                    massStorageDevices[currentDevice].close();
 				}
 				Intent intent = new Intent();
 				intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
@@ -661,6 +846,14 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                 intent.setType("*/*");
 
                 startActivityForResult(intent, COPY_STORAGE_PROVIDER_RESULT);
+            }
+            return true;
+		case R.id.copy_folder_from_storage_provider:
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_OPEN_DOCUMENT_TREE);
+
+                startActivityForResult(intent, OPEN_DOCUMENT_TREE_RESULT);
             }
             return true;
 		default:
@@ -850,7 +1043,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 				i.setData(uri);
 				startActivity(i);
 			}
-		} else if (requestCode == COPY_STORAGE_PROVIDER_RESULT){
+		} else if (requestCode == COPY_STORAGE_PROVIDER_RESULT) {
             Uri uri;
             if (data != null) {
                 uri = data.getData();
@@ -860,6 +1053,17 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                 params.from = uri;
 
                 new CopyToUsbTask().execute(params);
+            }
+        } else if (requestCode == OPEN_DOCUMENT_TREE_RESULT) {
+            Uri uri;
+            if (data != null) {
+                uri = data.getData();
+                Log.i(TAG, "Uri: " + uri.toString());
+
+                CopyToUsbTaskParam params = new CopyToUsbTaskParam();
+                params.from = uri;
+
+                new CopyFolderToUsbTask().execute(params);
             }
         }
 	}
@@ -932,10 +1136,10 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
             Log.d(TAG, "Stopping service");
             stopService(serviceIntent);
 
-            if (device != null) {
+            if (currentDevice != -1) {
                 Log.d(TAG, "Closing device");
 
-                device.close();
+                massStorageDevices[currentDevice].close();
             }
         }
 	}
