@@ -13,7 +13,7 @@ A library to access USB mass storage devices (pen drives, external HDDs, card re
 The library can be included into your project like this:
 
 ```ruby
-compile 'com.github.mjdev:libaums:0.5.4'
+compile 'com.github.mjdev:libaums:0.5.5'
 ```
 
 If you need the HTTP or the storage provider module:
