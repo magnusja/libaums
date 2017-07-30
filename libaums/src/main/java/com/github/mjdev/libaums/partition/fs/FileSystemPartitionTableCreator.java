@@ -3,6 +3,7 @@ package com.github.mjdev.libaums.partition.fs;
 import android.support.annotation.Nullable;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
+import com.github.mjdev.libaums.driver.ByteBlockDevice;
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.FileSystemFactory;
 import com.github.mjdev.libaums.partition.PartitionTable;
@@ -18,10 +19,11 @@ public class FileSystemPartitionTableCreator implements PartitionTableFactory.Pa
     @Nullable
     @Override
     public PartitionTable read(BlockDeviceDriver blockDevice) throws IOException {
-        FileSystem fs = FileSystemFactory.createFileSystem(null, blockDevice);
-        if (fs != null) {
-            return new FileSystemPartitionTable();
+        try {
+            return new FileSystemPartitionTable(blockDevice,
+                    FileSystemFactory.createFileSystem(null, new ByteBlockDevice(blockDevice)));
+        } catch(FileSystemFactory.UnsupportedFileSystemException e) {
+            return null;
         }
-        return null;
     }
 }

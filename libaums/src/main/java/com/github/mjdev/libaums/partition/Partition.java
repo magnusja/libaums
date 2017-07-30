@@ -23,6 +23,7 @@ import java.nio.ByteBuffer;
 import android.util.Log;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
+import com.github.mjdev.libaums.driver.ByteBlockDevice;
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.FileSystemFactory;
 
@@ -39,21 +40,17 @@ import com.github.mjdev.libaums.fs.FileSystemFactory;
  * @author mjahnen
  * 
  */
-public class Partition implements BlockDeviceDriver {
+public class Partition extends ByteBlockDevice {
 
 	private static final String TAG = Partition.class.getSimpleName();
 
-	// private PartitionTableEntry partitionTableEntry;
-	private BlockDeviceDriver blockDevice;
 	/**
 	 * The logical block address where on the device this partition starts.
 	 */
-	private int logicalBlockAddress;
-	private int blockSize;
 	private FileSystem fileSystem;
 
-	private Partition() {
-
+	private Partition(BlockDeviceDriver blockDevice, PartitionTableEntry entry) {
+		super(blockDevice, entry.getLogicalBlockAddress());
 	}
 
 	/**
@@ -69,19 +66,16 @@ public class Partition implements BlockDeviceDriver {
 	 */
 	public static Partition createPartition(PartitionTableEntry entry, BlockDeviceDriver blockDevice)
 			throws IOException {
-		Partition partition = null;
-
-		partition = new Partition();
-		partition.logicalBlockAddress = entry.getLogicalBlockAddress();
-		partition.blockDevice = blockDevice;
-		partition.blockSize = blockDevice.getBlockSize();
 		try {
-			partition.fileSystem = FileSystemFactory.createFileSystem(entry, partition);
+			Partition partition = new Partition(blockDevice, entry);
+			// TODO weird triangle relationship between partiton and fs??
+			FileSystem fs = FileSystemFactory.createFileSystem(entry, partition);
+			partition.fileSystem = fs;
+			return partition;
 		} catch (FileSystemFactory.UnsupportedFileSystemException e) {
 			Log.w(TAG, "Unsupported fs on partition");
+			return null;
 		}
-
-		return (partition.fileSystem != null ? partition : null);
 	}
 
 	/**
@@ -102,95 +96,5 @@ public class Partition implements BlockDeviceDriver {
 	 */
 	public String getVolumeLabel() {
 		return fileSystem.getVolumeLabel();
-	}
-
-	@Override
-	public void init() {
-
-	}
-
-	@Override
-	public void read(long offset, ByteBuffer dest) throws IOException {
-		long devOffset = offset / blockSize + logicalBlockAddress;
-		// TODO try to make this more efficient by for example making tmp buffer
-		// global
-		if (offset % blockSize != 0) {
-			//Log.w(TAG, "device offset " + offset + " not a multiple of block size");
-			ByteBuffer tmp = ByteBuffer.allocate(blockSize);
-
-			blockDevice.read(devOffset, tmp);
-			tmp.clear();
-			tmp.position((int) (offset % blockSize));
-			int limit = Math.min(dest.remaining(), tmp.remaining());
-			tmp.limit(tmp.position() + limit);
-			dest.put(tmp);
-
-			devOffset++;
-		}
-
-		if (dest.remaining() > 0) {
-			ByteBuffer buffer;
-			if (dest.remaining() % blockSize != 0) {
-				//Log.w(TAG, "we have to round up size to next block sector");
-				int rounded = blockSize - dest.remaining() % blockSize + dest.remaining();
-				buffer = ByteBuffer.allocate(rounded);
-				buffer.limit(rounded);
-			} else {
-				buffer = dest;
-			}
-
-			blockDevice.read(devOffset, buffer);
-
-			if (dest.remaining() % blockSize != 0) {
-                System.arraycopy(buffer.array(), 0, dest.array(), dest.position(), dest.remaining());
-			}
-		}
-	}
-
-	@Override
-	public void write(long offset, ByteBuffer src) throws IOException {
-		long devOffset = offset / blockSize + logicalBlockAddress;
-		// TODO try to make this more efficient by for example making tmp buffer
-		// global
-		if (offset % blockSize != 0) {
-			//Log.w(TAG, "device offset " + offset + " not a multiple of block size");
-			ByteBuffer tmp = ByteBuffer.allocate(blockSize);
-
-			blockDevice.read(devOffset, tmp);
-			tmp.clear();
-			tmp.position((int) (offset % blockSize));
-			int remaining = Math.min(tmp.remaining(), src.remaining());
-			tmp.put(src.array(), src.position(), remaining);
-			src.position(src.position() + remaining);
-			tmp.clear();
-			blockDevice.write(devOffset, tmp);
-
-			devOffset++;
-		}
-
-		if (src.remaining() > 0) {
-            // TODO try to make this more efficient by for example only allocating
-            // blockSize and making it global
-            ByteBuffer buffer;
-            if (src.remaining() % blockSize != 0) {
-                //Log.w(TAG, "we have to round up size to next block sector");
-                int rounded = blockSize - src.remaining() % blockSize + src.remaining();
-                buffer = ByteBuffer.allocate(rounded);
-                buffer.limit(rounded);
-
-                // TODO: instead of just writing 0s at the end of the buffer do we need to read what
-                // is currently on the disk and save that then?
-                System.arraycopy(src.array(), src.position(), buffer.array(), 0, src.remaining());
-            } else {
-                buffer = src;
-            }
-
-            blockDevice.write(devOffset, buffer);
-        }
-	}
-
-	@Override
-	public int getBlockSize() {
-		return blockDevice.getBlockSize();
 	}
 }

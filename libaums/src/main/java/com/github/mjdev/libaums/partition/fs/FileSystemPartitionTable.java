@@ -2,6 +2,8 @@ package com.github.mjdev.libaums.partition.fs;
 
 import android.util.Log;
 
+import com.github.mjdev.libaums.driver.BlockDeviceDriver;
+import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.partition.PartitionTable;
 import com.github.mjdev.libaums.partition.PartitionTableEntry;
 
@@ -20,7 +22,7 @@ public class FileSystemPartitionTable implements PartitionTable {
 
     List<PartitionTableEntry> entries = new ArrayList<>();
 
-    public FileSystemPartitionTable() {
+    public FileSystemPartitionTable(BlockDeviceDriver blockDevice, FileSystem fs) {
         Log.i(TAG, "Found a device without partition table, yay!");
         // TODO fix fs type and total number of sectors
         entries.add(new PartitionTableEntry(-1, 0, -1));
