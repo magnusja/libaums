@@ -63,7 +63,7 @@ public class MasterBootRecord implements PartitionTable {
 	private static final int TABLE_OFFSET = 446;
 	private static final int TABLE_ENTRY_SIZE = 16;
 
-	public List<PartitionTableEntry> partitions = new ArrayList<PartitionTableEntry>();
+	private List<PartitionTableEntry> partitions = new ArrayList<PartitionTableEntry>();
 
 	private MasterBootRecord() {
 

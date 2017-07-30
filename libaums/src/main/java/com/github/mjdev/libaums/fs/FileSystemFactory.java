@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
+import com.github.mjdev.libaums.fs.fat32.Fat32FileSystemCreator;
 import com.github.mjdev.libaums.partition.PartitionTableEntry;
 
 /**
@@ -34,7 +35,7 @@ import com.github.mjdev.libaums.partition.PartitionTableEntry;
  */
 public class FileSystemFactory {
 
-    public static class UnsupportedFileSystemException extends Exception {
+    public static class UnsupportedFileSystemException extends IOException {
 
     }
 
