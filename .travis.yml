@@ -13,16 +13,11 @@ android:
     - extra-android-m2repository
     - addon-google_apis-google-19
 
-before_install:
-  # required libs for android build tools
-  - sudo apt-get update
-  - sudo apt-get install -qq --force-yes libgd2-xpm ia32-libs ia32-libs-multiarch cmake
-  # for gradle output style
-  - export TERM=dumb
-  # newest Android NDK
-  - if [ `uname -m` = x86_64]; then wget https://dl.google.com/android/repository/android-ndk-r15c-linux-x86_64.zip -O ndk.tgz; else wget https://dl.google.com/android/repository/android-ndk-r15c-linux-x86.zip -O ndk.tgz; fi
-  - tar -xf ndk.tgz
-  - export ANDROID_NDK_HOME=`pwd`/android-ndk-r9c
+install:
+  - echo y | sdkmanager 'ndk-bundle'
+  - echo y | sdkmanager 'cmake;3.6.3155560'
+  - export ANDROID_HOME=$HOME/android/sdk
+  - export ANDROID_NDK_HOME=$HOME/android/sdk/ndk-bundle
 
 env:
   global:
