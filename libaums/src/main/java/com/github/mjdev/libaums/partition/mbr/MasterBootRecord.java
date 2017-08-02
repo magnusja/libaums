@@ -119,7 +119,7 @@ public class MasterBootRecord implements PartitionTable {
 	}
 
 	@Override
-	public Collection<PartitionTableEntry> getPartitionTableEntries() {
+	public List<PartitionTableEntry> getPartitionTableEntries() {
 		return partitions;
 	}
 }
