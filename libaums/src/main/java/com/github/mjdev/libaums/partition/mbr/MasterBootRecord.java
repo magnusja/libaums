@@ -98,9 +98,10 @@ public class MasterBootRecord implements PartitionTable {
 				continue;
 			}
 
-			Integer type = partitionTypes.get((int) partitionType);
+			Integer type = partitionTypes.get((int) partitionType & 0xff);
 
 			if(type == null) {
+                Log.d(TAG, "Unknown partition type" + partitionType);
 				type = PartitionTypes.UNKNOWN;
 			}
 
