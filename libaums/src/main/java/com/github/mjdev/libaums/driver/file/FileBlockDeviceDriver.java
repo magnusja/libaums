@@ -1,0 +1,69 @@
+package com.github.mjdev.libaums.driver.file;
+
+import com.github.mjdev.libaums.driver.BlockDeviceDriver;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+
+/**
+ * Created by magnusja on 01/08/17.
+ */
+
+public class FileBlockDeviceDriver implements BlockDeviceDriver {
+    private RandomAccessFile file;
+    private int blockSize;
+
+    public FileBlockDeviceDriver(File file, int blockSize) throws FileNotFoundException {
+        this.file = new RandomAccessFile(file, "rw");
+        this.blockSize = blockSize;
+    }
+
+    public FileBlockDeviceDriver(File file) throws FileNotFoundException {
+        this(file, 512);
+    }
+
+    public FileBlockDeviceDriver(URL url, int blockSize) throws IOException {
+        ReadableByteChannel rbc = Channels.newChannel(url.openStream());
+        File tempFile = File.createTempFile("blockdevice", "bin");
+        FileOutputStream fos = new FileOutputStream(tempFile);
+        fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+
+        this.file = new RandomAccessFile(tempFile, "rw");
+        this.blockSize = blockSize;
+    }
+
+    public FileBlockDeviceDriver(URL url) throws IOException {
+        this(url, 512);
+    }
+
+    @Override
+    public void init() throws IOException {
+
+    }
+
+    @Override
+    public void read(long deviceOffset, ByteBuffer buffer) throws IOException {
+        file.seek(deviceOffset * blockSize);
+        file.read(buffer.array(), buffer.position(), buffer.limit());
+        buffer.position(buffer.limit());
+    }
+
+    @Override
+    public void write(long deviceOffset, ByteBuffer buffer) throws IOException {
+        file.seek(deviceOffset * blockSize);
+        file.write(buffer.array(), buffer.position(), buffer.limit());
+        buffer.position(buffer.limit());
+    }
+
+    @Override
+    public int getBlockSize() {
+        return blockSize;
+    }
+}

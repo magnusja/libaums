@@ -12,12 +12,12 @@ configurations {
 }
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 26
     buildToolsVersion "25.0.2"
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
     }
@@ -32,6 +32,11 @@ android {
         abortOnError false
     }
 
+    // TODO remove this?
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
@@ -41,8 +46,10 @@ android {
 
 dependencies {
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:support-annotations:25.1.0'
-    javadocDeps 'com.android.support:support-annotations:25.1.0'
+    testCompile 'org.apache.commons:commons-io:1.3.2'
+    testCompile 'com.eclipsesource.minimal-json:minimal-json:0.9.4'
+    compile 'com.android.support:support-annotations:25.3.1'
+    javadocDeps 'com.android.support:support-annotations:25.3.1'
 }
 
 task bintray {
