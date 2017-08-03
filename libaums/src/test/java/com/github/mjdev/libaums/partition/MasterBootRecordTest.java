@@ -86,7 +86,7 @@ public class MasterBootRecordTest {
             MasterBootRecord mbr = MasterBootRecord.read(buffer);
 
             List<PartitionTableEntry> table = mbr.getPartitionTableEntries();
-            Assert.assertEquals(mbrUrl.getFile(), partitionTableInfo.size(), table.size());
+            Assert.assertEquals(mbrUrl.getFile(), partitionTableInfo.size() +1, table.size());
 
             int i = 0;
             for (PartitionTableEntry e : table) {
