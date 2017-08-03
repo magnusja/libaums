@@ -22,4 +22,4 @@ env:
 
 script:
   - android list target
-  - ./gradlew build -x bintray connectedCheck --stacktrace --info
+  - ./gradlew build -x bintray connectedCheck --stacktrace
