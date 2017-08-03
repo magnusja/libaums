@@ -21,5 +21,4 @@ env:
     - ADB_INSTALL_TIMEOUT=8
 
 script:
-  - android list target
   - ./gradlew build -x bintray connectedCheck --stacktrace
