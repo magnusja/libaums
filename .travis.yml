@@ -1,21 +1,19 @@
 language: android
 jdk: oraclejdk8
+dist: trusty
+sudo: required
+group: edge
+
 android:
   components:
     - tools
-    - build-tools-25.0.2
-    - android-25
-    - android-ndk
-
-    # Additional components
-    - extra-google-google_play_services
-    - extra-google-m2repository
-    - extra-android-m2repository
-    - addon-google_apis-google-19
+    - build-tools-26.0.1
+    - android-26
 
 install:
+  - sudo apt-get install build-essential
   - echo y | sdkmanager 'ndk-bundle'
-  - echo y | sdkmanager 'cmake;3.6.3155560'
+  - echo y | sdkmanager 'cmake'
   - export ANDROID_HOME=$HOME/android/sdk
   - export ANDROID_NDK_HOME=$HOME/android/sdk/ndk-bundle
 
