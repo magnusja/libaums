@@ -12,8 +12,8 @@ android:
 
 install:
   - sudo apt-get install build-essential
-  - echo -e y | sdkmanager 'ndk-bundle'
-  - echo -e y | sdkmanager 'cmake'
+  - yes | sdkmanager 'ndk-bundle'
+  - yes | sdkmanager 'cmake;3.6.4111459'
 
 env:
   global:
