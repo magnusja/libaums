@@ -19,17 +19,24 @@ import java.nio.channels.ReadableByteChannel;
 public class FileBlockDeviceDriver implements BlockDeviceDriver {
     private RandomAccessFile file;
     private int blockSize;
+    private int byteOffset;
 
-    public FileBlockDeviceDriver(File file, int blockSize) throws FileNotFoundException {
+    public FileBlockDeviceDriver(File file, int blockSize, int byteOffset) throws FileNotFoundException {
         this.file = new RandomAccessFile(file, "rw");
         this.blockSize = blockSize;
+        this.byteOffset = byteOffset;
+    }
+
+    public FileBlockDeviceDriver(File file, int byteOffset) throws FileNotFoundException {
+        this(file, 512, byteOffset);
     }
 
     public FileBlockDeviceDriver(File file) throws FileNotFoundException {
-        this(file, 512);
+        this(file, 512, 0);
     }
 
-    public FileBlockDeviceDriver(URL url, int blockSize) throws IOException {
+    public FileBlockDeviceDriver(URL url, int blockSize, int byteOffset) throws IOException {
+        this.byteOffset = byteOffset;
         ReadableByteChannel rbc = Channels.newChannel(url.openStream());
         File tempFile = File.createTempFile("blockdevice", "bin");
         FileOutputStream fos = new FileOutputStream(tempFile);
@@ -39,8 +46,12 @@ public class FileBlockDeviceDriver implements BlockDeviceDriver {
         this.blockSize = blockSize;
     }
 
+    public FileBlockDeviceDriver(URL url, int byteOffset) throws IOException {
+        this(url, 512, byteOffset);
+    }
+
     public FileBlockDeviceDriver(URL url) throws IOException {
-        this(url, 512);
+        this(url, 512, 0);
     }
 
     @Override
@@ -50,14 +61,14 @@ public class FileBlockDeviceDriver implements BlockDeviceDriver {
 
     @Override
     public void read(long deviceOffset, ByteBuffer buffer) throws IOException {
-        file.seek(deviceOffset * blockSize);
+        file.seek(deviceOffset * blockSize + byteOffset);
         file.read(buffer.array(), buffer.position(), buffer.limit());
         buffer.position(buffer.limit());
     }
 
     @Override
     public void write(long deviceOffset, ByteBuffer buffer) throws IOException {
-        file.seek(deviceOffset * blockSize);
+        file.seek(deviceOffset * blockSize + byteOffset);
         file.write(buffer.array(), buffer.position(), buffer.limit());
         buffer.position(buffer.limit());
     }
