@@ -5,7 +5,6 @@ import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.github.mjdev.libaums.driver.file.FileBlockDeviceDriver;
-import com.github.mjdev.libaums.partition.PartitionTableEntry;
 import com.github.mjdev.libaums.partition.mbr.MasterBootRecord;
 
 import org.apache.commons.io.IOUtils;
@@ -18,7 +17,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
