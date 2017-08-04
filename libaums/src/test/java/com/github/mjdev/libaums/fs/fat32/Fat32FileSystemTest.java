@@ -63,10 +63,4 @@ public class Fat32FileSystemTest {
     public IProducer<Pair<Fat32FileSystem, JsonObject>> makeFat32FileSystem() {
         return producer;
     }
-
-    @Test
-    public void read() throws Exception {
-        fail();
-    }
-
 }

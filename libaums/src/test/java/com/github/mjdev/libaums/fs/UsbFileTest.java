@@ -195,7 +195,7 @@ public class UsbFileTest {
             String folder = value.asString();
             try {
                 root.search(folder).getLength();
-                fail();
+                fail(folder);
             } catch(UnsupportedOperationException e) {
 
             }
