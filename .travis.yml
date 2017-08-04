@@ -21,4 +21,7 @@ env:
     - ADB_INSTALL_TIMEOUT=8
 
 script:
-  - ./gradlew build -x bintray connectedCheck --stacktrace
+  - ./gradlew build -x bintray jacocoTestReport --stacktrace
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
