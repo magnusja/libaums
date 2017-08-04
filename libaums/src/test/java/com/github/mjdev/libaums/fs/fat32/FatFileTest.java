@@ -17,7 +17,7 @@ import org.xenei.junit.contract.IProducer;
 import java.io.IOException;
 import java.net.URL;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 /**
  * Created by magnusja on 03/08/17.

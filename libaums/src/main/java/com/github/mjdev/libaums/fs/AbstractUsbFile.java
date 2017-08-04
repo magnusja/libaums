@@ -15,7 +15,11 @@ public abstract class AbstractUsbFile implements UsbFile {
     public UsbFile search(String path) throws IOException {
         Log.d(TAG, "search file: " + path);
 
-        if(isRoot() && path.startsWith(separator)) {
+        if (isRoot() && path.equals(separator)) {
+            return this;
+        }
+
+        if (isRoot() && path.startsWith(separator)) {
             path = path.substring(1);
         }
         if (path.endsWith(separator)) {
