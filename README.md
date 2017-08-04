@@ -1,14 +1,12 @@
 libaums
 =======
+[![Build Status](https://travis-ci.org/magnusja/libaums.svg?branch=master)](https://travis-ci.org/magnusja/libaums)[ ![codecov](https://codecov.io/gh/magnusja/libaums/branch/develop/graph/badge.svg)](https://codecov.io/gh/magnusja/libaums)[ ![Download](https://api.bintray.com/packages/mjdev/maven/libaums/images/download.svg) ](https://bintray.com/mjdev/maven/libaums/_latestVersion)
 
 A library to access USB mass storage devices (pen drives, external HDDs, card readers) using the Android USB Host API. Currently it supports the SCSI command set and the FAT32 file system.
 
-## Build status
-
-**develop** [![Build Status](https://travis-ci.org/magnusja/libaums.svg?branch=develop)](https://travis-ci.org/magnusja/libaums)
-**master** [![Build Status](https://travis-ci.org/magnusja/libaums.svg?branch=master)](https://travis-ci.org/magnusja/libaums)
-
 ## How to use
+
+### Install
 
 The library can be included into your project like this:
 
