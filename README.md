@@ -1,6 +1,7 @@
 libaums
 =======
-[![Build Status](https://travis-ci.org/magnusja/libaums.svg?branch=develop)](https://travis-ci.org/magnusja/libaums)[ ![codecov](https://codecov.io/gh/magnusja/libaums/branch/develop/graph/badge.svg)](https://codecov.io/gh/magnusja/libaums)[ ![Download](https://api.bintray.com/packages/mjdev/maven/libaums/images/download.svg) ](https://bintray.com/mjdev/maven/libaums/_latestVersion)
+[![Javadocs](https://www.javadoc.io/badge/com.github.mjdev/libaums.svg)](https://www.javadoc.io/doc/com.github.mjdev/libaums)
+[ ![Build Status](https://travis-ci.org/magnusja/libaums.svg?branch=develop)](https://travis-ci.org/magnusja/libaums)[ ![codecov](https://codecov.io/gh/magnusja/libaums/branch/develop/graph/badge.svg)](https://codecov.io/gh/magnusja/libaums)[ ![Download](https://api.bintray.com/packages/mjdev/maven/libaums/images/download.svg) ](https://bintray.com/mjdev/maven/libaums/_latestVersion)
 [ ![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/libaums)
 
 A library to access USB mass storage devices (pen drives, external HDDs, card readers) using the Android USB Host API. Currently it supports the SCSI command set and the FAT32 file system.
