@@ -17,7 +17,7 @@
 
 package com.github.mjdev.libaums.partition;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * This interface represents a partition table.
@@ -35,12 +35,12 @@ public interface PartitionTable {
 	 * 
 	 * @return The size in bytes the partition table occupies.
 	 */
-	public int getSize();
+	int getSize();
 
 	/**
 	 * 
 	 * @return A collection of {@link PartitionTableEntry}s located on the block
 	 *         device.
 	 */
-	public Collection<PartitionTableEntry> getPartitionTableEntries();
+	List<PartitionTableEntry> getPartitionTableEntries();
 }
