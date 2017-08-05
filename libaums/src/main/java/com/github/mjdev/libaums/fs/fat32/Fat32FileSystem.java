@@ -81,15 +81,16 @@ public class Fat32FileSystem implements FileSystem {
 
 		ByteBuffer buffer = ByteBuffer.allocate(512);
 		blockDevice.read(0, buffer);
+		buffer.flip();
 
-		if (buffer.getChar(82) != 'F' ||
-			buffer.getChar(83) != 'A' ||
-			buffer.getChar(84) != 'T' ||
-			buffer.getChar(85) != '3' ||
-			buffer.getChar(86) != '2' ||
-			buffer.getChar(87) != ' ' ||
-			buffer.getChar(88) != ' ' ||
-			buffer.getChar(89) != ' ') {
+		if ((char) buffer.get(82) != 'F' ||
+			(char) buffer.get(83) != 'A' ||
+			(char) buffer.get(84) != 'T' ||
+			(char) buffer.get(85) != '3' ||
+			(char) buffer.get(86) != '2' ||
+			(char) buffer.get(87) != ' ' ||
+			(char) buffer.get(88) != ' ' ||
+			(char) buffer.get(89) != ' ') {
 			return null;
 		}
 
