@@ -278,6 +278,7 @@ public class UsbFileTest {
 
     @ContractTest
     public void write() throws Exception {
+        URL bigFileUrl = new URL(expectedValues.get("bigFileToWrite").asString());
         ByteBuffer buffer = ByteBuffer.allocate(512);
         buffer.put("this is just a test!".getBytes());
         buffer.flip();
@@ -293,6 +294,23 @@ public class UsbFileTest {
         buffer.get(dst);
         assertEquals("this is just a test!", new String(dst));
 
+        UsbFile bigFile = root.createFile("bigwritetest");
+        IOUtils.copy(bigFileUrl.openStream(), new UsbFileOutputStream(bigFile));
+
+        IOUtils.contentEquals(bigFileUrl.openStream(), new UsbFileInputStream(bigFile));
+
+        newInstance();
+
+        file = root.search("writetest");
+        buffer.flip();
+        file.read(0, buffer);
+        buffer.flip();
+        buffer.get(dst);
+        assertEquals("this is just a test!", new String(dst));
+
+        bigFile = root.search("bigwritetest");
+
+        IOUtils.contentEquals(bigFileUrl.openStream(), new UsbFileInputStream(bigFile));
     }
 
     @ContractTest
