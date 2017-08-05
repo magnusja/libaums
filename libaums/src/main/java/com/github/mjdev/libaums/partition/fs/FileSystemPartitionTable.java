@@ -34,7 +34,7 @@ public class FileSystemPartitionTable implements PartitionTable {
     }
 
     @Override
-    public Collection<PartitionTableEntry> getPartitionTableEntries() {
+    public List<PartitionTableEntry> getPartitionTableEntries() {
         return entries;
     }
 }
