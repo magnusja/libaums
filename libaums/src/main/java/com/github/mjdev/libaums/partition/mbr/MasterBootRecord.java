@@ -17,6 +17,7 @@
 
 package com.github.mjdev.libaums.partition.mbr;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -77,9 +78,13 @@ public class MasterBootRecord implements PartitionTable {
 	 * @return A new {@link #MasterBootRecord()} or null if the data does not
 	 *         seem to be a MBR.
 	 */
-	public static MasterBootRecord read(ByteBuffer buffer) {
+	public static MasterBootRecord read(ByteBuffer buffer) throws IOException {
 		MasterBootRecord result = new MasterBootRecord();
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
+
+		if (buffer.limit() < 512) {
+            throw new IOException("Size mismatch!");
+        }
 
 		// test if it is a valid master boot record
 		if (buffer.get(510) != (byte) 0x55 || buffer.get(511) != (byte) 0xaa) {
@@ -98,9 +103,10 @@ public class MasterBootRecord implements PartitionTable {
 				continue;
 			}
 
-			Integer type = partitionTypes.get((int) partitionType);
+			Integer type = partitionTypes.get((int) partitionType & 0xff);
 
 			if(type == null) {
+                Log.d(TAG, "Unknown partition type" + partitionType);
 				type = PartitionTypes.UNKNOWN;
 			}
 
@@ -119,7 +125,7 @@ public class MasterBootRecord implements PartitionTable {
 	}
 
 	@Override
-	public Collection<PartitionTableEntry> getPartitionTableEntries() {
+	public List<PartitionTableEntry> getPartitionTableEntries() {
 		return partitions;
 	}
 }

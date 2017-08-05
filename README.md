@@ -1,14 +1,14 @@
 libaums
 =======
+[![Javadocs](https://www.javadoc.io/badge/com.github.mjdev/libaums.svg)](https://www.javadoc.io/doc/com.github.mjdev/libaums)
+[ ![Build Status](https://travis-ci.org/magnusja/libaums.svg?branch=develop)](https://travis-ci.org/magnusja/libaums)[ ![codecov](https://codecov.io/gh/magnusja/libaums/branch/develop/graph/badge.svg)](https://codecov.io/gh/magnusja/libaums)[ ![Download](https://api.bintray.com/packages/mjdev/maven/libaums/images/download.svg) ](https://bintray.com/mjdev/maven/libaums/_latestVersion)
+[ ![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/libaums)
 
 A library to access USB mass storage devices (pen drives, external HDDs, card readers) using the Android USB Host API. Currently it supports the SCSI command set and the FAT32 file system.
 
-## Build status
-
-**develop** [![Build Status](https://travis-ci.org/magnusja/libaums.svg?branch=develop)](https://travis-ci.org/magnusja/libaums)
-**master** [![Build Status](https://travis-ci.org/magnusja/libaums.svg?branch=master)](https://travis-ci.org/magnusja/libaums)
-
 ## How to use
+
+### Install
 
 The library can be included into your project like this:
 
@@ -102,6 +102,7 @@ device.close();
 Usually third party apps do not have access to the files on a mass storage device if the Android system does mount the device or this app integrates this library itself. To solve this issue there are two additional modules to provide access to other app. One uses the Storage Access Framework feature of Android (API level >= 19) and the other one spins up an HTTP server to allow downloading or streaming.
 
 ### Storage Access Framework
+[![Javadocs](https://www.javadoc.io/badge/com.github.mjdev/libaums-storageprovider.svg)](https://www.javadoc.io/doc/com.github.mjdev/libaums-storageprovider)
 
 To learn more about this visit: https://developer.android.com/guide/topics/providers/document-provider.html
 
@@ -124,6 +125,7 @@ To integrate this module in your app the only thing you have to do is add the de
 After that apps using the Storage Access Framework will be able to access the files of the USB mass storage device.
 
 ### HTTP server
+[![Javadocs](https://www.javadoc.io/badge/com.github.mjdev/libaums-httpserver.svg)](https://www.javadoc.io/doc/com.github.mjdev/libaums-httpserver)
 
 libaums currently supports two different HTTP server libraries.
 
