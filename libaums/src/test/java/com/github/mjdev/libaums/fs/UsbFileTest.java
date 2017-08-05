@@ -280,11 +280,18 @@ public class UsbFileTest {
     public void write() throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(512);
         buffer.put("this is just a test!".getBytes());
+        buffer.flip();
 
         UsbFile file = root.createFile("writetest");
 
         file.write(0, buffer);
 
+        buffer.flip();
+        file.read(0, buffer);
+        buffer.flip();
+        byte[] dst = new byte[20];
+        buffer.get(dst);
+        assertEquals("this is just a test!", new String(dst));
 
     }
 

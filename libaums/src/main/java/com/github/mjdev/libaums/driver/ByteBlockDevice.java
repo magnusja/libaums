@@ -69,6 +69,8 @@ public class ByteBlockDevice implements BlockDeviceDriver {
             if (dest.remaining() % blockSize != 0) {
                 System.arraycopy(buffer.array(), 0, dest.array(), dest.position(), dest.remaining());
             }
+
+            dest.position(dest.limit());
         }
     }
 
@@ -106,6 +108,8 @@ public class ByteBlockDevice implements BlockDeviceDriver {
                 // TODO: instead of just writing 0s at the end of the buffer do we need to read what
                 // is currently on the disk and save that then?
                 System.arraycopy(src.array(), src.position(), buffer.array(), 0, src.remaining());
+
+                src.position(src.limit());
             } else {
                 buffer = src;
             }
