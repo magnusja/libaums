@@ -72,7 +72,7 @@ public class MasterBootRecordTest {
     }
 
     @Test
-    public void read() throws Exception {
+    public void testRead() throws Exception {
         for (Map.Entry<URL, List<Map<String, Integer>>> entry : tests.entrySet()) {
             URL mbrUrl = entry.getKey();
             List<Map<String, Integer>> partitionTableInfo = entry.getValue();
@@ -97,6 +97,18 @@ public class MasterBootRecordTest {
                 i++;
             }
         }
+    }
+
+    @Test(expected = IOException.class)
+    public void testSizeMismatch() throws Exception {
+        ByteBuffer buffer = ByteBuffer.allocate(3);
+        MasterBootRecord.read(buffer);
+    }
+
+    @Test
+    public void testEmptyBuffer() throws Exception {
+        ByteBuffer buffer = ByteBuffer.allocate(512);
+        Assert.assertNull(MasterBootRecord.read(buffer));
     }
 
 }

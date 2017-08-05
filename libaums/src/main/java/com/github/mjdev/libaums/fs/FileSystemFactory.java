@@ -20,6 +20,7 @@ package com.github.mjdev.libaums.fs;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 import com.github.mjdev.libaums.partition.PartitionTableEntry;
@@ -39,6 +40,7 @@ public class FileSystemFactory {
     }
 
     private static List<FileSystemCreator> fileSystems = new ArrayList<>();
+    private static TimeZone timeZone = TimeZone.getDefault();
 
     static {
         FileSystemFactory.registerFileSystem(new Fat32FileSystemCreator());
@@ -56,7 +58,27 @@ public class FileSystemFactory {
         throw new UnsupportedFileSystemException();
 	}
 
+    /**
+     * Register a new file system.
+     * @param creator The creator which is able to check if a {@link BlockDeviceDriver} is holding
+     *                the correct type of file system and is able to instantiate a {@link FileSystem}
+     *                instance.
+     */
     public static synchronized void registerFileSystem(FileSystemCreator creator) {
         fileSystems.add(creator);
+    }
+
+    /**
+     * Set the timezone a file system should use to decode timestamps, if the file system only stores
+     * local date and time and has no reference which zone these timestamp correspond to. (True for
+     * FAT32, e.g.)
+     * @param zone The timezone to use.
+     */
+    public static void setTimeZone(TimeZone zone) {
+        timeZone = zone;
+    }
+
+    public static TimeZone getTimeZone() {
+        return timeZone;
     }
 }
