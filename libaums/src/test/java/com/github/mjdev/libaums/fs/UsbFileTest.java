@@ -5,6 +5,7 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.github.mjdev.libaums.util.Pair;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,6 +15,8 @@ import org.xenei.junit.contract.ContractTest;
 import org.xenei.junit.contract.IProducer;
 
 import java.io.IOException;
+import java.net.URL;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -213,16 +216,75 @@ public class UsbFileTest {
 
     @ContractTest
     public void setLength() throws Exception {
+        UsbFile file = root.createFile("testlength");
+
+        file.setLength(1337);
+        assertEquals(1337, file.getLength());
+
+        newInstance();
+
+        assertEquals(1337, file.getLength());
+
+        file = root.search("testlength");
+
+        file.setLength(1134571);
+        assertEquals(1134571, file.getLength());
+
+        newInstance();
+
+        assertEquals(1134571, file.getLength());
+
+        UsbFile dir = root.createDirectory("my dir");
+
+        try {
+            dir.setLength(1337);
+            fail("Directory did not throw UnsupportedOperationException on setLength");
+        } catch (UnsupportedOperationException e) {
+
+        }
 
     }
 
     @ContractTest
     public void read() throws Exception {
+        ByteBuffer buffer = ByteBuffer.allocate(19);
 
+        UsbFile file = root.search(expectedValues.get("fileToRead").asString());
+
+        file.read(0, buffer);
+
+        assertEquals(buffer.capacity(), buffer.limit());
+        assertEquals("this is just a test", new String(buffer.array()));
+
+        JsonObject bigFileToRead = expectedValues.get("bigFileToRead").asObject();
+
+        for(JsonObject.Member member : bigFileToRead) {
+            String path = member.getName();
+            file = root.search(path);
+            URL url = new URL(member.getValue().asString());
+
+            assertTrue(IOUtils.contentEquals(url.openStream(), new UsbFileInputStream(file)));
+        }
+
+        UsbFile dir = root.createDirectory("my dir");
+
+        try {
+            dir.read(0, buffer);
+            fail("Directory did not throw UnsupportedOperationException on read");
+        } catch (UnsupportedOperationException e) {
+
+        }
     }
 
     @ContractTest
     public void write() throws Exception {
+        ByteBuffer buffer = ByteBuffer.allocate(512);
+        buffer.put("this is just a test!".getBytes());
+
+        UsbFile file = root.createFile("writetest");
+
+        file.write(0, buffer);
+
 
     }
 

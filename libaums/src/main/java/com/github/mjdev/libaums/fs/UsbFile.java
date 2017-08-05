@@ -56,7 +56,7 @@ public interface UsbFile extends Closeable {
 	boolean isDirectory();
 
 	/**
-	 * 
+	 * Actual file or directory name or '/' for root directory.
 	 * @return The name of the file or directory.
 	 */
 	String getName();

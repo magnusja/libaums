@@ -49,7 +49,7 @@ public class FileSystemTest {
     public void getRootDirectory() throws Exception {
         UsbFile root = fs.getRootDirectory();
         assertNotNull(root);
-        assertEquals("", root.getName());
+        assertEquals("/", root.getName());
         assertTrue(root.isDirectory());
         assertTrue(root.isRoot());
     }

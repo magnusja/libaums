@@ -62,14 +62,14 @@ public class FileBlockDeviceDriver implements BlockDeviceDriver {
     @Override
     public void read(long deviceOffset, ByteBuffer buffer) throws IOException {
         file.seek(deviceOffset * blockSize + byteOffset);
-        file.read(buffer.array(), buffer.position(), buffer.limit());
+        file.read(buffer.array(), buffer.position(), buffer.remaining());
         buffer.position(buffer.limit());
     }
 
     @Override
     public void write(long deviceOffset, ByteBuffer buffer) throws IOException {
         file.seek(deviceOffset * blockSize + byteOffset);
-        file.write(buffer.array(), buffer.position(), buffer.limit());
+        file.write(buffer.array(), buffer.position(), buffer.remaining());
         buffer.position(buffer.limit());
     }
 
