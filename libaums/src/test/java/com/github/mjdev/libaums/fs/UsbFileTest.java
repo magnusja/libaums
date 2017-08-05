@@ -135,7 +135,7 @@ public class UsbFileTest {
 
         for (JsonObject.Member member : foldersToMove) {
             UsbFile file = root.search(member.getName());
-            assertEquals(member.getName(), member.getValue().asLong(), file.lastModified() / 1000);
+            assertEquals(member.getName(), member.getValue().asLong(), file.lastAccessed() / 1000);
         }
     }
 
