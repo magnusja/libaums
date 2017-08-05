@@ -427,7 +427,7 @@ public class FatDirectory extends AbstractUsbFile {
 
 	@Override
 	public String getName() {
-		return entry != null ? entry.getName() : "";
+		return entry != null ? entry.getName() : "/";
 	}
 
 	@Override

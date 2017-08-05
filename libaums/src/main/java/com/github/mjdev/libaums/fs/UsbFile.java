@@ -42,7 +42,8 @@ public interface UsbFile extends Closeable {
 
     /**
      * Tries to search a corresponding entry associated with the path parameter. Path separator is '/'.
-     * Parameter path must not start with an '/'. Path is treated relative to current UsbFile.
+     * Parameter path must not start with an '/' (except if querying from root directory). Path is
+	 * treated relative to current UsbFile.
      * @param path The path to the resource to search.
      * @return UsbFile directory or file if found, null otherwise.
      */

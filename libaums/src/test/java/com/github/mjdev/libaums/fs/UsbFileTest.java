@@ -13,6 +13,7 @@ import org.xenei.junit.contract.Contract;
 import org.xenei.junit.contract.ContractTest;
 import org.xenei.junit.contract.IProducer;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -72,7 +73,7 @@ public class UsbFileTest {
 
     @ContractTest
     public void getName() throws Exception {
-        assertEquals("Root getName", "", root.getName());
+        assertEquals("Root getName", "/", root.getName());
 
         for (JsonValue value : expectedValues.get("getName").asArray()) {
             String filePath = value.asString();
@@ -195,7 +196,7 @@ public class UsbFileTest {
             String folder = value.asString();
             try {
                 root.search(folder).getLength();
-                fail(folder);
+                fail("Folder did not throw UnsupportedOperationException on getLength(): " + folder);
             } catch(UnsupportedOperationException e) {
 
             }
@@ -237,12 +238,61 @@ public class UsbFileTest {
 
     @ContractTest
     public void createDirectory() throws Exception {
+        UsbFile directory = root.createDirectory("new dir");
+        UsbFile subDir = directory.createDirectory("new subdir");
 
+        assertTrue(root.search(directory.getName()).isDirectory());
+        assertTrue(root.search(directory.getName() + UsbFile.separator + subDir.getName()).isDirectory());
+
+        newInstance();
+
+        assertTrue(root.search(directory.getName()).isDirectory());
+        assertTrue(root.search(directory.getName() + UsbFile.separator + subDir.getName()).isDirectory());
+
+        try {
+            root.search(expectedValues.get("fileToCreateDirectoryOrFileOn").asString())
+                    .createDirectory("should not happen");
+            fail("UsbFile did not throw UnsupportedOperationException on createDirectory");
+        } catch (UnsupportedOperationException e) {
+
+        }
+
+        try {
+            root.createDirectory(directory.getName());
+            fail("UsbFile did not throw IOException when creating same name dir");
+        } catch (IOException e) {
+
+        }
     }
 
     @ContractTest
     public void createFile() throws Exception {
+        UsbFile file = root.createFile("new file");
+        UsbFile subFile = root.search(expectedValues.get("createFileInDir").asString()).
+                createFile("new file");
 
+        assertFalse(root.search(file.getName()).isDirectory());
+        assertFalse(root.search(expectedValues.get("createFileInDir").asString() + UsbFile.separator + subFile.getName()).isDirectory());
+
+        newInstance();
+
+        assertFalse(root.search(file.getName()).isDirectory());
+        assertFalse(root.search(expectedValues.get("createFileInDir").asString() + UsbFile.separator + subFile.getName()).isDirectory());
+
+        try {
+            root.search(expectedValues.get("fileToCreateDirectoryOrFileOn").asString())
+                    .createFile("should not happen");
+            fail("UsbFile did not throw UnsupportedOperationException on createFile");
+        } catch (UnsupportedOperationException e) {
+
+        }
+
+        try {
+            root.createFile(file.getName());
+            fail("UsbFile did not throw IOException when creating same name file");
+        } catch (IOException e) {
+
+        }
     }
 
     @ContractTest
@@ -252,7 +302,19 @@ public class UsbFileTest {
 
     @ContractTest
     public void delete() throws Exception {
+        UsbFile fileToDelete = root.search(expectedValues.get("fileToDelete").asString());
+        UsbFile folderToDelete = root.search(expectedValues.get("folderToDelete").asString());
 
+        fileToDelete.delete();
+        folderToDelete.delete();
+
+        assertNull(root.search(expectedValues.get("fileToDelete").asString()));
+        assertNull(root.search(expectedValues.get("folderToDelete").asString()));
+
+        newInstance();
+
+        assertNull(root.search(expectedValues.get("fileToDelete").asString()));
+        assertNull(root.search(expectedValues.get("folderToDelete").asString()));
     }
 
     @ContractTest
