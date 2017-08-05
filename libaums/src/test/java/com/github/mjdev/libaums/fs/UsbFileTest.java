@@ -111,17 +111,32 @@ public class UsbFileTest {
 
     @ContractTest
     public void createdAt() throws Exception {
+        JsonObject foldersToMove = expectedValues.get("createdAt").asObject();
 
+        for (JsonObject.Member member : foldersToMove) {
+            UsbFile file = root.search(member.getName());
+            assertEquals(member.getName(), member.getValue().asLong(), file.createdAt() / 1000);
+        }
     }
 
     @ContractTest
     public void lastModified() throws Exception {
+        JsonObject foldersToMove = expectedValues.get("lastModified").asObject();
 
+        for (JsonObject.Member member : foldersToMove) {
+            UsbFile file = root.search(member.getName());
+            assertEquals(member.getName(), member.getValue().asLong(), file.lastModified() / 1000);
+        }
     }
 
     @ContractTest
     public void lastAccessed() throws Exception {
+        JsonObject foldersToMove = expectedValues.get("lastAccessed").asObject();
 
+        for (JsonObject.Member member : foldersToMove) {
+            UsbFile file = root.search(member.getName());
+            assertEquals(member.getName(), member.getValue().asLong(), file.lastModified() / 1000);
+        }
     }
 
     @ContractTest
@@ -278,6 +293,7 @@ public class UsbFileTest {
 
     @ContractTest
     public void write() throws Exception {
+        // TODO test exception when disk is full
         URL bigFileUrl = new URL(expectedValues.get("bigFileToWrite").asString());
         ByteBuffer buffer = ByteBuffer.allocate(512);
         buffer.put("this is just a test!".getBytes());
@@ -315,12 +331,12 @@ public class UsbFileTest {
 
     @ContractTest
     public void flush() throws Exception {
-
+        // TODO
     }
 
     @ContractTest
     public void close() throws Exception {
-
+        // TODO
     }
 
     @ContractTest
@@ -503,6 +519,36 @@ public class UsbFileTest {
 
         assertNull(root.search(expectedValues.get("fileToDelete").asString()));
         assertNull(root.search(expectedValues.get("folderToDelete").asString()));
+    }
+
+    @ContractTest
+    public void deleteAll() throws Exception {
+        String path = expectedValues.get("subDeleteAll").asString();
+        UsbFile subDeleteAllFolder = root.search(path);
+        int parentCount = subDeleteAllFolder.getParent().list().length;
+
+        for (UsbFile file : subDeleteAllFolder.listFiles()) {
+            file.delete();
+        }
+
+        assertEquals(parentCount, subDeleteAllFolder.getParent().list().length);
+        assertEquals(0, subDeleteAllFolder.list().length);
+
+        newInstance();
+
+        subDeleteAllFolder = root.search(path);
+        assertEquals(parentCount, subDeleteAllFolder.getParent().list().length);
+        assertEquals(0, subDeleteAllFolder.list().length);
+
+        newInstance();
+
+        for (UsbFile file : root.listFiles()) {
+            file.delete();
+        }
+
+        assertEquals(0, root.list().length);
+        newInstance();
+        assertEquals(0, root.list().length);
     }
 
     @ContractTest
