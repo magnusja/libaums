@@ -383,8 +383,109 @@ public class UsbFileTest {
     }
 
     @ContractTest
-    public void moveTo() throws Exception {
+    public void moveFile() throws Exception {
+        JsonObject filesToMove = expectedValues.get("filesToMove").asObject();
 
+        for (JsonObject.Member member : filesToMove) {
+            UsbFile file = root.search(member.getName());
+            UsbFile dest = root.search(member.getValue().asString());
+            file.moveTo(dest);
+
+
+            // try to move dir into file
+            try {
+                dest.moveTo(file);
+                fail("Moving into file did not throw IllegalStateException");
+            } catch (IllegalStateException e) {
+
+            }
+
+            // try to move file into file
+            try {
+                file.moveTo(file);
+                fail("Moving into file did not throw IllegalStateException");
+            } catch (IllegalStateException e) {
+
+            }
+        }
+
+        for (JsonObject.Member member : filesToMove) {
+            UsbFile file = root.search(member.getName());
+            UsbFile dest = root.search(member.getValue().asString());
+            assertNull(file);
+
+            String path = member.getName();
+            int lastSep = path.lastIndexOf(UsbFile.separator);
+            if (lastSep == -1) lastSep = 0;
+            assertFalse(dest.search(path.substring(lastSep))
+                    .isDirectory());
+        }
+
+        newInstance();
+
+        for (JsonObject.Member member : filesToMove) {
+            UsbFile file = root.search(member.getName());
+            UsbFile dest = root.search(member.getValue().asString());
+            assertNull(file);
+
+            String path = member.getName();
+            int lastSep = path.lastIndexOf(UsbFile.separator);
+            if (lastSep == -1) lastSep = 0;
+            file = dest.search(path.substring(lastSep));
+            assertFalse(file.isDirectory());
+        }
+
+    }
+
+    @ContractTest
+    public void moveDirectory() throws Exception {
+        JsonObject foldersToMove = expectedValues.get("foldersToMove").asObject();
+
+        for (JsonObject.Member member : foldersToMove) {
+            UsbFile file = root.search(member.getName());
+            UsbFile dest = root.search(member.getValue().asString());
+            file.moveTo(dest);
+        }
+
+        for (JsonObject.Member member : foldersToMove) {
+            UsbFile file = root.search(member.getName());
+            UsbFile dest = root.search(member.getValue().asString());
+            assertNull(file);
+
+            String path = member.getName();
+            int lastSep = path.lastIndexOf(UsbFile.separator);
+            if (lastSep == -1) lastSep = 0;
+            assertTrue(dest.search(path.substring(lastSep))
+                    .isDirectory());
+        }
+
+        newInstance();
+
+        UsbFile lastDest = null;
+        for (JsonObject.Member member : foldersToMove) {
+            UsbFile file = root.search(member.getName());
+            UsbFile dest = root.search(member.getValue().asString());
+            assertNull(file);
+
+            String path = member.getName();
+            int lastSep = path.lastIndexOf(UsbFile.separator);
+            if (lastSep == -1) lastSep = 0;
+            assertTrue(dest.search(path.substring(lastSep))
+                    .isDirectory());
+
+            lastDest = dest;
+        }
+
+        // try to move root dir
+        try {
+            root.moveTo(lastDest);
+            fail("Moving root dir did not throw IllegalStateException");
+        } catch (IllegalStateException e) {
+
+        }
+
+        cleanup();
+        newInstance();
     }
 
     @ContractTest
