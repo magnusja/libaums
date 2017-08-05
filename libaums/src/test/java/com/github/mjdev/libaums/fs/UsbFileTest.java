@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TimeZone;
 
 import static org.junit.Assert.*;
 
@@ -111,6 +112,7 @@ public class UsbFileTest {
 
     @ContractTest
     public void createdAt() throws Exception {
+        FileSystemFactory.setTimeZone(TimeZone.getTimeZone(expectedValues.get("timezone").asString()));
         JsonObject foldersToMove = expectedValues.get("createdAt").asObject();
 
         for (JsonObject.Member member : foldersToMove) {
@@ -121,6 +123,8 @@ public class UsbFileTest {
 
     @ContractTest
     public void lastModified() throws Exception {
+        FileSystemFactory.setTimeZone(TimeZone.getTimeZone(expectedValues.get("timezone").asString()));
+
         JsonObject foldersToMove = expectedValues.get("lastModified").asObject();
 
         for (JsonObject.Member member : foldersToMove) {
@@ -131,6 +135,8 @@ public class UsbFileTest {
 
     @ContractTest
     public void lastAccessed() throws Exception {
+        FileSystemFactory.setTimeZone(TimeZone.getTimeZone(expectedValues.get("timezone").asString()));
+
         JsonObject foldersToMove = expectedValues.get("lastAccessed").asObject();
 
         for (JsonObject.Member member : foldersToMove) {
