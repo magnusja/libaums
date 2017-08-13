@@ -65,6 +65,14 @@ public class UsbFileTest {
         }
         String garbagePath = "garbage path!)(&`";
         assertNull(garbagePath, root.search(garbagePath));
+
+        try {
+            root.search(expectedValues.get("fileToCreateDirectoryOrFileOn").asString())
+                    .search("should not happen");
+            fail("UsbFile did not throw UnsupportedOperationException on search");
+        } catch (UnsupportedOperationException e) {
+
+        }
     }
 
     @ContractTest
@@ -565,6 +573,45 @@ public class UsbFileTest {
         for (UsbFile file : root.listFiles()) {
             assertFalse(file.isRoot());
         }
+    }
+
+    private void checkAbsolutePathRecursive(String currentDir, UsbFile dir) throws IOException {
+        for (UsbFile file : dir.listFiles()) {
+            String test = currentDir + UsbFile.separator + file.getName();
+            if (currentDir.equals(UsbFile.separator)) {
+                test = UsbFile.separator + file.getName();
+            }
+
+            assertEquals(test, file.getAbsolutePath());
+
+            if (file.isDirectory()) {
+                String nextDir = currentDir + UsbFile.separator + file.getName();
+                if (currentDir.equals(UsbFile.separator)) {
+                    nextDir = UsbFile.separator + file.getName();
+                }
+                checkAbsolutePathRecursive(nextDir, file);
+            }
+        }
+    }
+
+    @ContractTest
+    public void absolutePath() throws Exception {
+        checkAbsolutePathRecursive(UsbFile.separator, root);
+    }
+
+    private void checkEqualsRecursive(UsbFile dir) throws IOException {
+        for (UsbFile file : dir.listFiles()) {
+            if (file.isDirectory()) {
+                checkEqualsRecursive(file);
+            }
+
+            assertEquals(file, file);
+        }
+    }
+
+    @ContractTest
+    public void equals() throws Exception {
+        checkEqualsRecursive(root);
     }
 
 }

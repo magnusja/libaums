@@ -58,4 +58,30 @@ public abstract class AbstractUsbFile implements UsbFile {
 
         return null;
     }
+
+    @Override
+    public String getAbsolutePath() {
+        if (getParent().isRoot()) {
+            return "/" + getName();
+        }
+        return getParent().getAbsolutePath() + UsbFile.separator + getName();
+    }
+
+    @Override
+    public int hashCode() {
+        return getAbsolutePath().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        // TODO add getFileSystem and check if file system is the same
+        // TODO check reference
+        return obj instanceof UsbFile &&
+                getAbsolutePath().equals(((UsbFile) obj).getAbsolutePath());
+    }
 }
