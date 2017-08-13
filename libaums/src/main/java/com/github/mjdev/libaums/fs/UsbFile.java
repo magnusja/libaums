@@ -62,6 +62,12 @@ public interface UsbFile extends Closeable {
 	String getName();
 
 	/**
+	 * Absolute path of a file or directory.
+	 * @return Absolute path seperated with '/' and beginning with an '/'
+	 */
+	String getAbsolutePath();
+
+	/**
 	 * Set a new name for this file or directory.
 	 * 
 	 * @param newName
