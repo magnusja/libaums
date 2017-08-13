@@ -54,6 +54,8 @@ dependencies {
     testCompile 'org.apache.commons:commons-io:1.3.2'
     testCompile 'com.eclipsesource.minimal-json:minimal-json:0.9.4'
     testCompile 'org.xenei:junit-contracts:0.1.7'
+    testCompile 'org.mockito:mockito-core:2.7.22'
+
     compile 'com.android.support:support-annotations:25.3.1'
     javadocDeps 'com.android.support:support-annotations:25.3.1'
 }
