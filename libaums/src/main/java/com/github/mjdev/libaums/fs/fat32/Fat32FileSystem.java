@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.UsbFile;
+import com.github.mjdev.libaums.partition.PartitionTypes;
 
 /**
  * This class represents the FAT32 file system and is responsible for setting
@@ -129,5 +130,10 @@ public class Fat32FileSystem implements FileSystem {
 	@Override
 	public int getChunkSize() {
 		return bootSector.getBytesPerCluster();
+	}
+
+	@Override
+	public int getType() {
+		return PartitionTypes.FAT32;
 	}
 }

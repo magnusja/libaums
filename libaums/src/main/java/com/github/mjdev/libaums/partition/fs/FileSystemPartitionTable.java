@@ -24,8 +24,11 @@ public class FileSystemPartitionTable implements PartitionTable {
 
     public FileSystemPartitionTable(BlockDeviceDriver blockDevice, FileSystem fs) {
         Log.i(TAG, "Found a device without partition table, yay!");
-        // TODO fix fs type and total number of sectors
-        entries.add(new PartitionTableEntry(-1, 0, -1));
+        int totalNumberOfSectors = (int) fs.getCapacity() / blockDevice.getBlockSize();
+        if (fs.getCapacity() % blockDevice.getBlockSize() != 0) {
+            Log.w(TAG, "fs capacity is not multiple of block size");
+        }
+        entries.add(new PartitionTableEntry(fs.getType(), 0, totalNumberOfSectors));
     }
 
     @Override
