@@ -87,4 +87,10 @@ public class FileSystemWrapper implements FileSystem {
             return 4096;
         }
     }
+
+    @Override
+    public int getType() {
+        // TODO map this to PartitionTypes
+        return wrappedFs.getType().getName().hashCode();
+    }
 }

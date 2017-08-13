@@ -68,4 +68,10 @@ public interface FileSystem {
 	 * @return returns the optimal chuck size in bytes (you should read and write in multiples of that)
      */
 	int getChunkSize();
+
+	/**
+	 *
+	 * @return file system type {@link com.github.mjdev.libaums.partition.PartitionTypes}
+	 */
+	int getType();
 }

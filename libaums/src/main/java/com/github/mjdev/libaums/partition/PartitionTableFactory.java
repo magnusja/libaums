@@ -17,11 +17,18 @@
 
 package com.github.mjdev.libaums.partition;
 
+import android.support.annotation.Nullable;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
+import com.github.mjdev.libaums.partition.fs.FileSystemPartitionTable;
+import com.github.mjdev.libaums.partition.fs.FileSystemPartitionTableCreator;
 import com.github.mjdev.libaums.partition.mbr.MasterBootRecord;
+import com.github.mjdev.libaums.partition.mbr.MasterBootRecordCreator;
 
 /**
  * Helper class to create different supported {@link PartitionTable}s.
@@ -30,6 +37,22 @@ import com.github.mjdev.libaums.partition.mbr.MasterBootRecord;
  * 
  */
 public class PartitionTableFactory {
+
+    public static class UnsupportedPartitionTableException extends IOException {
+
+    }
+
+	public interface PartitionTableCreator {
+        @Nullable  PartitionTable read(BlockDeviceDriver blockDevice) throws IOException;
+    }
+
+    private static List<PartitionTableCreator> partitionTables = new ArrayList<>();
+
+    static {
+        PartitionTableFactory.registerPartitionTable(new FileSystemPartitionTableCreator());
+        PartitionTableFactory.registerPartitionTable(new MasterBootRecordCreator());
+    }
+
 	/**
 	 * Creates a {@link PartitionTable} suitable for the given block device. The
 	 * partition table should be located at the logical block address zero of
@@ -43,9 +66,17 @@ public class PartitionTableFactory {
 	 */
 	public static PartitionTable createPartitionTable(BlockDeviceDriver blockDevice)
 			throws IOException {
-		// we currently only support mbr
-		ByteBuffer buffer = ByteBuffer.allocate(512);
-		blockDevice.read(0, buffer);
-		return MasterBootRecord.read(buffer);
+        for(PartitionTableCreator creator : partitionTables) {
+            PartitionTable table = creator.read(blockDevice);
+            if(table != null) {
+                return table;
+            }
+        }
+
+        throw new UnsupportedPartitionTableException();
 	}
+
+    public static synchronized void registerPartitionTable(PartitionTableCreator creator) {
+        partitionTables.add(creator);
+    }
 }
