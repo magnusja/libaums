@@ -22,7 +22,8 @@ public class FileSystemFactoryTest {
     @Test
     public void createFat32FileSystem() throws Exception {
         BlockDeviceDriver blockDevice = new FileBlockDeviceDriver(
-                new URL("https://www.dropbox.com/s/w3x12zw6d6lc6x5/mbr_1_partition_hfs%2B.bin?dl=1"));
+                new URL("https://www.dropbox.com/s/w3x12zw6d6lc6x5/mbr_1_partition_hfs%2B.bin?dl=1"),
+                2 * 512);
 
         PartitionTableEntry entry = new PartitionTableEntry(PartitionTypes.FAT32, 2 * 512, 1337);
         FileSystem fs = FileSystemFactory.createFileSystem(entry, blockDevice);
