@@ -1,6 +1,7 @@
 package com.github.mjdev.libaums.fs;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
+import com.github.mjdev.libaums.driver.ByteBlockDevice;
 import com.github.mjdev.libaums.driver.file.FileBlockDeviceDriver;
 import com.github.mjdev.libaums.fs.fat32.Fat32FileSystem;
 import com.github.mjdev.libaums.partition.PartitionTable;
@@ -21,9 +22,9 @@ import static org.junit.Assert.*;
 public class FileSystemFactoryTest {
     @Test
     public void createFat32FileSystem() throws Exception {
-        BlockDeviceDriver blockDevice = new FileBlockDeviceDriver(
+        BlockDeviceDriver blockDevice = new ByteBlockDevice(new FileBlockDeviceDriver(
                 new URL("https://www.dropbox.com/s/3bxngiqmwitlucd/mbr_fat32.img?dl=1"),
-                2 * 512);
+                2 * 512));
 
         PartitionTableEntry entry = new PartitionTableEntry(PartitionTypes.FAT32, 2 * 512, 1337);
         FileSystem fs = FileSystemFactory.createFileSystem(entry, blockDevice);

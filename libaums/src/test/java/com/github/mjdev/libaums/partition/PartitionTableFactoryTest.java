@@ -28,9 +28,9 @@ public class PartitionTableFactoryTest {
 
     @Test
     public void testFileSystemCreate() throws Exception {
-        BlockDeviceDriver blockDevice = new ByteBlockDevice(new FileBlockDeviceDriver(
+        BlockDeviceDriver blockDevice = new FileBlockDeviceDriver(
                 new URL("https://www.dropbox.com/s/3bxngiqmwitlucd/mbr_fat32.img?dl=1"),
-                2 * 512));
+                2 * 512);
 
         PartitionTable table = PartitionTableFactory.createPartitionTable(blockDevice);
 
