@@ -88,6 +88,7 @@ public class UsbMassStorageDevice {
 	private BlockDeviceDriver blockDevice;
 	private PartitionTable partitionTable;
 	private List<Partition> partitions = new ArrayList<Partition>();
+	// TODO this is never used, should we only allow one init() call?
 	private boolean inited = false;
 
 	/**

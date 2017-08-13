@@ -59,7 +59,8 @@ public class Partition extends ByteBlockDevice {
 	 * @param entry
 	 *            The entry the partition shall represent.
 	 * @param blockDevice
-	 *            The underlying block device.
+	 *            The underlying block device. This block device must already been initialized, see
+	 *            {@link BlockDeviceDriver#init()}.
 	 * @return The newly created Partition.
 	 * @throws IOException
 	 *             If reading from the device fails.
