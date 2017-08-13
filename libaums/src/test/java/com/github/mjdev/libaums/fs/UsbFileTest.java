@@ -387,13 +387,19 @@ public class UsbFileTest {
         UsbFile file = root.createFile("new file");
         UsbFile subFile = root.search(expectedValues.get("createFileInDir").asString()).
                 createFile("new file");
+        UsbFile specialCharFile = root.createFile("as~!@#$%^&()_-{},.=[]`'öäL@=(!\\\"&$%(!$)asdqweasdqweasd111°!§!§`´´");
+        UsbFile specialCharFile2 = root.createFile("as~!@#$%^&()_-{},.=[]`'öäL@=(!\\\"&$%(!$)asdqweasdqweasd111°!§!§`´´2");
 
         assertFalse(root.search(file.getName()).isDirectory());
+        assertFalse(root.search(specialCharFile.getName()).isDirectory());
+        assertFalse(root.search(specialCharFile2.getName()).isDirectory());
         assertFalse(root.search(expectedValues.get("createFileInDir").asString() + UsbFile.separator + subFile.getName()).isDirectory());
 
         newInstance();
 
         assertFalse(root.search(file.getName()).isDirectory());
+        assertFalse(root.search("as~!@#$%^&()_-{},.=[]`'öäL@=(!\\\"&$%(!$)asdqweasdqweasd111°!§!§`´´").isDirectory());
+        assertFalse(root.search("as~!@#$%^&()_-{},.=[]`'öäL@=(!\\\"&$%(!$)asdqweasdqweasd111°!§!§`´´2").isDirectory());
         assertFalse(root.search(expectedValues.get("createFileInDir").asString() + UsbFile.separator + subFile.getName()).isDirectory());
 
         try {
