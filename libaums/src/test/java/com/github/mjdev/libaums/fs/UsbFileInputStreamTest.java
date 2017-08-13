@@ -82,12 +82,12 @@ public class UsbFileInputStreamTest {
         is.read(new byte[50]);
         verify(file).read(longCaptor.capture(), byteBufferCaptor.capture());
         assertEquals(0, longCaptor.getValue().longValue());
-        assertNotNull(byteBufferCaptor.getValue());
+        assertEquals(50, byteBufferCaptor.getValue().remaining());
 
         is.read(new byte[50]);
         verify(file, times(2)).read(longCaptor.capture(), byteBufferCaptor.capture());
         assertEquals(50, longCaptor.getValue().longValue());
-        assertNotNull(byteBufferCaptor.getValue());
+        assertEquals(50, byteBufferCaptor.getValue().remaining());
     }
 
     @Test
