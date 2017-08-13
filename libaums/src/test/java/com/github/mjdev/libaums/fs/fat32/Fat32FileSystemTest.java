@@ -44,6 +44,7 @@ public class Fat32FileSystemTest {
                                     new URL("https://www.dropbox.com/s/3bxngiqmwitlucd/mbr_fat32.img?dl=1"),
                                     obj.get("blockSize").asInt(),
                                     obj.get("blockSize").asInt() * obj.get("fileSystemOffset").asInt()));
+                            blockDevice.init();
                         }
                         return new Pair<>(Fat32FileSystem.read(blockDevice), obj);
                     } catch (IOException e) {

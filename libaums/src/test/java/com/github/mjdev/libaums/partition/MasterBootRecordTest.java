@@ -78,6 +78,8 @@ public class MasterBootRecordTest {
             List<Map<String, Integer>> partitionTableInfo = entry.getValue();
 
             FileBlockDeviceDriver blockDevice = new FileBlockDeviceDriver(mbrUrl);
+            blockDevice.init();
+
             ByteBuffer buffer = ByteBuffer.allocate(512);
             blockDevice.read(0, buffer);
             buffer.flip();
