@@ -11,7 +11,7 @@ import android.util.Log;
 
 public class UsbCommunicationFactory {
 
-    enum UnderlyingUsbCommunication {
+    public enum UnderlyingUsbCommunication {
         USB_REQUEST_ASYNC,
         DEVICE_CONNECTION_SYNC
     }
