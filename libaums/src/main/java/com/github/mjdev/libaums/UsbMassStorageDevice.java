@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
@@ -30,7 +29,6 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
-import android.os.Build;
 import android.util.Log;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
@@ -230,7 +228,9 @@ public class UsbMassStorageDevice {
 		blockDevice = BlockDeviceDriverFactory.createBlockDevice(communication);
 		blockDevice.init();
 		partitionTable = PartitionTableFactory.createPartitionTable(blockDevice);
-		initPartitions();
+		if (partitionTable != null) {
+			initPartitions();
+		}
 	}
 
 	/**
