@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import android.Manifest;
@@ -86,6 +87,7 @@ import com.github.mjdev.libaums.fs.FileSystemFactory;
 import com.github.mjdev.libaums.fs.UsbFile;
 import com.github.mjdev.libaums.fs.UsbFileInputStream;
 import com.github.mjdev.libaums.fs.UsbFileStreamFactory;
+import com.github.mjdev.libaums.partition.Partition;
 import com.github.mjdev.libaums.server.http.UsbFileHttpServerService;
 import com.github.mjdev.libaums.server.http.server.AsyncHttpServer;
 
@@ -761,7 +763,11 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
             massStorageDevices[currentDevice].init();
 
 			// we always use the first partition of the device
-			currentFs = massStorageDevices[currentDevice].getPartitions().get(0).getFileSystem();
+            final List<Partition> partitions = massStorageDevices[currentDevice].getPartitions();
+            if (partitions.isEmpty()) {
+                throw new IOException("device has no partitions.");
+            }
+            currentFs = partitions.get(0).getFileSystem();
 			Log.d(TAG, "Capacity: " + currentFs.getCapacity());
 			Log.d(TAG, "Occupied Space: " + currentFs.getOccupiedSpace());
 			Log.d(TAG, "Free Space: " + currentFs.getFreeSpace());
