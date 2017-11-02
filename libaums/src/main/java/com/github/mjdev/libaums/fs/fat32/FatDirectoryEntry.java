@@ -479,7 +479,7 @@ import java.util.Calendar;
 	/* package */long getStartCluster() {
 		final int msb = getUnsignedInt16(MSB_CLUSTER_OFF);
 		final int lsb = getUnsignedInt16(LSB_CLUSTER_OFF);
-		return (msb << 16) | lsb;
+		return ((long) msb << 16) | lsb;
 	}
 
 	/**
