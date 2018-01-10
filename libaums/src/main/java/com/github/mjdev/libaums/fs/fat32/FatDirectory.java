@@ -400,7 +400,7 @@ public class FatDirectory extends AbstractUsbFile {
 		FatLfnDirectoryEntry dotDotEntry = FatLfnDirectoryEntry.createNew(null, new ShortName("..",
 				""));
 		dotDotEntry.setDirectory();
-		dotDotEntry.setStartCluster(isRoot() ? 0 : entry.getStartCluster());
+		dotDotEntry.setStartCluster(isRoot() ? 0 : this.entry.getStartCluster());
 		FatLfnDirectoryEntry.copyDateTime(entry, dotDotEntry);
 		result.addEntry(dotDotEntry, dotDotEntry.getActualEntry());
 
