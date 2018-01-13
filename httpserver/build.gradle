@@ -14,7 +14,6 @@ configurations {
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.2"
 
     defaultConfig {
         minSdkVersion 16
@@ -40,7 +39,7 @@ dependencies {
     compile 'com.koushikdutta.async:androidasync:2.+'
 
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:support-annotations:25.1.0'
+    compile 'com.android.support:support-annotations:27.0.2'
     compile project(':libaums')
 }
 

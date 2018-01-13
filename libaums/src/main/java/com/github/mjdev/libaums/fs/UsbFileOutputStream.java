@@ -51,6 +51,7 @@ public class UsbFileOutputStream extends OutputStream {
 
     @Override
     public void close() throws IOException {
+        file.setLength(currentByteOffset);
         file.close();
     }
 
