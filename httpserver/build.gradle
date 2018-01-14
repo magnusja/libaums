@@ -33,14 +33,14 @@ android {
 }
 
 dependencies {
-    compile 'org.nanohttpd:nanohttpd:2.+'
+    implementation 'org.nanohttpd:nanohttpd:2.+'
     javadocDeps 'org.nanohttpd:nanohttpd:2.+'
 
-    compile 'com.koushikdutta.async:androidasync:2.+'
+    implementation 'com.koushikdutta.async:androidasync:2.+'
 
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:support-annotations:27.0.2'
-    compile project(':libaums')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:support-annotations:27.0.2'
+    implementation project(':libaums')
 }
 
 task bintray {

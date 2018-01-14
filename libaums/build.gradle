@@ -49,13 +49,13 @@ android {
 }
 
 dependencies {
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.apache.commons:commons-io:1.3.2'
-    testCompile 'com.eclipsesource.minimal-json:minimal-json:0.9.4'
-    testCompile 'org.xenei:junit-contracts:0.1.7'
-    testCompile 'org.mockito:mockito-core:2.7.22'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'commons-io:commons-io:1.3.2'
+    testImplementation 'com.eclipsesource.minimal-json:minimal-json:0.9.4'
+    testImplementation 'org.xenei:junit-contracts:0.1.7'
+    testImplementation 'org.mockito:mockito-core:2.7.22'
 
-    compile 'com.android.support:support-annotations:27.0.2'
+    implementation 'com.android.support:support-annotations:27.0.2'
     javadocDeps 'com.android.support:support-annotations:27.0.2'
 }
 
