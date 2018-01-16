@@ -14,7 +14,7 @@ public abstract class AbstractUsbFile implements UsbFile {
     @Override
     public UsbFile search(String path) throws IOException {
 
-        if(isDirectory()) {
+        if(!isDirectory()) {
             throw new UnsupportedOperationException("This is a file!");
         }
 
