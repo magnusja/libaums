@@ -92,11 +92,6 @@ public class FatFile extends AbstractUsbFile {
 	}
 
 	@Override
-	public UsbFile search(String path) {
-		throw new UnsupportedOperationException("This is a file!");
-	}
-
-	@Override
 	public boolean isDirectory() {
 		return false;
 	}
