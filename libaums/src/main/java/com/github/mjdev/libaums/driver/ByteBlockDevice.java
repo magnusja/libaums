@@ -120,6 +120,6 @@ public class ByteBlockDevice implements BlockDeviceDriver {
 
     @Override
     public int getBlockSize() {
-        return targetBlockDevice.getBlockSize();
+        return 1;
     }
 } 
