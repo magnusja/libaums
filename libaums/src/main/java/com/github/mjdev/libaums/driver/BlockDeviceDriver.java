@@ -84,4 +84,12 @@ public interface BlockDeviceDriver {
 	 * @return The block size in bytes, mostly 512 bytes.
 	 */
 	public int getBlockSize();
+
+	/**
+	 * Returns the size of the block device in blocks. That means that the
+	 * total device size is `getSize() * getBlockSize()` bytes.
+	 *
+	 * @return The size of the device in blocks
+	 */
+	public int getSize();
 }

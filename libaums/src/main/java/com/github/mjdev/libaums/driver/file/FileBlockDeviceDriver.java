@@ -20,10 +20,12 @@ public class FileBlockDeviceDriver implements BlockDeviceDriver {
     private RandomAccessFile file;
     private int blockSize;
     private int byteOffset;
+    private int blockDevSize;
 
     public FileBlockDeviceDriver(File file, int blockSize, int byteOffset) throws FileNotFoundException {
         this.file = new RandomAccessFile(file, "rw");
         this.blockSize = blockSize;
+        this.blockDevSize = (int) (file.length() / blockSize);
         this.byteOffset = byteOffset;
     }
 
@@ -76,5 +78,10 @@ public class FileBlockDeviceDriver implements BlockDeviceDriver {
     @Override
     public int getBlockSize() {
         return blockSize;
+    }
+
+    @Override
+    public int getSize() {
+        return blockDevSize;
     }
 }

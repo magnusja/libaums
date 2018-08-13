@@ -237,4 +237,9 @@ public class ScsiBlockDevice implements BlockDeviceDriver {
 	public int getBlockSize() {
 		return blockSize;
 	}
+
+	@Override
+	public int getSize() {
+		return lastBlockAddress;
+	}
 }
