@@ -290,4 +290,13 @@ public class UsbMassStorageDevice {
 	public UsbDevice getUsbDevice() {
 		return usbDevice;
 	}
+
+	/**
+	 * Returns the block device interface for this device.
+	 *
+	 * @return The BlockDeviceDriver implementation
+	 */
+	public BlockDeviceDriver getBlockDevice() {
+		return blockDevice;
+	}
 }
