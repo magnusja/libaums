@@ -13,12 +13,12 @@ configurations {
 }
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 28
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
     }
@@ -34,14 +34,14 @@ android {
 }
 
 dependencies {
-    compile 'org.nanohttpd:nanohttpd:2.+'
+    api 'org.nanohttpd:nanohttpd:2.+'
     javadocDeps 'org.nanohttpd:nanohttpd:2.+'
 
-    compile 'com.koushikdutta.async:androidasync:2.+'
+    api 'com.koushikdutta.async:androidasync:2.+'
 
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:support-annotations:25.1.0'
-    compile project(':libaums')
+    api fileTree(include: ['*.jar'], dir: 'libs')
+    api 'com.android.support:support-annotations:27.1.1'
+    api project(':libaums')
 }
 
 task bintray {
