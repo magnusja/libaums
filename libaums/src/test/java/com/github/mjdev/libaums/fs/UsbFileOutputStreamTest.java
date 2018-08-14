@@ -102,4 +102,16 @@ public class UsbFileOutputStreamTest {
         assertEquals(10, byteBufferCaptor.getValue().remaining());
     }
 
+
+    @Test
+    public void closeSetLength() throws Exception {
+        OutputStream os = new UsbFileOutputStream(file);
+
+        os.write(new byte[20]);
+        os.close();
+        verify(file).setLength(longCaptor.capture());
+
+        assertEquals(20, longCaptor.getValue().longValue());
+    }
+
 }
