@@ -1,11 +1,12 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 28
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
 
@@ -24,16 +25,15 @@ android {
 }
 
 dependencies {
-    implementation project(':libaums')
-    implementation 'com.android.support:support-annotations:27.0.2'
+    api project(':libaums')
 
-    implementation('log4j:log4j:1.2.17')
-    implementation('de.mindpipe.android:android-logging-log4j:1.0.3')
-    implementation 'com.github.magnusja:java-fs:0.1.3'
+    api('log4j:log4j:1.2.17')
+    api('de.mindpipe.android:android-logging-log4j:1.0.3')
+    api 'com.github.magnusja:java-fs:0.1.3'
 
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    api fileTree(dir: 'libs', include: ['*.jar'])
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    implementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 }

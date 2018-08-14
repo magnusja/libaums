@@ -1,12 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 28
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         applicationId "com.github.mjdev.usbfileman"
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
     }
@@ -23,11 +24,12 @@ android {
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.12'
-    implementation 'com.android.support:appcompat-v7:25.4.0'
-    implementation 'com.android.support:design:25.4.0'
-    implementation project(':libaums')
-    implementation project(':httpserver')
-    implementation project(':storageprovider')
-    implementation project(':javafs')
+    api fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'junit:junit:4.12'
+    api 'com.android.support:appcompat-v7:28.0.0-rc01'
+    api 'com.android.support:design:28.0.0-rc01'
+    api project(':libaums')
+    api project(':httpserver')
+    api project(':storageprovider')
+    api project(':javafs')
 }
