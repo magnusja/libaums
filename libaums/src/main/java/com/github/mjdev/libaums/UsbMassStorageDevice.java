@@ -290,4 +290,16 @@ public class UsbMassStorageDevice {
 	public UsbDevice getUsbDevice() {
 		return usbDevice;
 	}
+
+	/**
+	 * Returns the block device interface for this device.
+	 * 
+	 * Only use this if you know what you are doing, for a interacting (listing/reading/writing files)
+	 * with a pen drive this is usually not needed
+	 *
+	 * @return The BlockDeviceDriver implementation
+	 */
+	public BlockDeviceDriver getBlockDevice() {
+		return blockDevice;
+	}
 }
