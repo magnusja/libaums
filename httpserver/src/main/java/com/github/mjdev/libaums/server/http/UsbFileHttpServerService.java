@@ -18,11 +18,19 @@
 package com.github.mjdev.libaums.server.http;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.core.app.NotificationCompat;
+
 import android.util.Log;
 
 import com.github.mjdev.libaums.fs.UsbFile;
@@ -50,7 +58,11 @@ public class UsbFileHttpServerService extends Service {
     protected UsbFileHttpServer server;
 
     public void startServer(UsbFile file, HttpServer server) throws IOException {
-        startAsForeground();
+        startServer(file, server, "com.github.magnusja.libaums.http_service_channel", "libaums_http");
+    }
+
+    public void startServer(UsbFile file, HttpServer server, String notificationChannelId, CharSequence notificationName) throws IOException {
+        startAsForeground(notificationChannelId, notificationName);
 
         this.server = new UsbFileHttpServer(file, server);
         this.server.start();
@@ -84,11 +96,31 @@ public class UsbFileHttpServerService extends Service {
         return new ServiceBinder();
     }
 
-    protected void startAsForeground() {
-        Notification notification = new Notification.Builder(this)
+    protected void startAsForeground(String notificationId, CharSequence notificationName) {
+
+        String channelId = "";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            channelId = createNotificationChannel(notificationId, notificationName);
+        }
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channelId);
+        Notification notification = notificationBuilder.setOngoing(true)
+                .setCategory("service")
                 .setContentTitle("Serving via HTTP")
                 .build();
         startForeground(ONGOING_NOTIFICATION_ID, notification);
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private String createNotificationChannel(String id, CharSequence name) {
+        NotificationChannel chan = new NotificationChannel(id,
+                name, NotificationManager.IMPORTANCE_DEFAULT);
+        chan.setLightColor(Color.BLUE);
+        chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+        NotificationManager service = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        service.createNotificationChannel(chan);
+
+        return id;
     }
 
     protected void stopForeground() {
