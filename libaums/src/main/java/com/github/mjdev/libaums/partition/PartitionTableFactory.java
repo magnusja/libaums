@@ -17,17 +17,14 @@
 
 package com.github.mjdev.libaums.partition;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
-import com.github.mjdev.libaums.partition.fs.FileSystemPartitionTable;
 import com.github.mjdev.libaums.partition.fs.FileSystemPartitionTableCreator;
-import com.github.mjdev.libaums.partition.mbr.MasterBootRecord;
 import com.github.mjdev.libaums.partition.mbr.MasterBootRecordCreator;
 
 /**

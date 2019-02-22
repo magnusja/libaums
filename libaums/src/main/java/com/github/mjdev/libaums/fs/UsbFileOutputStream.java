@@ -18,7 +18,7 @@
 
 package com.github.mjdev.libaums.fs;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.io.OutputStream;

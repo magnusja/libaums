@@ -3,7 +3,7 @@ package com.github.mjdev.libaums.usbfileman;
 import android.content.Context;
 import android.hardware.usb.UsbDevice;
 import android.os.Build;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.widget.ArrayAdapter;
 
 import com.github.mjdev.libaums.UsbMassStorageDevice;

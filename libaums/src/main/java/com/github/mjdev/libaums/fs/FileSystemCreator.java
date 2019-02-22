@@ -1,6 +1,6 @@
 package com.github.mjdev.libaums.fs;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 import com.github.mjdev.libaums.partition.PartitionTableEntry;
