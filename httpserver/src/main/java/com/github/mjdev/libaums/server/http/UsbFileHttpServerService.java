@@ -114,7 +114,7 @@ public class UsbFileHttpServerService extends Service {
     @RequiresApi(Build.VERSION_CODES.O)
     private String createNotificationChannel(String id, CharSequence name) {
         NotificationChannel chan = new NotificationChannel(id,
-                name, NotificationManager.IMPORTANCE_DEFAULT);
+                name, NotificationManager.IMPORTANCE_LOW);
         chan.setLightColor(Color.BLUE);
         chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
         NotificationManager service = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
