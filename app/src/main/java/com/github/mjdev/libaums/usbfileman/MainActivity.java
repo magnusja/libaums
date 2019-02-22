@@ -54,15 +54,15 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.provider.OpenableColumns;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
-import android.support.v4.provider.DocumentFile;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.documentfile.provider.DocumentFile;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -727,7 +727,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 
 		if (massStorageDevices.length == 0) {
 			Log.w(TAG, "no device found!");
-			android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+			androidx.appcompat.app.ActionBar actionBar = getSupportActionBar();
 			actionBar.setTitle("No device");
 			listView.setAdapter(null);
 			return;
