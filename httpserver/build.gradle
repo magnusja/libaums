@@ -41,6 +41,7 @@ dependencies {
 
     api fileTree(include: ['*.jar'], dir: 'libs')
     api 'androidx.annotation:annotation:1.0.0-beta01'
+    api 'androidx.core:core:1.0.0-beta01'
     api project(':libaums')
 }
 
