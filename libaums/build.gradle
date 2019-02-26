@@ -4,7 +4,7 @@ apply plugin: 'jacoco-android'
 ext {
     artifact = 'libaums'
     bintrayName = 'libaums'
-    libraryVersion = '0.5.6'
+    libraryVersion = '0.6.0'
 }
 
 
