@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.UsbFile;
+import com.github.mjdev.libaums.partition.PartitionTypes;
 
 /**
  * This class represents the FAT32 file system and is responsible for setting
@@ -51,13 +52,13 @@ public class Fat32FileSystem implements FileSystem {
 	 * 
 	 * @param blockDevice
 	 *            The block device the FAT32 file system is located.
+	 * @param first512Bytes
+	 * 			  First 512 bytes read from block device.
 	 * @throws IOException
 	 *             If reading from the device fails.
 	 */
-	private Fat32FileSystem(BlockDeviceDriver blockDevice) throws IOException {
-		ByteBuffer buffer = ByteBuffer.allocate(512);
-		blockDevice.read(0, buffer);
-		bootSector = Fat32BootSector.read(buffer);
+	private Fat32FileSystem(BlockDeviceDriver blockDevice, ByteBuffer first512Bytes) throws IOException {
+		bootSector = Fat32BootSector.read(first512Bytes);
 		fsInfoStructure = FsInfoStructure.read(blockDevice, bootSector.getFsInfoStartSector()
 				* bootSector.getBytesPerSector());
 		fat = new FAT(blockDevice, bootSector, fsInfoStructure);
@@ -78,7 +79,23 @@ public class Fat32FileSystem implements FileSystem {
 	 *             If reading from the device fails.
 	 */
 	public static Fat32FileSystem read(BlockDeviceDriver blockDevice) throws IOException {
-		return new Fat32FileSystem(blockDevice);
+
+		ByteBuffer buffer = ByteBuffer.allocate(512);
+		blockDevice.read(0, buffer);
+		buffer.flip();
+
+		if ((char) buffer.get(82) != 'F' ||
+			(char) buffer.get(83) != 'A' ||
+			(char) buffer.get(84) != 'T' ||
+			(char) buffer.get(85) != '3' ||
+			(char) buffer.get(86) != '2' ||
+			(char) buffer.get(87) != ' ' ||
+			(char) buffer.get(88) != ' ' ||
+			(char) buffer.get(89) != ' ') {
+			return null;
+		}
+
+		return new Fat32FileSystem(blockDevice, buffer);
 	}
 
 	@Override
@@ -113,5 +130,10 @@ public class Fat32FileSystem implements FileSystem {
 	@Override
 	public int getChunkSize() {
 		return bootSector.getBytesPerCluster();
+	}
+
+	@Override
+	public int getType() {
+		return PartitionTypes.FAT32;
 	}
 }

@@ -62,7 +62,7 @@ public class JavaFsFileSystemCreator implements FileSystemCreator {
 
     @Override
     public FileSystem read(PartitionTableEntry entry, BlockDeviceDriver blockDevice) throws IOException {
-        ByteBuffer buffer = ByteBuffer.allocate(blockDevice.getBlockSize());
+        ByteBuffer buffer = ByteBuffer.allocate(4096);
         blockDevice.read(0, buffer);
 
         FSBlockDeviceWrapper wrapper = new FSBlockDeviceWrapper(blockDevice, entry);

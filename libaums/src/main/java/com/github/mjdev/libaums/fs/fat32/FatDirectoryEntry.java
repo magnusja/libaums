@@ -17,6 +17,9 @@
 
 package com.github.mjdev.libaums.fs.fat32;
 
+import com.github.mjdev.libaums.fs.FileSystem;
+import com.github.mjdev.libaums.fs.FileSystemFactory;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
@@ -476,7 +479,7 @@ import java.util.Calendar;
 	/* package */long getStartCluster() {
 		final int msb = getUnsignedInt16(MSB_CLUSTER_OFF);
 		final int lsb = getUnsignedInt16(LSB_CLUSTER_OFF);
-		return (msb << 16) | lsb;
+		return ((long) msb << 16) | lsb;
 	}
 
 	/**
@@ -660,7 +663,7 @@ import java.util.Calendar;
 	 * @return Time in milliseconds since January 1 00:00:00, 1970 UTC
 	 */
 	private static long decodeDateTime(int date, int time) {
-		final Calendar calendar = Calendar.getInstance();
+		final Calendar calendar = Calendar.getInstance(FileSystemFactory.getTimeZone());
 
 		calendar.set(Calendar.YEAR, 1980 + (date >> 9));
 		calendar.set(Calendar.MONTH, ((date >> 5) & 0x0f) - 1);
@@ -681,7 +684,7 @@ import java.util.Calendar;
 	 * @return The date suitable to store in an #{@link FatDirectoryEntry}.
 	 */
 	private static int encodeDate(long timeInMillis) {
-		final Calendar calendar = Calendar.getInstance();
+		final Calendar calendar = Calendar.getInstance(FileSystemFactory.getTimeZone());
 
 		calendar.setTimeInMillis(timeInMillis);
 
@@ -699,7 +702,7 @@ import java.util.Calendar;
 	 * @return The time suitable to store in an #{@link FatDirectoryEntry}.
 	 */
 	private static int encodeTime(long timeInMillis) {
-		final Calendar calendar = Calendar.getInstance();
+		final Calendar calendar = Calendar.getInstance(FileSystemFactory.getTimeZone());
 
 		calendar.setTimeInMillis(timeInMillis);
 

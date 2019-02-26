@@ -21,9 +21,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
+import com.github.mjdev.libaums.fs.AbstractUsbFile;
 import com.github.mjdev.libaums.fs.UsbFile;
 
-public class FatFile implements UsbFile {
+public class FatFile extends AbstractUsbFile {
 
 	private BlockDeviceDriver blockDevice;
 	private FAT fat;
@@ -88,11 +89,6 @@ public class FatFile implements UsbFile {
 		if (chain == null) {
 			chain = new ClusterChain(entry.getStartCluster(), blockDevice, fat, bootSector);
 		}
-	}
-
-	@Override
-	public UsbFile search(String path) {
-		throw new UnsupportedOperationException("This is a file!");
 	}
 
 	@Override

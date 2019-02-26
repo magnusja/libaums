@@ -210,7 +210,7 @@ import java.nio.ByteOrder;
 	 *            The number of the FAT.
 	 * @return Offset in bytes.
 	 * @see #isFatMirrored()
-	 * @see #fatCount()
+	 * @see #getFatCount()
 	 * @see #getValidFat()
 	 */
 	/* package */long getFatOffset(int fatNumber) {

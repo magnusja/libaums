@@ -88,6 +88,7 @@ public class UsbMassStorageDevice {
 	private BlockDeviceDriver blockDevice;
 	private PartitionTable partitionTable;
 	private List<Partition> partitions = new ArrayList<Partition>();
+	// TODO this is never used, should we only allow one init() call?
 	private boolean inited = false;
 
 	/**
@@ -288,5 +289,17 @@ public class UsbMassStorageDevice {
 	 */
 	public UsbDevice getUsbDevice() {
 		return usbDevice;
+	}
+
+	/**
+	 * Returns the block device interface for this device.
+	 * 
+	 * Only use this if you know what you are doing, for a interacting (listing/reading/writing files)
+	 * with a pen drive this is usually not needed
+	 *
+	 * @return The BlockDeviceDriver implementation
+	 */
+	public BlockDeviceDriver getBlockDevice() {
+		return blockDevice;
 	}
 }

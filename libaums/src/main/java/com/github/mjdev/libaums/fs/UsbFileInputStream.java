@@ -35,7 +35,7 @@ public class UsbFileInputStream extends InputStream {
     public UsbFileInputStream(UsbFile file) {
 
         if(file.isDirectory()) {
-            throw new RuntimeException("UsbFileInputStream cannot be created on directory!");
+            throw new UnsupportedOperationException("UsbFileInputStream cannot be created on directory!");
         }
 
         this.file = file;
@@ -65,7 +65,7 @@ public class UsbFileInputStream extends InputStream {
 
     @Override
     public void close() throws IOException {
-        super.close();
+        file.close();
     }
 
     @Override

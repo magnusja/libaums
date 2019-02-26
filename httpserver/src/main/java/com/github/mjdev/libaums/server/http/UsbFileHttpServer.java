@@ -17,7 +17,7 @@
 
 package com.github.mjdev.libaums.server.http;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 import android.util.LruCache;
 

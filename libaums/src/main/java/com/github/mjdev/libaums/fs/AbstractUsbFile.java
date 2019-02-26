@@ -13,7 +13,23 @@ public abstract class AbstractUsbFile implements UsbFile {
 
     @Override
     public UsbFile search(String path) throws IOException {
+
+        if(!isDirectory()) {
+            throw new UnsupportedOperationException("This is a file!");
+        }
+
         Log.d(TAG, "search file: " + path);
+
+        if (isRoot() && path.equals(separator)) {
+            return this;
+        }
+
+        if (isRoot() && path.startsWith(separator)) {
+            path = path.substring(1);
+        }
+        if (path.endsWith(separator)) {
+            path = path.substring(0, path.length() - 1);
+        }
 
         int index = path.indexOf(UsbFile.separator);
 
@@ -46,5 +62,31 @@ public abstract class AbstractUsbFile implements UsbFile {
         }
 
         return null;
+    }
+
+    @Override
+    public String getAbsolutePath() {
+        if (getParent().isRoot()) {
+            return "/" + getName();
+        }
+        return getParent().getAbsolutePath() + UsbFile.separator + getName();
+    }
+
+    @Override
+    public int hashCode() {
+        return getAbsolutePath().hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        // TODO add getFileSystem and check if file system is the same
+        // TODO check reference
+        return obj instanceof UsbFile &&
+                getAbsolutePath().equals(((UsbFile) obj).getAbsolutePath());
     }
 }

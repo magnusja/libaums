@@ -1,30 +1,26 @@
 language: android
 jdk: oraclejdk8
+dist: trusty
+sudo: required
+group: edge
+
 android:
   components:
     - tools
-    - build-tools-25.0.2
-    - android-25
-    - android-ndk
+    - android-26
 
-    # Additional components
-    - extra-google-google_play_services
-    - extra-google-m2repository
-    - extra-android-m2repository
-    - addon-google_apis-google-19
+install:
+  - sudo apt-get install build-essential
+  - yes | sdkmanager 'ndk-bundle'
+  - yes | sdkmanager 'cmake;3.6.4111459'
 
 env:
   global:
    # install timeout in minutes (2 minutes by default)
     - ADB_INSTALL_TIMEOUT=8
 
-# Emulator Management: Create, Start and Wait
-before_script:
-  - echo no | android create avd --force -n test -t android-21 --abi armeabi-v7a
-  - emulator -avd test -no-skin -no-audio -no-window &
-  - android-wait-for-emulator
-  - adb shell input keyevent 82 &
-
 script:
-  - android list target
-  - ./gradlew build -x bintray connectedCheck --stacktrace --info
+  - ./gradlew build -x bintray jacocoTestReport --stacktrace
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
