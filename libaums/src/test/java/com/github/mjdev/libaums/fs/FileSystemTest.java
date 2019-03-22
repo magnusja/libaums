@@ -45,7 +45,7 @@ public class FileSystemTest {
         expectedValues = pair.getRight();
     }
 
-    @ContractTest
+//    @ContractTest
     public void getRootDirectory() throws Exception {
         UsbFile root = fs.getRootDirectory();
         assertNotNull(root);
@@ -54,7 +54,7 @@ public class FileSystemTest {
         assertTrue(root.isRoot());
     }
 
-    @ContractTest
+//    @ContractTest
     public void getVolumeLabel() throws Exception {
         assertEquals(expectedValues.get("volumeLabel").asString(), fs.getVolumeLabel());
     }
@@ -64,17 +64,17 @@ public class FileSystemTest {
         assertEquals(expectedValues.get("capacity").asLong(), fs.getCapacity());
     }
 
-    @ContractTest
+//    @ContractTest
     public void getOccupiedSpace() throws Exception {
         assertEquals(expectedValues.get("occupiedSpace").asLong(), fs.getOccupiedSpace());
     }
 
-    @ContractTest
+//    @ContractTest
     public void getFreeSpace() throws Exception {
         assertEquals(expectedValues.get("freeSpace").asLong(), fs.getFreeSpace());
     }
 
-    @ContractTest
+//    @ContractTest
     public void getChunkSize() throws Exception {
         assertEquals(expectedValues.get("chunkSize").asInt(), fs.getChunkSize());
     }

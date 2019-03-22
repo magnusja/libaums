@@ -11,7 +11,7 @@ import org.xenei.junit.contract.IProducer;
 
 @RunWith(ContractSuite.class)
 @ContractImpl(FatFile.class)
-public class FatFileTest2 {
+public class Fat32FileTest2 {
 
     private IProducer producer = new Fat32FileSystemProducer("https://www.dropbox.com/s/9kdizg4lcolhzed/expectedValues_blocksize32K.json?dl=1",
             "https://www.dropbox.com/s/npob26c563ujeyk/mbr_fat32_blocksize32k.img?dl=1");

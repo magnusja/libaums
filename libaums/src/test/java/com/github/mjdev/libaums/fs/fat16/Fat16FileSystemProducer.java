@@ -1,4 +1,4 @@
-package com.github.mjdev.libaums.fs.fat32;
+package com.github.mjdev.libaums.fs.fat16;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
@@ -20,17 +20,13 @@ import java.nio.channels.ReadableByteChannel;
 
 import static org.junit.Assert.fail;
 
-/**
- * Created by magnusja on 19/09/17.
- */
-
-public class Fat32FileSystemProducer implements IProducer<Pair<Fat32FileSystem, JsonObject>> {
+public class Fat16FileSystemProducer implements IProducer<Pair<Fat16FileSystem, JsonObject>> {
     private File originalFile;
     private File tempFile;
     private BlockDeviceDriver blockDevice;
     private JsonObject expectedValues;
 
-    public Fat32FileSystemProducer(String jsonUrl, String imageUrl) {
+    public Fat16FileSystemProducer(String jsonUrl, String imageUrl) {
         try {
             expectedValues = Json.parse(IOUtils.toString(
                     new URL(jsonUrl)
@@ -55,7 +51,7 @@ public class Fat32FileSystemProducer implements IProducer<Pair<Fat32FileSystem, 
 
     }
 
-    public synchronized Pair<Fat32FileSystem, JsonObject> newInstance() {
+    public synchronized Pair<Fat16FileSystem, JsonObject> newInstance() {
         try {
             blockDevice = new ByteBlockDevice(
                     new FileBlockDeviceDriver(
@@ -63,7 +59,7 @@ public class Fat32FileSystemProducer implements IProducer<Pair<Fat32FileSystem, 
                             expectedValues.get("blockSize").asInt(),
                             expectedValues.get("blockSize").asInt() * expectedValues.get("fileSystemOffset").asInt()));
             blockDevice.init();
-            return new Pair<>(Fat32FileSystem.read(blockDevice), expectedValues);
+            return new Pair<>(Fat16FileSystem.read(blockDevice), expectedValues);
         } catch (IOException e) {
             e.printStackTrace();
             fail();

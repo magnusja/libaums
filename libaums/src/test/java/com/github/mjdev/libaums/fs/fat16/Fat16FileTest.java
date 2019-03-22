@@ -1,4 +1,4 @@
-package com.github.mjdev.libaums.fs.fat32;
+package com.github.mjdev.libaums.fs.fat16;
 
 import com.eclipsesource.json.JsonObject;
 import com.github.mjdev.libaums.util.Pair;
@@ -10,18 +10,15 @@ import org.xenei.junit.contract.ContractSuite;
 import org.xenei.junit.contract.IProducer;
 
 
-/**
- * Created by magnusja on 03/08/17.
- */
 @RunWith(ContractSuite.class)
 @ContractImpl(FatFile.class)
-public class FatFileTest {
+public class Fat16FileTest {
 
-    private IProducer producer = new Fat32FileSystemProducer("https://www.dropbox.com/s/nek7bu08prykkhv/expectedValues.json?dl=1",
-            "https://www.dropbox.com/s/3bxngiqmwitlucd/mbr_fat32.img?dl=1");
+    private IProducer producer = new Fat16FileSystemProducer("https://raw.githubusercontent.com/gopai/iso-store/master/expectedValues.json",
+            "https://github.com/gopai/iso-store/raw/master/fat16.iso.gz");
 
     @Contract.Inject
-    public IProducer<Pair<Fat32FileSystem, JsonObject>> makeFat32FileSystem() {
+    public IProducer<Pair<Fat16FileSystem, JsonObject>> makeFat16FileSystem() {
         return producer;
     }
 
