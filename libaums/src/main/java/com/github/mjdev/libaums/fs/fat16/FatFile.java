@@ -31,7 +31,7 @@ public class FatFile extends AbstractUsbFile {
 	private Fat16BootSector bootSector;
 
 	private FatDirectory parent;
-	private ClusterChain chain;
+//	private ClusterChain chain;
 	private FAT16LongNameEntry entry;
 
 	/**
@@ -85,11 +85,11 @@ public class FatFile extends AbstractUsbFile {
 	 * @throws IOException
 	 *             If reading from FAT fails.
 	 */
-	private void initChain() throws IOException {
-		if (chain == null) {
-			chain = new ClusterChain(entry.getStartCluster(), blockDevice, fat, bootSector);
-		}
-	}
+//	private void initChain() throws IOException {
+//		if (chain == null) {
+//			chain = new ClusterChain(entry.getStartCluster(), blockDevice, fat, bootSector);
+//		}
+//	}
 
 	@Override
 	public boolean isDirectory() {
@@ -143,26 +143,26 @@ public class FatFile extends AbstractUsbFile {
 
 	@Override
 	public void setLength(long newLength) throws IOException {
-        	initChain();
-		chain.setLength(newLength);
-		entry.setFileSize(newLength);
+//        	initChain();
+//		chain.setLength(newLength);
+//		entry.setFileSize(newLength);
 	}
 
 	@Override
 	public void read(long offset, ByteBuffer destination) throws IOException {
-		initChain();
-		entry.setLastAccessedTimeToNow();
-		chain.read(offset, destination);
+//		initChain();
+//		entry.setLastAccessedTimeToNow();
+//		chain.read(offset, destination);
 	}
 
 	@Override
 	public void write(long offset, ByteBuffer source) throws IOException {
-		initChain();
-		long length = offset + source.remaining();
-		if (length > getLength())
-			setLength(length);
-		entry.setLastModifiedTimeToNow();
-		chain.write(offset, source);
+//		initChain();
+//		long length = offset + source.remaining();
+//		if (length > getLength())
+//			setLength(length);
+//		entry.setLastModifiedTimeToNow();
+//		chain.write(offset, source);
 	}
 
 	@Override
@@ -199,10 +199,10 @@ public class FatFile extends AbstractUsbFile {
 
 	@Override
 	public void delete() throws IOException {
-		initChain();
-		parent.removeEntry(entry);
-		parent.write();
-		chain.setLength(0);
+//		initChain();
+//		parent.removeEntry(entry);
+//		parent.write();
+//		chain.setLength(0);
 	}
 
 	@Override

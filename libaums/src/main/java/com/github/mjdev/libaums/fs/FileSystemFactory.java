@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
+import com.github.mjdev.libaums.fs.fat16.Fat16FileSystemCreator;
 import com.github.mjdev.libaums.fs.fat32.Fat32FileSystemCreator;
 import com.github.mjdev.libaums.partition.PartitionTableEntry;
 
@@ -45,6 +46,7 @@ public class FileSystemFactory {
 
     static {
         FileSystemFactory.registerFileSystem(new Fat32FileSystemCreator());
+        FileSystemFactory.registerFileSystem(new Fat16FileSystemCreator());
     }
 
 	public static FileSystem createFileSystem(PartitionTableEntry entry,

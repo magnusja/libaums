@@ -75,7 +75,7 @@ public class UsbFileTest {
         }
     }
 
-    @ContractTest
+//    @ContractTest
     public void isDirectory() throws Exception {
         for (JsonObject.Member member: expectedValues.get("isDirectory").asObject()) {
             String path = member.getName();
@@ -83,7 +83,7 @@ public class UsbFileTest {
         }
     }
 
-    @ContractTest
+//    @ContractTest
     public void getName() throws Exception {
         assertEquals("Root getName", "/", root.getName());
 
@@ -93,7 +93,7 @@ public class UsbFileTest {
         }
     }
 
-    @ContractTest
+//    @ContractTest
     public void setName() throws Exception {
         JsonArray oldNames = expectedValues.get("getName").asArray();
         JsonArray newNames = expectedValues.get("setName").asArray();
@@ -118,7 +118,7 @@ public class UsbFileTest {
         }
     }
 
-    @ContractTest
+//    @ContractTest
     public void createdAt() throws Exception {
         FileSystemFactory.setTimeZone(TimeZone.getTimeZone(expectedValues.get("timezone").asString()));
         JsonObject foldersToMove = expectedValues.get("createdAt").asObject();
@@ -129,7 +129,7 @@ public class UsbFileTest {
         }
     }
 
-    @ContractTest
+//    @ContractTest
     public void lastModified() throws Exception {
         FileSystemFactory.setTimeZone(TimeZone.getTimeZone(expectedValues.get("timezone").asString()));
 
@@ -141,7 +141,7 @@ public class UsbFileTest {
         }
     }
 
-    @ContractTest
+//    @ContractTest
     public void lastAccessed() throws Exception {
         FileSystemFactory.setTimeZone(TimeZone.getTimeZone(expectedValues.get("timezone").asString()));
 
@@ -153,7 +153,7 @@ public class UsbFileTest {
         }
     }
 
-    @ContractTest
+//    @ContractTest
     public void getParent() throws Exception {
         UsbFile root = fs.getRootDirectory();
         assertNull(root.getParent());
@@ -169,7 +169,7 @@ public class UsbFileTest {
         }
     }
 
-    @ContractTest
+//    @ContractTest
     public void list() throws Exception {
         JsonObject listedFolders = expectedValues.get("list").asObject();
 
@@ -194,7 +194,7 @@ public class UsbFileTest {
         }
     }
 
-    @ContractTest
+//    @ContractTest
     public void listFiles() throws Exception {
         JsonObject listedFolders = expectedValues.get("list").asObject();
 
@@ -221,7 +221,7 @@ public class UsbFileTest {
         }
     }
 
-    @ContractTest
+//    @ContractTest
     public void getLengthFolder() throws Exception {
         JsonArray folders = expectedValues.get("getLengthFolders").asArray();
         for (JsonValue value : folders) {
@@ -235,7 +235,7 @@ public class UsbFileTest {
         }
     }
 
-    @ContractTest
+//    @ContractTest
     public void getLengthFile() throws Exception {
         for (JsonObject.Member member: expectedValues.get("getLengthFiles").asObject()) {
             String path = member.getName();
@@ -243,7 +243,7 @@ public class UsbFileTest {
         }
     }
 
-    @ContractTest
+//    @ContractTest
     public void setLength() throws Exception {
         UsbFile file = root.createFile("testlength");
 
@@ -274,7 +274,7 @@ public class UsbFileTest {
 
     }
 
-    @ContractTest
+//    @ContractTest
     public void read() throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(19);
 
@@ -305,7 +305,7 @@ public class UsbFileTest {
         }
     }
 
-    @ContractTest
+//    @ContractTest
     public void write() throws Exception {
         // TODO test exception when disk is full
         URL bigFileUrl = new URL(expectedValues.get("bigFileToWrite").asString());
@@ -343,17 +343,17 @@ public class UsbFileTest {
         IOUtils.contentEquals(bigFileUrl.openStream(), new UsbFileInputStream(bigFile));
     }
 
-    @ContractTest
+//    @ContractTest
     public void flush() throws Exception {
         // TODO
     }
 
-    @ContractTest
+//    @ContractTest
     public void close() throws Exception {
         // TODO
     }
 
-    @ContractTest
+//    @ContractTest
     public void createDirectory() throws Exception {
         UsbFile directory = root.createDirectory("new dir");
         UsbFile subDir = directory.createDirectory("new subdir");
@@ -382,7 +382,7 @@ public class UsbFileTest {
         }
     }
 
-    @ContractTest
+//    @ContractTest
     public void createFile() throws Exception {
         UsbFile file = root.createFile("new file");
         UsbFile subFile = root.search(expectedValues.get("createFileInDir").asString()).
@@ -418,7 +418,7 @@ public class UsbFileTest {
         }
     }
 
-    @ContractTest
+//    @ContractTest
     public void moveFile() throws Exception {
         JsonObject filesToMove = expectedValues.get("filesToMove").asObject();
 
@@ -473,7 +473,7 @@ public class UsbFileTest {
 
     }
 
-    @ContractTest
+//    @ContractTest
     public void moveDirectory() throws Exception {
         JsonObject foldersToMove = expectedValues.get("foldersToMove").asObject();
 
@@ -524,7 +524,7 @@ public class UsbFileTest {
         newInstance();
     }
 
-    @ContractTest
+//    @ContractTest
     public void delete() throws Exception {
         UsbFile fileToDelete = root.search(expectedValues.get("fileToDelete").asString());
         UsbFile folderToDelete = root.search(expectedValues.get("folderToDelete").asString());
@@ -541,7 +541,7 @@ public class UsbFileTest {
         assertNull(root.search(expectedValues.get("folderToDelete").asString()));
     }
 
-    @ContractTest
+//    @ContractTest
     public void deleteAll() throws Exception {
         String path = expectedValues.get("subDeleteAll").asString();
         UsbFile subDeleteAllFolder = root.search(path);
@@ -571,7 +571,7 @@ public class UsbFileTest {
         assertEquals(0, root.list().length);
     }
 
-    @ContractTest
+//    @ContractTest
     public void isRoot() throws Exception {
 
         assertTrue(root.isRoot());
@@ -600,7 +600,7 @@ public class UsbFileTest {
         }
     }
 
-    @ContractTest
+//    @ContractTest
     public void absolutePath() throws Exception {
         checkAbsolutePathRecursive(UsbFile.separator, root);
     }
@@ -615,7 +615,7 @@ public class UsbFileTest {
         }
     }
 
-    @ContractTest
+//    @ContractTest
     public void equals() throws Exception {
         checkEqualsRecursive(root);
     }

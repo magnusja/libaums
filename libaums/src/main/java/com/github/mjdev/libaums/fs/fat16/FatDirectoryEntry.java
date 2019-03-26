@@ -680,4 +680,12 @@ import java.util.Calendar;
 	public String toString() {
 		return "[FatDirectoryEntry shortName=" + shortName.getString() + "]";
 	}
+
+	public int getFirstDataCluster() {
+		return getUnsignedInt16(FIRST_CLUSTER_OFF) - 2;
+	}
+
+	public int getFirstFATCluster() {
+		return getUnsignedInt16(FIRST_CLUSTER_OFF);
+	}
 }

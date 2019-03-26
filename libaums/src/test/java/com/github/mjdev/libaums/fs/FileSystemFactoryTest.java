@@ -3,6 +3,7 @@ package com.github.mjdev.libaums.fs;
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 import com.github.mjdev.libaums.driver.ByteBlockDevice;
 import com.github.mjdev.libaums.driver.file.FileBlockDeviceDriver;
+import com.github.mjdev.libaums.fs.fat16.Fat16FileSystem;
 import com.github.mjdev.libaums.fs.fat32.Fat32FileSystem;
 import com.github.mjdev.libaums.partition.PartitionTable;
 import com.github.mjdev.libaums.partition.PartitionTableEntry;
@@ -31,6 +32,21 @@ public class FileSystemFactoryTest {
         FileSystem fs = FileSystemFactory.createFileSystem(entry, blockDevice);
 
         assertTrue(fs instanceof Fat32FileSystem);
+    }
+
+    @Test
+    public void createFat16FileSystem() throws Exception {
+        BlockDeviceDriver blockDevice = new ByteBlockDevice(new FileBlockDeviceDriver(
+                new URL("https://github.com/gopai/iso-store/raw/master/fat16test.iso.gz"),
+                512,
+                2048 * 512,
+                true));
+        blockDevice.init();
+
+        PartitionTableEntry entry = new PartitionTableEntry(PartitionTypes.FAT16, 4 * 512, 1964032);
+        FileSystem fs = FileSystemFactory.createFileSystem(entry, blockDevice);
+
+        assertTrue(fs instanceof Fat16FileSystem);
     }
 
 }

@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.zip.GZIPInputStream;
 
 import static org.junit.Assert.fail;
 
@@ -38,8 +39,25 @@ public class Fat16FileSystemProducer implements IProducer<Pair<Fat16FileSystem, 
             tempFile.deleteOnExit();
             FileOutputStream fos = new FileOutputStream(tempFile);
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+            fos.close();
 
-            this.originalFile = tempFile;
+            byte[] buffer = new byte[1024];
+
+            File unzipped = File.createTempFile("unzipped-file", ".iso");
+            unzipped.deleteOnExit();
+
+            GZIPInputStream gzis = new GZIPInputStream(new FileInputStream(tempFile));
+            FileOutputStream unzippedFOS = new FileOutputStream(unzipped);
+
+            int len;
+            while ((len = gzis.read(buffer)) > 0) {
+                unzippedFOS.write(buffer, 0, len);
+            }
+
+            gzis.close();
+            unzippedFOS.close();
+
+            this.originalFile = unzipped;
 
             // force first copy
             cleanUp();
@@ -55,7 +73,7 @@ public class Fat16FileSystemProducer implements IProducer<Pair<Fat16FileSystem, 
         try {
             blockDevice = new ByteBlockDevice(
                     new FileBlockDeviceDriver(
-                            tempFile,
+                            originalFile,
                             expectedValues.get("blockSize").asInt(),
                             expectedValues.get("blockSize").asInt() * expectedValues.get("fileSystemOffset").asInt()));
             blockDevice.init();
@@ -69,17 +87,17 @@ public class Fat16FileSystemProducer implements IProducer<Pair<Fat16FileSystem, 
     }
 
     public synchronized void cleanUp() {
-        try {
-            ReadableByteChannel rbc = Channels.newChannel(new FileInputStream(originalFile));
-            File tempFile = File.createTempFile("libaums_test_blockdevice", ".bin");
-            tempFile.deleteOnExit();
-            FileOutputStream fos = new FileOutputStream(tempFile);
-            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-
-            this.tempFile = tempFile;
-        } catch (IOException e) {
-            e.printStackTrace();
-            fail();
-        }
+//        try {
+//            ReadableByteChannel rbc = Channels.newChannel(new FileInputStream(originalFile));
+//            File tempFile = File.createTempFile("libaums_test_blockdevice", ".bin");
+//            tempFile.deleteOnExit();
+//            FileOutputStream fos = new FileOutputStream(tempFile);
+//            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+//
+//            this.tempFile = tempFile;
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            fail();
+//        }
     }
 }

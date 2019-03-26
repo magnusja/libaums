@@ -110,12 +110,12 @@ public class Fat16FileSystem implements FileSystem {
 
     @Override
     public long getOccupiedSpace() {
-        return getCapacity() - getFreeSpace();
+        return fat.getOccupiedSpace();
     }
 
     @Override
     public long getFreeSpace() {
-        return 0;
+        return fat.getFreeSpace();
     }
 
     @Override

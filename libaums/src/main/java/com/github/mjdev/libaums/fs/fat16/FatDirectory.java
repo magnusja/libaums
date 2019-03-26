@@ -160,35 +160,43 @@ public class FatDirectory extends AbstractUsbFile {
      * @see #write()
      */
     private void readEntries() throws IOException {
-        long rootDirStartSector = bootSector.getRootDirStartSector();
-        long dataBlockSectorStart = bootSector.getDataStartSector();
+        if (isRoot()) {
+            long rootDirStartSector = bootSector.getRootDirStartSector();
+            long dataBlockSectorStart = bootSector.getDataStartSector();
 
-        long currentSector = rootDirStartSector;
-
-
-        while (currentSector < currentSector + 1) {
-//        while (currentSector < dataBlockSectorStart) {
-            ByteBuffer bb = ByteBuffer.allocate(512);
-            blockDevice.read(currentSector, bb);
-            byte[] sectorBA = bb.array();
-            byte[][] bucketedSectorArray = new byte[16][32];
+            long currentSector = rootDirStartSector;
 
 
-            for (int i = 0; i < sectorBA.length; i++) {//length is always 512
-                bucketedSectorArray[i/32][i%32] = sectorBA[i];
+            List<FatDirectoryEntry> entries = new ArrayList<>();
+            while (currentSector < dataBlockSectorStart) {
+                ByteBuffer bb = ByteBuffer.allocate(512);
+                bb.position(0);
+                blockDevice.read(currentSector * 512, bb);
+                bb.flip();
+                for (int x = 0; x < 16; x++) {
+                    byte[] record = new byte[32];
+                    bb.get(record);
+
+                    FatDirectoryEntry read = FatDirectoryEntry.read(ByteBuffer.wrap(record));
+                    if (read != null)
+                        entries.add(read);
+                }
+
+                currentSector++;
             }
 
-            for (int i = 0; i < bucketedSectorArray.length; i+=2) {
-                ByteBuffer lfnBA = ByteBuffer.wrap(bucketedSectorArray[i]);
-                ByteBuffer directoryBA = ByteBuffer.wrap(bucketedSectorArray[i+1]);
-
-                FatDirectoryEntry entry = FatDirectoryEntry.read(directoryBA);
-                new FAT16LongNameEntry()
+            List<FatDirectoryEntry> lfns = new ArrayList<>();
+            for (FatDirectoryEntry entry : entries) {
+                if (entry.isLfnEntry()) {
+                    lfns.add(entry);
+                } else {
+                    addEntry(FAT16LongNameEntry.read(entry, lfns), entry);
+                    lfns.clear();
+                }
             }
-
-            currentSector++;
+        } else {
+            System.out.print("");
         }
-
 
     }
 

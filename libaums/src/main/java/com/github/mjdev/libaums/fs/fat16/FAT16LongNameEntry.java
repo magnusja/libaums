@@ -233,7 +233,7 @@ import java.util.List;
 	 * @see #getStartCluster()
 	 */
 	/* package */long getStartCluster() {
-		return actualEntry.getStartCluster();
+		return actualEntry.getFirstDataCluster();
 	}
 
 	/**
@@ -244,7 +244,7 @@ import java.util.List;
 	 * @see #getStartCluster()
 	 */
 	/* package */void setStartCluster(long newStartCluster) {
-		actualEntry.setStartCluster(newStartCluster);
+//		actualEntry.setStartCluster(newStartCluster);
 	}
 
 	/**

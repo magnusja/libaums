@@ -15,7 +15,7 @@ import org.xenei.junit.contract.IProducer;
 public class Fat16FileTest {
 
     private IProducer producer = new Fat16FileSystemProducer("https://raw.githubusercontent.com/gopai/iso-store/master/expectedValues.json",
-            "https://github.com/gopai/iso-store/raw/master/fat16.iso.gz");
+            "https://github.com/gopai/iso-store/raw/master/fat16test.iso.gz");
 
     @Contract.Inject
     public IProducer<Pair<Fat16FileSystem, JsonObject>> makeFat16FileSystem() {

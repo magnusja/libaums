@@ -144,7 +144,7 @@ import java.nio.ByteOrder;
      * @return Total number of sectors.
      */
     /* package */long getTotalNumberOfSectors() {
-        return totalNumberOfSectors;
+        return totalNumberOfSectors - (2*sectorsPerFat) - 32;
     }
 
     /**
