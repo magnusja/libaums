@@ -244,7 +244,7 @@ import java.util.List;
 	 * @see #getStartCluster()
 	 */
 	/* package */void setStartCluster(long newStartCluster) {
-//		actualEntry.setStartCluster(newStartCluster);
+		actualEntry.setStartCluster(newStartCluster);
 	}
 
 	/**

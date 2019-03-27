@@ -144,7 +144,7 @@ import java.nio.ByteOrder;
      * @return Total number of sectors.
      */
     /* package */long getTotalNumberOfSectors() {
-        return totalNumberOfSectors - (2*sectorsPerFat) - 32;
+        return totalNumberOfSectors - (2 * sectorsPerFat) - 32;
     }
 
     /**
@@ -220,7 +220,7 @@ import java.nio.ByteOrder;
      * @return Offset in bytes.
      */
     /* package */long getDataAreaOffset() {
-        return getFatOffset(0) + getFatCount() * getSectorsPerFat() * getBytesPerSector();
+        return (getRootDirStartSector() + 32) * bytesPerSector;
     }
 
     /**

@@ -49,7 +49,8 @@ public class FAT {
      * End of file / chain marker. This is used to determine when following a
      * cluster chain should be stopped. (Last allocated cluster has been found.)
      */
-    private static final int FAT16_EOF_CLUSTER = 0xFFF8;
+    private static final short FAT16_EOF_CLUSTER = -1;
+    public static final int SECTOR_SIZE = 512;
     private final long freeSpace;
     private final long occupiedSpace;
 
@@ -99,7 +100,7 @@ public class FAT {
                     if ((i % 2 == 1)) {
                         if (b == 0x00) {
                             freeClusterCount++;
-                        }else {
+                        } else {
                             usedClusterCount++;
                         }
                     }
@@ -131,34 +132,30 @@ public class FAT {
 
         final ArrayList<Long> result = new ArrayList<Long>();
         final int bufferSize = blockDevice.getBlockSize() * 2;
-        // for performance reasons we always read or write two times the block
-        // size
-        // this is esp. good for long cluster chains because it reduces of read
-        // or writes
-        // and mostly cluster chains are located consecutively in the FAT
+
         final ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
         buffer.order(ByteOrder.LITTLE_ENDIAN);
 
-        long currentCluster = startCluster;
-        long offset;
-        long offsetInBlock;
+        int currentCluster = (int) startCluster;
+        long clusterLocationInFat = (startCluster * 2);
+        long fatOffset;
         long lastOffset = -1;
 
         do {
-            result.add(currentCluster);
-            //offset = MBR + reserved sectors + current cluster
-            offset = ((fatOffset[0] + currentCluster) / bufferSize) * bufferSize;
-            offsetInBlock = ((fatOffset[0] + currentCluster) % bufferSize);
+            result.add((long) currentCluster);
+            fatOffset = (this.fatOffset[0] + clusterLocationInFat);
 
-            // if we have a new offset we are forced to read again
-            if (lastOffset != offset) {
+            // if we have a new fatOffset we are forced to read again
+            if (lastOffset != fatOffset) {
                 buffer.clear();
-                blockDevice.read(offset, buffer);
-                lastOffset = offset;
+                blockDevice.read(fatOffset, buffer);
+                lastOffset = fatOffset;
             }
 
-            currentCluster = buffer.getInt((int) offsetInBlock);
-        } while (currentCluster < FAT16_EOF_CLUSTER);
+            buffer.position(0);
+            currentCluster = buffer.getShort();
+            clusterLocationInFat = currentCluster * 2;
+        } while (currentCluster != FAT16_EOF_CLUSTER);
 
         return result.toArray(new Long[0]);
     }
@@ -175,107 +172,58 @@ public class FAT {
      * @return The new chain including the old and the newly allocated clusters.
      * @throws IOException If reading or writing to the FAT fails.
      */
-    /* package */Long[] alloc(Long[] chain, int numberOfClusters) throws IOException {
+    /* package */long[] alloc(Long[] chain, int numberOfClusters) throws IOException {
 
-        // save original number of clusters for fs info structure
-        final int originalNumberOfClusters = numberOfClusters;
+        long startOfFAT = fatOffset[0];
 
-        final ArrayList<Long> result = new ArrayList<Long>(chain.length + numberOfClusters);
-        result.addAll(Arrays.asList(chain));
-        // for performance reasons we always read or write two times the block
-        // size
-        // this is esp. good for long cluster chains because it reduces of read
-        // or writes
-        // and mostly cluster chains are located consecutively in the FAT
-        final int bufferSize = blockDevice.getBlockSize() * 2;
-        final ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
 
-        final long cluster;
-        if (chain.length != 0)
-            cluster = chain[chain.length - 1];
-        else
-            cluster = -1;
+        int foundClusterHintCount = 0;
 
-        long currentCluster = (long) 2;
+        long[] returnChain = new long[numberOfClusters];
 
-        long offset;
-        long offsetInBlock;
-        long lastOffset = -1;
+        ByteBuffer fatBuffer = ByteBuffer.allocate(SECTOR_SIZE);
 
-        // first we search all needed cluster and save them
-        while (numberOfClusters > 0) {
-            currentCluster++;
-            offset = ((fatOffset[0] + currentCluster * 4) / bufferSize) * bufferSize;
-            offsetInBlock = ((fatOffset[0] + currentCluster * 4) % bufferSize);
-
-            // if we have a new offset we are forced to read again
-            if (lastOffset != offset) {
-                buffer.clear();
-                blockDevice.read(offset, buffer);
-                lastOffset = offset;
+        int clustersPerSector = SECTOR_SIZE / 2;
+        int currentBlock = 0;
+        int chainIndex = 0;
+        for (int clusterIndex = 0; clusterIndex < 0xFFFF; clusterIndex++) {
+            if (clusterIndex % clustersPerSector == 0) {
+                fatBuffer.position(0);
+                blockDevice.read(startOfFAT + (currentBlock * SECTOR_SIZE), fatBuffer);
+                fatBuffer.position(0);
+                currentBlock++;
             }
 
-            if (buffer.getInt((int) offsetInBlock) == 0) {
-                result.add(currentCluster);
-                numberOfClusters--;
+            short clusterValue = fatBuffer.getShort();
+            if (clusterValue == 0) {
+                returnChain[chainIndex] = clusterIndex;
+                chainIndex++;
+            }
+
+            if (chainIndex == numberOfClusters) {
+                break;
             }
         }
 
-        // TODO we should write in in all FATs when they are mirrored!
-        if (cluster != -1) {
-            // now it is time to write the partial cluster chain
-            // start with the last cluster in the existing chain
-            offset = ((fatOffset[0] + cluster * 4) / bufferSize) * bufferSize;
-            offsetInBlock = ((fatOffset[0] + cluster * 4) % bufferSize);
+        for (int x = 0; x < returnChain.length; x++) {
+            ByteBuffer sectorBuffer = ByteBuffer.allocate(512);
+            long byteNeedingWritten = returnChain[x];
+            long sectorLocationInFAT = (byteNeedingWritten * 2) / 512;
+            int byteLocationInSector = ((int) (byteNeedingWritten * 2) % 512);
 
-            // if we have a new offset we are forced to read again
-            if (lastOffset != offset) {
-                buffer.clear();
-                blockDevice.read(offset, buffer);
-                lastOffset = offset;
-            }
-            buffer.putInt((int) offsetInBlock, (int) result.get(chain.length).longValue());
-        }
-
-        // write the new allocated clusters now
-        for (int i = chain.length; i < result.size() - 1; i++) {
-            currentCluster = result.get(i);
-            offset = ((fatOffset[0] + currentCluster * 4) / bufferSize) * bufferSize;
-            offsetInBlock = ((fatOffset[0] + currentCluster * 4) % bufferSize);
-
-            // if we have a new offset we are forced to read again
-            if (lastOffset != offset) {
-                buffer.clear();
-                blockDevice.write(lastOffset, buffer);
-                buffer.clear();
-                blockDevice.read(offset, buffer);
-                lastOffset = offset;
+            blockDevice.read(startOfFAT + (sectorLocationInFAT * 512), sectorBuffer);
+            if (x < returnChain.length - 1) {//if not last cluster in chain
+                sectorBuffer.putShort(byteLocationInSector, (short) returnChain[x + 1]);
+            } else {
+                sectorBuffer.putShort(byteLocationInSector, (short) -1);
             }
 
-            buffer.putInt((int) offsetInBlock, (int) result.get(i + 1).longValue());
+            sectorBuffer.position(0);
+
+            blockDevice.write(startOfFAT + (sectorLocationInFAT * 512), sectorBuffer);
         }
 
-        // write end mark to last newly allocated cluster now
-        currentCluster = result.get(result.size() - 1);
-        offset = ((fatOffset[0] + currentCluster * 4) / bufferSize) * bufferSize;
-        offsetInBlock = ((fatOffset[0] + currentCluster * 4) % bufferSize);
-
-        // if we have a new offset we are forced to read again
-        if (lastOffset != offset) {
-            buffer.clear();
-            blockDevice.write(lastOffset, buffer);
-            buffer.clear();
-            blockDevice.read(offset, buffer);
-            lastOffset = offset;
-        }
-        buffer.putInt((int) offsetInBlock, FAT16_EOF_CLUSTER);
-        buffer.clear();
-        blockDevice.write(offset, buffer);
-
-        Log.i(TAG, "allocating clusters finished");
-
-        return result.toArray(new Long[0]);
+        return returnChain;
     }
 
     /**

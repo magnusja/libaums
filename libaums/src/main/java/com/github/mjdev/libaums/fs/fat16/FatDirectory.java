@@ -195,6 +195,36 @@ public class FatDirectory extends AbstractUsbFile {
                 }
             }
         } else {
+
+            Long[] chain = fat.getChain(entry.getActualEntry().getFirstFATCluster());
+
+            List<FatDirectoryEntry> entries = new ArrayList<>();
+            for (Long byteLocation : chain) {
+
+                ByteBuffer bb = ByteBuffer.allocate(512);
+                bb.position(0);
+                blockDevice.read(bootSector.getDataAreaOffset() + ((byteLocation - 2) * 32 * 512), bb);
+                bb.flip();
+                for (int x = 0; x < 16; x++) {
+                    byte[] record = new byte[32];
+                    bb.get(record);
+
+                    FatDirectoryEntry read = FatDirectoryEntry.read(ByteBuffer.wrap(record));
+                    if (read != null)
+                        entries.add(read);
+                }
+            }
+
+            List<FatDirectoryEntry> lfns = new ArrayList<>();
+            for (FatDirectoryEntry entry : entries) {
+                if (entry.isLfnEntry()) {
+                    lfns.add(entry);
+                } else {
+                    addEntry(FAT16LongNameEntry.read(entry, lfns), entry);
+                    lfns.clear();
+                }
+            }
+
             System.out.print("");
         }
 
@@ -264,6 +294,19 @@ public class FatDirectory extends AbstractUsbFile {
      * @see {@link #write()}
      */
     /* package */void write() throws IOException {
+        System.out.print("");
+        ByteBuffer allocate = ByteBuffer.allocate(512);
+        for (FAT16LongNameEntry fat16LongNameEntry : entries) {
+            fat16LongNameEntry.serialize(allocate);
+        }
+        allocate.position(0);
+
+        if(isRoot()){
+            blockDevice.write((bootSector.getRootDirStartSector()*512), allocate);
+        }else {
+            blockDevice.write(bootSector.getDataAreaOffset() + ((entry.getActualEntry().getFirstDataCluster() - 2) * 32 * 512), allocate);
+        }
+
     }
 
     /**
@@ -326,9 +369,11 @@ public class FatDirectory extends AbstractUsbFile {
         // write changes immediately to disk
         write();
 
+
+
         FatDirectory result = FatDirectory.create(entry, blockDevice, fat, bootSector, this);
         result.hasBeenInited = true;
-
+        result.entry.setStartCluster(newStartCluster);
         result.entries = new ArrayList<FAT16LongNameEntry>(); // initialise entries before adding sub-directories
 
         // first create the dot entry which points to the dir just created
