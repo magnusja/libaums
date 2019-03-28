@@ -295,16 +295,46 @@ public class FatDirectory extends AbstractUsbFile {
      */
     /* package */void write() throws IOException {
         System.out.print("");
-        ByteBuffer allocate = ByteBuffer.allocate(512);
-        for (FAT16LongNameEntry fat16LongNameEntry : entries) {
-            fat16LongNameEntry.serialize(allocate);
-        }
-        allocate.position(0);
 
-        if(isRoot()){
-            blockDevice.write((bootSector.getRootDirStartSector()*512), allocate);
-        }else {
-            blockDevice.write(bootSector.getDataAreaOffset() + ((entry.getActualEntry().getFirstDataCluster() - 2) * 32 * 512), allocate);
+
+        if (isRoot()) {
+            ByteBuffer allocate = ByteBuffer.allocate(32 * 512);
+
+            for (int i = 0; i < entries.size(); i++) {
+                FAT16LongNameEntry fat16LongNameEntry = entries.get(i);
+                fat16LongNameEntry.serialize(allocate);
+            }
+
+            allocate.position(0);
+            blockDevice.write(bootSector.getRootDirStartSector() * bootSector.getBytesPerSector(), allocate);
+
+        } else {
+
+            Long[] chain = fat.getChain(entry.getStartCluster());
+
+            ByteBuffer allocate = ByteBuffer.allocate(32 * 512);
+
+
+            int chainCounter = 0;
+
+            for (int i = 0; i < entries.size(); i++) {
+
+
+                if ((i * 32) % 512 == 0 && i > 0) {
+                    allocate.position(0);
+                    blockDevice.write(bootSector.getDataAreaOffset() + ((chain[chainCounter] - 2) * 32 * 512), allocate);
+                    allocate.position(0);
+                    chainCounter++;
+                }
+
+                FAT16LongNameEntry fat16LongNameEntry = entries.get(i);
+                fat16LongNameEntry.serialize(allocate);
+            }
+
+            if (allocate.position() > 0) {
+                allocate.position(0);
+                blockDevice.write(bootSector.getDataAreaOffset() + ((chain[chainCounter] - 2) * 32 * 512), allocate);
+            }
         }
 
     }
@@ -338,7 +368,7 @@ public class FatDirectory extends AbstractUsbFile {
 
         FAT16LongNameEntry entry = FAT16LongNameEntry.createNew(name, shortName);
         // alloc completely new chain
-        long newStartCluster = fat.alloc(new Long[0], 1)[0];
+        long newStartCluster = fat.alloc(1)[0];
         entry.setStartCluster(newStartCluster);
 
         Log.d(TAG, "adding entry: " + entry + " with short name: " + shortName);
@@ -361,14 +391,13 @@ public class FatDirectory extends AbstractUsbFile {
         FAT16LongNameEntry entry = FAT16LongNameEntry.createNew(name, shortName);
         entry.setDirectory();
         // alloc completely new chain
-        long newStartCluster = fat.alloc(new Long[0], 1)[0];
+        long newStartCluster = fat.alloc(1)[0];
         entry.setStartCluster(newStartCluster);
 
         Log.d(TAG, "adding entry: " + entry + " with short name: " + shortName);
         addEntry(entry, entry.getActualEntry());
         // write changes immediately to disk
         write();
-
 
 
         FatDirectory result = FatDirectory.create(entry, blockDevice, fat, bootSector, this);
@@ -590,5 +619,7 @@ public class FatDirectory extends AbstractUsbFile {
 
         parent.removeEntry(entry);
         parent.write();
+
+        fat.free(entry.getStartCluster());
     }
 }

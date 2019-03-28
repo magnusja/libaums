@@ -73,7 +73,7 @@ public class Fat16FileSystemProducer implements IProducer<Pair<Fat16FileSystem, 
         try {
             blockDevice = new ByteBlockDevice(
                     new FileBlockDeviceDriver(
-                            originalFile,
+                            tempFile,
                             expectedValues.get("blockSize").asInt(),
                             expectedValues.get("blockSize").asInt() * expectedValues.get("fileSystemOffset").asInt()));
             blockDevice.init();
@@ -87,17 +87,17 @@ public class Fat16FileSystemProducer implements IProducer<Pair<Fat16FileSystem, 
     }
 
     public synchronized void cleanUp() {
-//        try {
-//            ReadableByteChannel rbc = Channels.newChannel(new FileInputStream(originalFile));
-//            File tempFile = File.createTempFile("libaums_test_blockdevice", ".bin");
-//            tempFile.deleteOnExit();
-//            FileOutputStream fos = new FileOutputStream(tempFile);
-//            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-//
-//            this.tempFile = tempFile;
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            fail();
-//        }
+        try {
+            ReadableByteChannel rbc = Channels.newChannel(new FileInputStream(originalFile));
+            File tempFile = File.createTempFile("libaums_test_blockdevice", ".bin");
+            tempFile.deleteOnExit();
+            FileOutputStream fos = new FileOutputStream(tempFile);
+            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+
+            this.tempFile = tempFile;
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail();
+        }
     }
 }

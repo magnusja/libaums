@@ -130,9 +130,7 @@ public class FatFile extends AbstractUsbFile {
 
     @Override
     public void setLength(long newLength) throws IOException {
-//        	initChain();
-//		chain.setLength(newLength);
-//		entry.setFileSize(newLength);
+		entry.setFileSize(newLength);
     }
 
     @Override
@@ -145,20 +143,28 @@ public class FatFile extends AbstractUsbFile {
         Long clusterToReadPosition = bootSector.getDataAreaOffset() + ((chain[clusterToRead] - 2) * 32 * 512);
 
         blockDevice.read(clusterToReadPosition + clusterOffset, destination);
-
-//		initChain();
-//		entry.setLastAccessedTimeToNow();
-//		chain.read(offset, destination);
     }
 
     @Override
     public void write(long offset, ByteBuffer source) throws IOException {
-//		initChain();
-//		long length = offset + source.remaining();
-//		if (length > getLength())
-//			setLength(length);
-//		entry.setLastModifiedTimeToNow();
-//		chain.write(offset, source);
+        long length = offset + source.remaining();
+        if (length > getLength())
+			setLength(length);
+
+
+        Long[] chain = fat.getChain(entry.getStartCluster(), length);
+
+        int clusterToWrite = (int) (offset / bootSector.getBytesPerCluster());
+        int clusterOffset = (int) (offset % bootSector.getBytesPerCluster());
+
+        Long clusterToWritePosition = bootSector.getDataAreaOffset() + ((chain[clusterToWrite] - 2) * 32 * 512);
+
+        blockDevice.write(clusterToWritePosition + clusterOffset, source);
+
+        entry.setLastModifiedTimeToNow();
+
+        parent.write();
+
     }
 
     @Override
@@ -195,10 +201,9 @@ public class FatFile extends AbstractUsbFile {
 
     @Override
     public void delete() throws IOException {
-//		initChain();
-//		parent.removeEntry(entry);
-//		parent.write();
-//		chain.setLength(0);
+		parent.removeEntry(entry);
+		parent.write();
+		fat.free(entry.getStartCluster());
     }
 
     @Override

@@ -126,7 +126,7 @@ public class UsbFileTest {
 
         for (JsonObject.Member member : foldersToMove) {
             UsbFile file = root.search(member.getName());
-//            assertEquals(member.getName(), member.getValue().asLong(), file.lastModified() / 1000);
+            assertEquals(member.getName(), member.getValue().asLong(), file.lastModified() / 1000);
         }
     }
 
@@ -220,7 +220,7 @@ public class UsbFileTest {
         }
     }
 
-    //@ContractTest
+    @ContractTest
     public void setLength() throws Exception {
         UsbFile file = root.createFile("testlength");
 
@@ -282,10 +282,8 @@ public class UsbFileTest {
         }
     }
 
-//    //@ContractTest
+    @ContractTest
     public void write() throws Exception {
-        // TODO test exception when disk is full
-        URL bigFileUrl = new URL(expectedValues.get("bigFileToWrite").asString());
         ByteBuffer buffer = ByteBuffer.allocate(512);
         buffer.put("this is just a test!".getBytes());
         buffer.flip();
@@ -302,9 +300,9 @@ public class UsbFileTest {
         assertEquals("this is just a test!", new String(dst));
 
         UsbFile bigFile = root.createFile("bigwritetest");
-        IOUtils.copy(bigFileUrl.openStream(), new UsbFileOutputStream(bigFile));
+        IOUtils.copy(new RepeatedSequenceInputStream("ABCD1234".getBytes(), 300 * 1024 * 1024), new UsbFileOutputStream(bigFile));
 
-        IOUtils.contentEquals(bigFileUrl.openStream(), new UsbFileInputStream(bigFile));
+        IOUtils.contentEquals(new RepeatedSequenceInputStream("ABCD1234".getBytes(), 300 * 1024 * 1024), new UsbFileInputStream(bigFile));
 
         newInstance();
 
@@ -317,7 +315,7 @@ public class UsbFileTest {
 
         bigFile = root.search("bigwritetest");
 
-        IOUtils.contentEquals(bigFileUrl.openStream(), new UsbFileInputStream(bigFile));
+        IOUtils.contentEquals(new RepeatedSequenceInputStream("ABCD1234".getBytes(), 300 * 1024 * 1024), new UsbFileInputStream(bigFile));
     }
 
     @ContractTest
@@ -359,7 +357,7 @@ public class UsbFileTest {
         }
     }
 
-    //@ContractTest
+    @ContractTest
     public void createFile() throws Exception {
         UsbFile file = root.createFile("new file");
         UsbFile subFile = root.search(expectedValues.get("createFileInDir").asString()).
@@ -395,7 +393,7 @@ public class UsbFileTest {
         }
     }
 
-    //@ContractTest
+    @ContractTest
     public void moveFile() throws Exception {
         JsonObject filesToMove = expectedValues.get("filesToMove").asObject();
 
@@ -450,7 +448,7 @@ public class UsbFileTest {
 
     }
 
-    //@ContractTest
+    @ContractTest
     public void moveDirectory() throws Exception {
         JsonObject foldersToMove = expectedValues.get("foldersToMove").asObject();
 
@@ -501,7 +499,7 @@ public class UsbFileTest {
         newInstance();
     }
 
-    //@ContractTest
+    @ContractTest
     public void delete() throws Exception {
         UsbFile fileToDelete = root.search(expectedValues.get("fileToDelete").asString());
         UsbFile folderToDelete = root.search(expectedValues.get("folderToDelete").asString());
@@ -518,7 +516,7 @@ public class UsbFileTest {
         assertNull(root.search(expectedValues.get("folderToDelete").asString()));
     }
 
-    //@ContractTest
+    @ContractTest
     public void deleteAll() throws Exception {
         String path = expectedValues.get("subDeleteAll").asString();
         UsbFile subDeleteAllFolder = root.search(path);
@@ -548,7 +546,7 @@ public class UsbFileTest {
         assertEquals(0, root.list().length);
     }
 
-    //@ContractTest
+    @ContractTest
     public void isRoot() throws Exception {
 
         assertTrue(root.isRoot());
@@ -577,7 +575,7 @@ public class UsbFileTest {
         }
     }
 
-    //@ContractTest
+    @ContractTest
     public void absolutePath() throws Exception {
         checkAbsolutePathRecursive(UsbFile.separator, root);
     }
@@ -592,7 +590,7 @@ public class UsbFileTest {
         }
     }
 
-    //@ContractTest
+    @ContractTest
     public void equals() throws Exception {
         checkEqualsRecursive(root);
     }
