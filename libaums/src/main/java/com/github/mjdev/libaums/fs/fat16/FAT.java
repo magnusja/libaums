@@ -55,8 +55,8 @@ public class FAT {
     private final long freeSpace;
     private final long occupiedSpace;
     private final Fat16BootSector bootSector;
-    private HashMap<Long, Long[]> foundClusters = new HashMap<>();
 
+    private HashMap<Long, Long[]> chains = new HashMap<>();
     private BlockDeviceDriver blockDevice;
     private long fatOffset[];
     private int fatNumbers[];
@@ -134,9 +134,8 @@ public class FAT {
             return new Long[0];
         }
 
-        if(foundClusters.containsKey(startCluster)){
-            return foundClusters.get(startCluster);
-        }
+        if(chains.containsKey(startCluster))
+            return chains.get(startCluster);
 
         final ArrayList<Long> result = new ArrayList<Long>();
         final int bufferSize = blockDevice.getBlockSize() * 2;
@@ -166,7 +165,7 @@ public class FAT {
         } while (currentCluster != FAT16_EOF_CLUSTER);
 
         Long[] returnResult = result.toArray(new Long[0]);
-        foundClusters.put(startCluster, returnResult);
+        chains.put(startCluster, returnResult);
         return returnResult;
     }
 
@@ -182,21 +181,26 @@ public class FAT {
                 neededClusters++;
             }
         }
-        if(neededClusters == 0){
+
+        if (neededClusters == 0) {
             return chain;
         }
 
         Long[] alloc = findFreeClusters((int) neededClusters);
 
+        ArrayList<Long> clustersToReserve = new ArrayList<>();
+        clustersToReserve.add(chain[chain.length - 1]);
+        clustersToReserve.addAll(Arrays.asList(alloc));
+        reserveClusters(clustersToReserve.toArray(new Long[0]));
+
+
         ArrayList<Long> result = new ArrayList<>();
         result.addAll(Arrays.asList(chain));
         result.addAll(Arrays.asList(alloc));
 
-
-        Long[] clusterChain = result.toArray(new Long[0]);
-        reserveClusters(clusterChain);
-
-        return clusterChain;
+        Long[] returnChain = result.toArray(new Long[0]);
+        chains.put(startCluster, returnChain);
+        return returnChain;
     }
 
     /**
@@ -213,11 +217,11 @@ public class FAT {
         Long[] returnChain = findFreeClusters(numberOfClusters);
         reserveClusters(returnChain);
 
+
         return returnChain;
     }
 
     private Long[] findFreeClusters(int numberOfClusters) throws IOException {
-        long start = System.currentTimeMillis();
         long startOfFAT = fatOffset[0];
 
         Long[] returnChain = new Long[numberOfClusters];
@@ -245,12 +249,10 @@ public class FAT {
                 break;
             }
         }
-        System.out.println("Finding free clusters took " + (System.currentTimeMillis() - start) + " milliseconds");
         return returnChain;
     }
 
     private void reserveClusters(Long[] returnChain) throws IOException {
-        long start = System.currentTimeMillis();
         ByteBuffer sectorBuffer = ByteBuffer.allocate(512);
         sectorBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
@@ -274,10 +276,8 @@ public class FAT {
                 blockDevice.write(bootSector.getFatOffset(i) + (sectorLocationInFAT * 512), sectorBuffer);
             }
         }
-        foundClusters.put(returnChain[0], returnChain);
-        System.out.println("Reserving clusters took " + (System.currentTimeMillis() - start) + " milliseconds");
-    }
 
+    }
 
 
     public long getFreeSpace() {
@@ -291,9 +291,7 @@ public class FAT {
     /**
      * This methods frees the desired cluster chain in the FAT
      *
-     *
-     * @param startCluster        The existing cluster chain location
-
+     * @param startCluster The existing cluster chain location
      * @return The new chain without the unneeded clusters.
      * @throws IOException           If reading or writing to the FAT fails.
      * @throws IllegalStateException If more clusters are requested to be freed than currently

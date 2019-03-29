@@ -151,7 +151,6 @@ public class FatFile extends AbstractUsbFile {
         if (length > getLength())
 			setLength(length);
 
-
         Long[] chain = fat.getChain(entry.getStartCluster(), length);
 
         int clusterToWrite = (int) (offset / bootSector.getBytesPerCluster());
@@ -164,7 +163,6 @@ public class FatFile extends AbstractUsbFile {
         entry.setLastModifiedTimeToNow();
 
         parent.write();
-
     }
 
     @Override
