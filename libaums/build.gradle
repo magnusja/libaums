@@ -60,7 +60,7 @@ dependencies {
     testImplementation 'org.apache.commons:commons-io:1.3.2'
     testImplementation 'com.eclipsesource.minimal-json:minimal-json:0.9.4'
     testImplementation 'org.xenei:junit-contracts:0.1.7'
-    testImplementation 'org.mockito:mockito-core:2.7.22'
+    testImplementation 'org.mockito:mockito-core:2.24.5'
 
     api 'androidx.annotation:annotation:1.0.0-beta01'
     javadocDeps 'androidx.annotation:annotation:1.0.0-beta01'

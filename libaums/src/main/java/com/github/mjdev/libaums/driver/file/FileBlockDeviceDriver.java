@@ -38,7 +38,8 @@ public class FileBlockDeviceDriver implements BlockDeviceDriver {
     public FileBlockDeviceDriver(URL url, int blockSize, int byteOffset) throws IOException {
         this.byteOffset = byteOffset;
         ReadableByteChannel rbc = Channels.newChannel(url.openStream());
-        File tempFile = File.createTempFile("blockdevice", "bin");
+        File tempFile = File.createTempFile("libaums_file_blockdevice", ".bin");
+        tempFile.deleteOnExit();
         FileOutputStream fos = new FileOutputStream(tempFile);
         fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 
