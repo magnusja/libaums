@@ -178,7 +178,6 @@ public class FatFile extends AbstractUsbFile {
 
 	@Override
 	public void close() throws IOException {
-		flush();
 	}
 
 	@Override

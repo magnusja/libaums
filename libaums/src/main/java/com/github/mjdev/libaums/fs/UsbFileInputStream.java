@@ -65,7 +65,7 @@ public class UsbFileInputStream extends InputStream {
 
     @Override
     public void close() throws IOException {
-//        file.close();
+        file.close();
     }
 
     @Override
