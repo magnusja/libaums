@@ -44,6 +44,7 @@ import java.util.List;
 	 * name.
 	 */
 	private String lfnName;
+	private long startClusterByteValue;
 
 	private FAT16LongNameEntry() {
 

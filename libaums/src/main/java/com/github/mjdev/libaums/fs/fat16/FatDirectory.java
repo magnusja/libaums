@@ -25,6 +25,7 @@ import com.github.mjdev.libaums.fs.UsbFile;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -168,8 +169,10 @@ public class FatDirectory extends AbstractUsbFile {
 
 
             List<FatDirectoryEntry> entries = new ArrayList<>();
+            ByteBuffer bb = UnsignedUtil.allocateLittleEndian(512);
             while (currentSector < dataBlockSectorStart) {
-                ByteBuffer bb = ByteBuffer.allocate(512);
+
+
                 bb.position(0);
                 blockDevice.read(currentSector * 512, bb);
                 bb.flip();
@@ -199,11 +202,11 @@ public class FatDirectory extends AbstractUsbFile {
             Long[] chain = fat.getChain(entry.getActualEntry().getFirstFATCluster());
 
             List<FatDirectoryEntry> entries = new ArrayList<>();
+            ByteBuffer bb = UnsignedUtil.allocateLittleEndian(512);
             for (Long byteLocation : chain) {
 
-                ByteBuffer bb = ByteBuffer.allocate(512);
                 bb.position(0);
-                blockDevice.read(bootSector.getDataAreaOffset() + ((byteLocation - 2) * 32 * 512), bb);
+                blockDevice.read(bootSector.getDataAreaOffset() + ((byteLocation - 2) * bootSector.getSectorsPerCluster() * bootSector.getBytesPerCluster()), bb);
                 bb.flip();
                 for (int x = 0; x < 16; x++) {
                     byte[] record = new byte[32];
@@ -224,8 +227,6 @@ public class FatDirectory extends AbstractUsbFile {
                     lfns.clear();
                 }
             }
-
-            System.out.print("");
         }
 
     }
@@ -294,11 +295,9 @@ public class FatDirectory extends AbstractUsbFile {
      * @see {@link #write()}
      */
     /* package */void write() throws IOException {
-        System.out.print("");
-
 
         if (isRoot()) {
-            ByteBuffer allocate = ByteBuffer.allocate(32 * 512);
+            ByteBuffer allocate = UnsignedUtil.allocateLittleEndian(bootSector.getBytesPerCluster());
 
             for (int i = 0; i < entries.size(); i++) {
                 FAT16LongNameEntry fat16LongNameEntry = entries.get(i);
@@ -312,8 +311,7 @@ public class FatDirectory extends AbstractUsbFile {
 
             Long[] chain = fat.getChain(entry.getStartCluster());
 
-            ByteBuffer allocate = ByteBuffer.allocate(32 * 512);
-
+            ByteBuffer allocate = UnsignedUtil.allocateLittleEndian(bootSector.getBytesPerCluster());
 
             int chainCounter = 0;
 
@@ -322,7 +320,7 @@ public class FatDirectory extends AbstractUsbFile {
 
                 if ((i * 32) % 512 == 0 && i > 0) {
                     allocate.position(0);
-                    blockDevice.write(bootSector.getDataAreaOffset() + ((chain[chainCounter] - 2) * 32 * 512), allocate);
+                    blockDevice.write(bootSector.getByteAddressForCluster(chain[chainCounter]), allocate);
                     allocate.position(0);
                     chainCounter++;
                 }
@@ -333,7 +331,7 @@ public class FatDirectory extends AbstractUsbFile {
 
             if (allocate.position() > 0) {
                 allocate.position(0);
-                blockDevice.write(bootSector.getDataAreaOffset() + ((chain[chainCounter] - 2) * 32 * 512), allocate);
+                blockDevice.write(bootSector.getByteAddressForCluster(chain[chainCounter]), allocate);
             }
         }
 
@@ -382,7 +380,7 @@ public class FatDirectory extends AbstractUsbFile {
     @Override
     public FatDirectory createDirectory(String name) throws IOException {
         if (lfnMap.containsKey(name.toLowerCase(Locale.getDefault())))
-            throw new IOException("Item already exists!");
+            throw new IOException("Item " + name + " already exists! ");
 
         init(); // initialise the directory before creating files
 
@@ -621,5 +619,21 @@ public class FatDirectory extends AbstractUsbFile {
         parent.write();
 
         fat.free(entry.getStartCluster());
+    }
+
+    @Override
+    public String toString() {
+        return "FatDirectory{" +
+                "blockDevice=" + blockDevice +
+                ", fat=" + fat +
+                ", bootSector=" + bootSector +
+                ", entries=" + entries +
+                ", lfnMap=" + lfnMap +
+                ", shortNameMap=" + shortNameMap +
+                ", parent=" + parent +
+                ", entry=" + entry +
+                ", volumeLabel='" + volumeLabel + '\'' +
+                ", hasBeenInited=" + hasBeenInited +
+                '}';
     }
 }

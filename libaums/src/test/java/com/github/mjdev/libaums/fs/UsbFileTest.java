@@ -3,6 +3,7 @@ package com.github.mjdev.libaums.fs;
 import com.eclipsesource.json.JsonArray;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
+import com.github.mjdev.libaums.fs.fat16.FatDirectory;
 import com.github.mjdev.libaums.util.Pair;
 
 import org.apache.commons.io.IOUtils;
@@ -331,14 +332,18 @@ public class UsbFileTest {
     @ContractTest
     public void createDirectory() throws Exception {
         UsbFile directory = root.createDirectory("new dir");
+        root.createDirectory("seconddir");
         UsbFile subDir = directory.createDirectory("new subdir");
 
         assertTrue(root.search(directory.getName()).isDirectory());
+        assertTrue(root.search("seconddir").isDirectory());
+
         assertTrue(root.search(directory.getName() + UsbFile.separator + subDir.getName()).isDirectory());
 
         newInstance();
 
         assertTrue(root.search(directory.getName()).isDirectory());
+        assertTrue(root.search("seconddir").isDirectory());
         assertTrue(root.search(directory.getName() + UsbFile.separator + subDir.getName()).isDirectory());
 
         try {

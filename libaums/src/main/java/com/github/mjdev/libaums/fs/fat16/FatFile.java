@@ -23,6 +23,7 @@ import com.github.mjdev.libaums.fs.UsbFile;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class FatFile extends AbstractUsbFile {
 
@@ -33,6 +34,7 @@ public class FatFile extends AbstractUsbFile {
     private FatDirectory parent;
     //	private ClusterChain chain;
     private FAT16LongNameEntry entry;
+    private long startClusterByteValue;
 
     /**
      * Constructs a new file with the given information.
@@ -140,7 +142,7 @@ public class FatFile extends AbstractUsbFile {
         int clusterToRead = (int) (offset / bootSector.getBytesPerCluster());
         int clusterOffset = (int) (offset % bootSector.getBytesPerCluster());
 
-        Long clusterToReadPosition = bootSector.getDataAreaOffset() + ((chain[clusterToRead] - 2) * 32 * 512);
+        Long clusterToReadPosition = bootSector.getByteAddressForCluster(chain[clusterToRead]);
 
         blockDevice.read(clusterToReadPosition + clusterOffset, destination);
     }
@@ -156,10 +158,12 @@ public class FatFile extends AbstractUsbFile {
         int clusterToWrite = (int) (offset / bootSector.getBytesPerCluster());
         int clusterOffset = (int) (offset % bootSector.getBytesPerCluster());
 
-        Long clusterToWritePosition = bootSector.getDataAreaOffset() + ((chain[clusterToWrite] - 2) * 32 * 512);
+        Long clusterToWritePosition = bootSector.getByteAddressForCluster(chain[clusterToWrite]);
 
+        this.setStartClusterByteValue(clusterToWritePosition + clusterOffset);
         blockDevice.write(clusterToWritePosition + clusterOffset, source);
 
+        entry.setStartCluster(chain[0]);
         entry.setLastModifiedTimeToNow();
 
         parent.write();
@@ -209,4 +213,26 @@ public class FatFile extends AbstractUsbFile {
         return false;
     }
 
+    @Override
+    public String toString() {
+        try {
+            return "FatFile{" +
+                    "blockDevice=" + blockDevice +
+                    "chain=" + (entry == null ? "root" : Arrays.toString(fat.getChain(entry.getStartCluster()))) +
+                    "startClusterByteValue=" + startClusterByteValue +
+                    ", startcluster=" + (entry == null? "root": this.entry.getStartCluster()) +
+
+                    '}';
+        } catch (IOException e) {
+            return "oh nooooes";
+        }
+    }
+
+    public void setStartClusterByteValue(long startClusterByteValue) {
+        this.startClusterByteValue = startClusterByteValue;
+    }
+
+    public long getStartClusterByteValue() {
+        return startClusterByteValue;
+    }
 }

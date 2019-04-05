@@ -91,7 +91,8 @@ public class FAT {
         long usedClusterCount = 0;
         long freeClusterCount = 0;
         try {
-            ByteBuffer bb = ByteBuffer.allocate(512);
+            ByteBuffer bb = UnsignedUtil.allocateLittleEndian(512);
+
             for (long blockNumber = (fatOffset[0] / 512); blockNumber < fatOffset[1] / 512; blockNumber++) {
                 blockDevice.read(blockNumber * 512, bb);
                 //need to skep first 4
@@ -134,14 +135,13 @@ public class FAT {
             return new Long[0];
         }
 
-        if(chains.containsKey(startCluster))
+        if (chains.containsKey(startCluster))
             return chains.get(startCluster);
 
         final ArrayList<Long> result = new ArrayList<Long>();
         final int bufferSize = blockDevice.getBlockSize() * 2;
 
-        final ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer buffer = UnsignedUtil.allocateLittleEndian(bufferSize);
 
         int currentCluster = (int) startCluster;
         long clusterLocationInFat = (startCluster * 2);
@@ -226,8 +226,8 @@ public class FAT {
 
         Long[] returnChain = new Long[numberOfClusters];
 
-        ByteBuffer fatBuffer = ByteBuffer.allocate(SECTOR_SIZE);
-        fatBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer fatBuffer = UnsignedUtil.allocateLittleEndian(SECTOR_SIZE);
+
         int clustersPerSector = SECTOR_SIZE / 2;
         int currentBlock = 0;
         int chainIndex = 0;
@@ -253,8 +253,7 @@ public class FAT {
     }
 
     private void reserveClusters(Long[] returnChain) throws IOException {
-        ByteBuffer sectorBuffer = ByteBuffer.allocate(512);
-        sectorBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer sectorBuffer = UnsignedUtil.allocateLittleEndian(512);
 
         for (int x = 0; x < returnChain.length; x++) {
 
@@ -299,7 +298,7 @@ public class FAT {
      */
     public void free(long startCluster) throws IOException {
         Long[] chain = getChain(startCluster);
-        ByteBuffer sectorBuffer = ByteBuffer.allocate(512);
+        ByteBuffer sectorBuffer = UnsignedUtil.allocateLittleEndian(512);
 
         for (int x = 0; x < chain.length; x++) {
 

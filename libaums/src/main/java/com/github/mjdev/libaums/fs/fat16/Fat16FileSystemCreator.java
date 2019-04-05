@@ -3,7 +3,6 @@ package com.github.mjdev.libaums.fs.fat16;
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 import com.github.mjdev.libaums.fs.FileSystem;
 import com.github.mjdev.libaums.fs.FileSystemCreator;
-import com.github.mjdev.libaums.fs.fat32.Fat32FileSystem;
 import com.github.mjdev.libaums.partition.PartitionTableEntry;
 
 import java.io.IOException;

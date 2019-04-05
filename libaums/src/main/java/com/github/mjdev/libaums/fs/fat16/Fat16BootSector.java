@@ -17,8 +17,6 @@
 
 package com.github.mjdev.libaums.fs.fat16;
 
-import com.github.mjdev.libaums.fs.fat32.FatDirectory;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -144,7 +142,7 @@ import java.nio.ByteOrder;
      * @return Total number of sectors.
      */
     /* package */long getTotalNumberOfSectors() {
-        return totalNumberOfSectors - (2 * sectorsPerFat) - 32;
+        return totalNumberOfSectors - (fatCount * sectorsPerFat) - getReservedSectors();
     }
 
     /**
@@ -220,7 +218,7 @@ import java.nio.ByteOrder;
      * @return Offset in bytes.
      */
     /* package */long getDataAreaOffset() {
-        return (getRootDirStartSector() + 32) * bytesPerSector;
+        return dataStartSector * bytesPerSector;
     }
 
     /**
@@ -236,6 +234,14 @@ import java.nio.ByteOrder;
 
     public long getDataStartSector() {
         return dataStartSector;
+    }
+
+    public long getByteAddressForCluster(long cluster) {
+        return getDataAreaOffset() + ((cluster - 2) * bytesPerCluster());
+    }
+
+    public long bytesPerCluster() {
+        return getSectorsPerCluster() * getBytesPerSector();
     }
 
     @Override

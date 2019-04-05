@@ -116,7 +116,8 @@ import java.util.Calendar;
     /* package */
     static FatDirectoryEntry createNew() {
         FatDirectoryEntry result = new FatDirectoryEntry();
-        result.data = ByteBuffer.allocate(SIZE);
+        result.data = UnsignedUtil.allocateLittleEndian(SIZE);
+
 
         long now = System.currentTimeMillis();
         result.setCreatedDateTime(now);
@@ -419,8 +420,7 @@ import java.util.Calendar;
     /* package */
     static FatDirectoryEntry createVolumeLabel(String volumeLabel) {
         FatDirectoryEntry result = new FatDirectoryEntry();
-        ByteBuffer buffer = ByteBuffer.allocate(SIZE);
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer buffer = UnsignedUtil.allocateLittleEndian(SIZE);
 
         System.arraycopy(volumeLabel.getBytes(Charset.forName("ASCII")), 0, buffer.array(), 0,
                 volumeLabel.length());
@@ -512,8 +512,8 @@ import java.util.Calendar;
             }
         }
 
-        ByteBuffer buffer = ByteBuffer.allocate(SIZE);
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer buffer = UnsignedUtil.allocateLittleEndian(SIZE);
+
 
         buffer.put(0, (byte) (isLast ? index + (1 << 6) : index));
         buffer.putShort(1, (short) unicode.charAt(offset));
