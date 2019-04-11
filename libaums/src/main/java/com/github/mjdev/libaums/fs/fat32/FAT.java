@@ -135,7 +135,7 @@ public class FAT {
 				lastOffset = offset;
 			}
 
-			currentCluster = buffer.getInt((int) offsetInBlock);
+			currentCluster = buffer.getInt((int) offsetInBlock) & 0x0FFFFFFF;
 		} while (currentCluster < FAT32_EOF_CLUSTER);
 
 		return result.toArray(new Long[0]);
