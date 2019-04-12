@@ -276,7 +276,13 @@ public class FAT {
 
 		Log.i(TAG, "allocating clusters finished");
 
-		return result.toArray(new Long[0]);
+		Long[] arr = result.toArray(new Long[0]);
+
+		if(cluster == -1) {
+			cache.put(arr[0], arr);
+		}
+
+		return arr;
 	}
 
 	/**
