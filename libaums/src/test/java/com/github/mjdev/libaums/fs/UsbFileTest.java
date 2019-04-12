@@ -295,6 +295,15 @@ public class UsbFileTest {
             assertTrue(IOUtils.contentEquals(url.openStream(), new UsbFileInputStream(file)));
         }
 
+        // do that again to check LRU cache of FAT
+        for(JsonObject.Member member : bigFileToRead) {
+            String path = member.getName();
+            file = root.search(path);
+            URL url = new URL(member.getValue().asString());
+
+            assertTrue(IOUtils.contentEquals(url.openStream(), new UsbFileInputStream(file)));
+        }
+
         UsbFile dir = root.createDirectory("my dir");
 
         try {
@@ -602,6 +611,9 @@ public class UsbFileTest {
 
     @ContractTest
     public void absolutePath() throws Exception {
+
+        assertEquals("/", root.getAbsolutePath());
+
         checkAbsolutePathRecursive(UsbFile.separator, root);
     }
 
