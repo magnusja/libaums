@@ -24,9 +24,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import android.util.Log;
-import android.util.LruCache;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
+import com.github.mjdev.libaums.util.LRUCache;
 
 /**
  * This class represents the File Allocation Table (FAT) in a FAT32 file system.
@@ -57,7 +57,7 @@ public class FAT {
 	private long fatOffset[];
 	private int fatNumbers[];
 	private FsInfoStructure fsInfoStructure;
-	private LruCache<Long, Long[]> cache = new LruCache<>(64);
+	private LRUCache<Long, Long[]> cache = new LRUCache<>(64);
 
 	/**
 	 * Constructs a new FAT.
@@ -147,6 +147,7 @@ public class FAT {
 
 		Long[] arr = result.toArray(new Long[0]);
 		cache.put(startCluster, arr);
+
 		return arr;
 	}
 
