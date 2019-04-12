@@ -66,6 +66,10 @@ public abstract class AbstractUsbFile implements UsbFile {
 
     @Override
     public String getAbsolutePath() {
+        if(isRoot()){
+            return "/";
+        }
+
         if (getParent().isRoot()) {
             return "/" + getName();
         }
