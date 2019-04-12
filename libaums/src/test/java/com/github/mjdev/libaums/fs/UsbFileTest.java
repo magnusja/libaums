@@ -296,6 +296,12 @@ public class UsbFileTest {
         }
 
         // do that again to check LRU cache of FAT
+        file = root.search(expectedValues.get("fileToRead").asString());
+
+        file.read(0, buffer);
+
+        assertEquals(buffer.capacity(), buffer.limit());
+
         for(JsonObject.Member member : bigFileToRead) {
             String path = member.getName();
             file = root.search(path);
