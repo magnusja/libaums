@@ -69,6 +69,7 @@ public abstract class AbstractUsbFile implements UsbFile {
         if(isRoot()){
             return "/";
         }
+	
         if (getParent().isRoot()) {
             return "/" + getName();
         }

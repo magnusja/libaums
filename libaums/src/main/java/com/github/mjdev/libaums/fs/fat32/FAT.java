@@ -26,6 +26,7 @@ import java.util.Arrays;
 import android.util.Log;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
+import com.github.mjdev.libaums.util.LRUCache;
 
 /**
  * This class represents the File Allocation Table (FAT) in a FAT32 file system.
@@ -56,6 +57,7 @@ public class FAT {
 	private long fatOffset[];
 	private int fatNumbers[];
 	private FsInfoStructure fsInfoStructure;
+	private LRUCache<Long, Long[]> cache = new LRUCache<>(64);
 
 	/**
 	 * Constructs a new FAT.
@@ -107,6 +109,11 @@ public class FAT {
 			// if the start cluster is 0, we have an empty file 
 			return new Long[0];
 		}
+
+		Long[] cachedChain = cache.get(startCluster);
+		if(cachedChain != null) {
+			return cachedChain;
+		}
 		
 		final ArrayList<Long> result = new ArrayList<Long>();
 		final int bufferSize = blockDevice.getBlockSize() * 2;
@@ -135,10 +142,13 @@ public class FAT {
 				lastOffset = offset;
 			}
 
-			currentCluster = buffer.getInt((int) offsetInBlock);
+			currentCluster = buffer.getInt((int) offsetInBlock) & 0x0FFFFFFF;
 		} while (currentCluster < FAT32_EOF_CLUSTER);
 
-		return result.toArray(new Long[0]);
+		Long[] arr = result.toArray(new Long[0]);
+		cache.put(startCluster, arr);
+
+		return arr;
 	}
 
 	/**
@@ -267,7 +277,13 @@ public class FAT {
 
 		Log.i(TAG, "allocating clusters finished");
 
-		return result.toArray(new Long[0]);
+		Long[] arr = result.toArray(new Long[0]);
+
+		if(cluster == -1) {
+			cache.put(arr[0], arr);
+		}
+
+		return arr;
 	}
 
 	/**

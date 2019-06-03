@@ -48,7 +48,7 @@ for(UsbMassStorageDevice device: devices) {
 Your app needs to get permission from the user at run time to be able to communicate the device. From a `UsbMassStorageDevice` you can get the underlying `android.usb.UsbDevice` to do so.
 
 ```java
-PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Inten(ACTION_USB_PERMISSION), 0);
+PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
 usbManager.requestPermission(device.getUsbDevice(), permissionIntent);
 ```
 
