@@ -376,6 +376,12 @@ public class FAT {
 		fsInfoStructure.decreaseClusterCount(-numberOfClusters);
 		fsInfoStructure.write();
 
-		return Arrays.copyOfRange(chain, 0, offsetInChain);
+		Long[] arr = Arrays.copyOfRange(chain, 0, offsetInChain);
+
+		if (arr.length > 0) {
+			cache.put(arr[0], arr);
+		}
+
+		return arr;
 	}
 }

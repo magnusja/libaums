@@ -673,6 +673,11 @@ public class UsbFileTest {
         }
         inputStream.close();
         outStream.close();
+
+
+        InputStream inputStream1 = UsbFileStreamFactory.createBufferedInputStream(srcPtr, fs);
+        InputStream inputStream2  = UsbFileStreamFactory.createBufferedInputStream(dstPtr, fs);
+        assertTrue(IOUtils.contentEquals(inputStream1, inputStream2));
     }
 
 }
