@@ -276,6 +276,10 @@ public class UsbFileTest {
 
     @ContractTest
     public void read() throws Exception {
+
+        int numberOfFiles = root.listFiles().length;
+        String[] files = root.list();
+
         ByteBuffer buffer = ByteBuffer.allocate(19);
 
         UsbFile file = root.search(expectedValues.get("fileToRead").asString());
@@ -299,6 +303,7 @@ public class UsbFileTest {
         file = root.search(expectedValues.get("fileToRead").asString());
 
         file.read(0, buffer);
+        file.flush();
 
         assertEquals(buffer.capacity(), buffer.limit());
 
@@ -310,6 +315,17 @@ public class UsbFileTest {
             assertTrue(IOUtils.contentEquals(url.openStream(), new UsbFileInputStream(file)));
         }
 
+        file.flush();
+
+        assertArrayEquals(files, root.list());
+        assertEquals(numberOfFiles, root.listFiles().length);
+
+        newInstance();
+
+        assertArrayEquals(files, root.list());
+        assertEquals(numberOfFiles, root.listFiles().length);
+
+
         UsbFile dir = root.createDirectory("my dir");
 
         try {
@@ -318,10 +334,14 @@ public class UsbFileTest {
         } catch (UnsupportedOperationException e) {
 
         }
+
     }
 
     @ContractTest
     public void write() throws Exception {
+
+        int numberOfFiles = root.listFiles().length;
+
         // TODO test exception when disk is full
         URL bigFileUrl = new URL(expectedValues.get("bigFileToWrite").asString());
         ByteBuffer buffer = ByteBuffer.allocate(512);
@@ -344,6 +364,8 @@ public class UsbFileTest {
 
         IOUtils.contentEquals(bigFileUrl.openStream(), new UsbFileInputStream(bigFile));
 
+        assertEquals(numberOfFiles + 2, root.listFiles().length);
+
         newInstance();
 
         file = root.search("writetest");
@@ -356,6 +378,8 @@ public class UsbFileTest {
         bigFile = root.search("bigwritetest");
 
         IOUtils.contentEquals(bigFileUrl.openStream(), new UsbFileInputStream(bigFile));
+
+        assertEquals(numberOfFiles + 2, root.listFiles().length);
     }
 
     @ContractTest
