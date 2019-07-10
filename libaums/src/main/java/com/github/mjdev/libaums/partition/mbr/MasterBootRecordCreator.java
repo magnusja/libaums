@@ -8,6 +8,7 @@ import com.github.mjdev.libaums.partition.PartitionTableFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.lang.Math;
 
 /**
  * Created by magnusja on 30/07/17.
@@ -17,7 +18,7 @@ public class MasterBootRecordCreator implements PartitionTableFactory.PartitionT
     @Nullable
     @Override
     public PartitionTable read(BlockDeviceDriver blockDevice) throws IOException {
-        ByteBuffer buffer = ByteBuffer.allocate(512);
+        ByteBuffer buffer = ByteBuffer.allocate(Math.max(512, blockDevice.getBlockSize()));
         blockDevice.read(0, buffer);
         return MasterBootRecord.read(buffer);
     }

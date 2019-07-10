@@ -15,6 +15,8 @@ import org.xenei.junit.contract.ContractTest;
 import org.xenei.junit.contract.IProducer;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -660,6 +662,46 @@ public class UsbFileTest {
     @ContractTest
     public void equals() throws Exception {
         checkEqualsRecursive(root);
+    }
+
+
+
+    @ContractTest
+    public void testIssue187() throws IOException {
+        UsbFile file = root.createFile("testissue187");
+        OutputStream outputStream = UsbFileStreamFactory.createBufferedOutputStream(file, fs);
+        outputStream.write("START\n".getBytes());
+        int i;
+
+        for (i = 6; i < 40000; i += 5) {
+            outputStream.write("TEST\n".getBytes());
+        }
+
+        outputStream.write("END\n".getBytes());
+        outputStream.close();
+
+
+        UsbFile srcPtr = root.search("testissue187");
+        long srcLen = srcPtr.getLength();
+        UsbFile dstPtr = root.createFile("testissue187_copy");
+        InputStream inputStream = UsbFileStreamFactory.createBufferedInputStream(srcPtr, fs);
+        OutputStream outStream  = UsbFileStreamFactory.createBufferedOutputStream(dstPtr, fs);
+
+        byte[] bytes = new byte[fs.getChunkSize()];
+
+        dstPtr.setLength(srcLen);
+
+        int count;
+        while ((count=inputStream.read(bytes))>0) {
+            outStream.write(bytes,0,count);
+        }
+        inputStream.close();
+        outStream.close();
+
+
+        InputStream inputStream1 = UsbFileStreamFactory.createBufferedInputStream(srcPtr, fs);
+        InputStream inputStream2  = UsbFileStreamFactory.createBufferedInputStream(dstPtr, fs);
+        assertTrue(IOUtils.contentEquals(inputStream1, inputStream2));
     }
 
 }
