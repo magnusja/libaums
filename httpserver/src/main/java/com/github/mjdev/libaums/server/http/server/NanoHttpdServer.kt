@@ -20,8 +20,6 @@ import fi.iki.elonen.NanoHTTPD
  */
 class NanoHttpdServer : NanoHTTPD, HttpServer {
     private var usbFileProvider: UsbFileProvider? = null
-    override val hostname: String
-        get() = "asd"
 
     constructor(port: Int) : super(port) {}
 
