@@ -49,19 +49,19 @@ class NanoHttpdServer : HttpServer {
             val range = headers["range"]
 
 
-            try {
+            return try {
                 val fileToServe = usbFileProvider!!.determineFileToServe(uri)
 
-                return range?.let { serveRangeOfFile(fileToServe, it) }
+                range?.let { serveRangeOfFile(fileToServe, it) }
                         ?: serveCompleteFile(fileToServe)
             } catch (e: FileNotFoundException) {
-                return newFixedLengthResponse(Response.Status.NOT_FOUND,
+                newFixedLengthResponse(Response.Status.NOT_FOUND,
                         MIME_HTML, e.message)
             } catch (e: NotAFileException) {
-                return newFixedLengthResponse(Response.Status.BAD_REQUEST,
+                newFixedLengthResponse(Response.Status.BAD_REQUEST,
                         MIME_HTML, e.message)
             } catch (e: IOException) {
-                return newFixedLengthResponse(Response.Status.INTERNAL_ERROR,
+                newFixedLengthResponse(Response.Status.INTERNAL_ERROR,
                         MIME_HTML, e.message)
             }
 

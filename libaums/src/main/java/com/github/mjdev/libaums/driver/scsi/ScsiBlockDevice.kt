@@ -45,8 +45,8 @@ import com.github.mjdev.libaums.driver.scsi.commands.ScsiWrite10
  * @see com.github.mjdev.libaums.driver.scsi.commands
  */
 class ScsiBlockDevice(private val usbCommunication: UsbCommunication) : BlockDeviceDriver {
-    private val outBuffer: ByteBuffer = ByteBuffer.allocate(31)
-    private val cswBuffer: ByteBuffer = ByteBuffer.allocate(CommandStatusWrapper.SIZE)
+    private val outBuffer: ByteBuffer
+    private val cswBuffer: ByteBuffer
 
     override var blockSize: Int = 0
         private set
@@ -55,6 +55,11 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication) : BlockDev
     private val writeCommand = ScsiWrite10()
     private val readCommand = ScsiRead10()
     private val csw = CommandStatusWrapper()
+
+    init {
+        outBuffer = ByteBuffer.allocate(31)
+        cswBuffer = ByteBuffer.allocate(CommandStatusWrapper.SIZE)
+    }
 
     /**
      * Issues a SCSI Inquiry to determine the connected device. After that it is
@@ -89,7 +94,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication) : BlockDev
         }
 
         val testUnit = ScsiTestUnitReady()
-        if (!transferCommand(testUnit, null)) {
+        if (!transferCommand(testUnit, ByteBuffer.allocate(0))) {
             Log.w(TAG, "unit not ready!")
         }
 
@@ -127,7 +132,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication) : BlockDev
      * If something fails.
      */
     @Throws(IOException::class)
-    private fun transferCommand(command: CommandBlockWrapper, inBuffer: ByteBuffer?): Boolean {
+    private fun transferCommand(command: CommandBlockWrapper, inBuffer: ByteBuffer): Boolean {
         val outArray = outBuffer.array()
         Arrays.fill(outArray, 0.toByte())
 
@@ -146,7 +151,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication) : BlockDev
 
             if (command.direction == Direction.IN) {
                 do {
-                    read += usbCommunication.bulkInTransfer(inBuffer!!)
+                    read += usbCommunication.bulkInTransfer(inBuffer)
                 } while (read < transferLength)
 
                 if (read != transferLength) {
@@ -156,7 +161,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication) : BlockDev
             } else {
                 written = 0
                 do {
-                    written += usbCommunication.bulkOutTransfer(inBuffer!!)
+                    written += usbCommunication.bulkOutTransfer(inBuffer)
                 } while (written < transferLength)
 
                 if (written != transferLength) {
