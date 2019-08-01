@@ -13,7 +13,7 @@ object UsbCommunicationFactory {
 
     private val TAG = UsbCommunicationFactory::class.java.simpleName
 
-    private var underlyingUsbCommunication = UnderlyingUsbCommunication.DEVICE_CONNECTION_SYNC
+    var underlyingUsbCommunication = UnderlyingUsbCommunication.DEVICE_CONNECTION_SYNC
 
     enum class UnderlyingUsbCommunication {
         USB_REQUEST_ASYNC,
@@ -35,9 +35,5 @@ object UsbCommunicationFactory {
         }
 
         return communication
-    }
-
-    fun setUnderlyingUsbCommunication(underlyingUsbCommunication: UnderlyingUsbCommunication) {
-        UsbCommunicationFactory.underlyingUsbCommunication = underlyingUsbCommunication
     }
 }
