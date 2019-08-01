@@ -81,8 +81,8 @@ class NanoHttpdServer : HttpServer {
 
         @Throws(IOException::class)
         private fun serveRangeOfFile(file: UsbFile, range: String): Response {
-            var range = range
-            Log.d(TAG, "Serving range of file $range")
+            var newRange = range
+            Log.d(TAG, "Serving range of file $newRange")
 
             val mimeType = getMimeTypeForFile(file.name)
 
@@ -90,13 +90,13 @@ class NanoHttpdServer : HttpServer {
             var end: Long = -1
             val length = file.length
 
-            if (range.startsWith("bytes=")) {
-                range = range.substring("bytes=".length)
-                val minus = range.indexOf('-')
+            if (newRange.startsWith("bytes=")) {
+                newRange = newRange.substring("bytes=".length)
+                val minus = newRange.indexOf('-')
                 try {
                     if (minus > 0) {
-                        start = java.lang.Long.parseLong(range.substring(0, minus))
-                        end = java.lang.Long.parseLong(range.substring(minus + 1))
+                        start = java.lang.Long.parseLong(newRange.substring(0, minus))
+                        end = java.lang.Long.parseLong(newRange.substring(minus + 1))
                     }
                 } catch (e: NumberFormatException) {
                     // ignore due to fallback values 0 and -1 -> length - 1

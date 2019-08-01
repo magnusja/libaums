@@ -224,7 +224,7 @@ public class UsbMassStorageDevice {
 			throw new IOException("could not claim interface!");
 		}
 
-		UsbCommunication communication = UsbCommunicationFactory.createUsbCommunication(deviceConnection, outEndpoint, inEndpoint);
+		UsbCommunication communication = UsbCommunicationFactory.INSTANCE.createUsbCommunication(deviceConnection, outEndpoint, inEndpoint);
 		byte[] b = new byte[1];
 		deviceConnection.controlTransfer(0b10100001, 0b11111110, 0, usbInterface.getId(), b, 1, 5000);
 		Log.i(TAG, "MAX LUN " + (int)b[0]);
