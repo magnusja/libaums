@@ -20,7 +20,6 @@ package com.github.mjdev.libaums
 import java.io.IOException
 import java.util.ArrayList
 
-import android.annotation.TargetApi
 import android.content.Context
 import android.hardware.usb.UsbConstants
 import android.hardware.usb.UsbDevice
@@ -28,14 +27,12 @@ import android.hardware.usb.UsbDeviceConnection
 import android.hardware.usb.UsbEndpoint
 import android.hardware.usb.UsbInterface
 import android.hardware.usb.UsbManager
-import android.os.Build
 import android.util.Log
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.driver.BlockDeviceDriverFactory
 import com.github.mjdev.libaums.partition.Partition
 import com.github.mjdev.libaums.partition.PartitionTable
-import com.github.mjdev.libaums.partition.PartitionTableEntry
 import com.github.mjdev.libaums.partition.PartitionTableFactory
 import com.github.mjdev.libaums.usb.UsbCommunication
 import com.github.mjdev.libaums.usb.UsbCommunicationFactory
@@ -121,7 +118,6 @@ private constructor(private val usbManager: UsbManager,
             throw IllegalStateException("Missing permission to access usb device: $usbDevice")
 
         inited = true
-
     }
 
     /**
@@ -218,12 +214,12 @@ private constructor(private val usbManager: UsbManager,
          * subclass 6 means that the usb mass storage device implements the SCSI
          * transparent command set
          */
-        private val INTERFACE_SUBCLASS = 6
+        private const val INTERFACE_SUBCLASS = 6
 
         /**
          * protocol 80 means the communication happens only via bulk transfers
          */
-        private val INTERFACE_PROTOCOL = 80
+        private const val INTERFACE_PROTOCOL = 80
 
         /**
          * This method iterates through all connected USB devices and searches for
