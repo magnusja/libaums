@@ -99,7 +99,7 @@ import com.github.mjdev.libaums.server.http.server.AsyncHttpServer;
 public class MainActivity extends AppCompatActivity implements OnItemClickListener {
 
 	static {
-		FileSystemFactory.registerFileSystem(new JavaFsFileSystemCreator());
+		FileSystemFactory.INSTANCE.registerFileSystem(new JavaFsFileSystemCreator());
 	}
 
 	/**
@@ -452,7 +452,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                 }
 
                 InputStream inputStream = getContentResolver().openInputStream(param.from);
-                OutputStream outputStream = UsbFileStreamFactory.createBufferedOutputStream(file, currentFs);
+                OutputStream outputStream = UsbFileStreamFactory.INSTANCE.createBufferedOutputStream(file, currentFs);
 
                 byte[] bytes = new byte[1337];
                 int count;
@@ -549,7 +549,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                 usbFile.setLength(file.length());
 
                 InputStream inputStream = getContentResolver().openInputStream(file.getUri());
-                OutputStream outputStream = UsbFileStreamFactory.createBufferedOutputStream(usbFile, currentFs);
+                OutputStream outputStream = UsbFileStreamFactory.INSTANCE.createBufferedOutputStream(usbFile, currentFs);
 
                 byte[] bytes = new byte[1337];
                 int count;
@@ -1081,7 +1081,7 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
 		UsbFile file;
 		try {
 			file = dir.createFile("big_file_test.txt");
-            OutputStream outputStream = UsbFileStreamFactory.createBufferedOutputStream(file, currentFs);
+            OutputStream outputStream = UsbFileStreamFactory.INSTANCE.createBufferedOutputStream(file, currentFs);
 			outputStream.write("START\n".getBytes());
 			int i;
 

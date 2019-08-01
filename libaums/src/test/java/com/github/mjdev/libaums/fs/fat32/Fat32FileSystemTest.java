@@ -46,7 +46,7 @@ public class Fat32FileSystemTest {
                                     obj.get("blockSize").asInt()));
                             blockDevice.init();
                         }
-                        return new Pair<>(Fat32FileSystem.read(blockDevice), obj);
+                        return new Pair<>(Fat32FileSystem.Companion.read(blockDevice), obj);
                     } catch (IOException e) {
                         e.printStackTrace();
                         fail();
