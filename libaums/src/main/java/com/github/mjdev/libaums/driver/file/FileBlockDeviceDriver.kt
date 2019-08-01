@@ -17,7 +17,7 @@ import java.nio.channels.ReadableByteChannel
  */
 
 class FileBlockDeviceDriver : BlockDeviceDriver {
-    private var file: RandomAccessFile? = null
+    private var file: RandomAccessFile
     override var blockSize: Int = 0
         private set
     private var byteOffset: Int = 0
@@ -51,15 +51,15 @@ class FileBlockDeviceDriver : BlockDeviceDriver {
 
     @Throws(IOException::class)
     override fun read(deviceOffset: Long, buffer: ByteBuffer) {
-        file!!.seek(deviceOffset * blockSize + byteOffset)
-        val read = file!!.read(buffer.array(), buffer.position(), buffer.remaining())
+        file.seek(deviceOffset * blockSize + byteOffset)
+        val read = file.read(buffer.array(), buffer.position(), buffer.remaining())
         buffer.position(buffer.position() + read)
     }
 
     @Throws(IOException::class)
     override fun write(deviceOffset: Long, buffer: ByteBuffer) {
-        file!!.seek(deviceOffset * blockSize + byteOffset)
-        file!!.write(buffer.array(), buffer.position(), buffer.remaining())
+        file.seek(deviceOffset * blockSize + byteOffset)
+        file.write(buffer.array(), buffer.position(), buffer.remaining())
         buffer.position(buffer.limit())
     }
 }
