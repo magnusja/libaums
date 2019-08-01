@@ -53,6 +53,6 @@ interface UsbCommunication {
     fun bulkInTransfer(dest: ByteBuffer): Int
 
     companion object {
-        val TRANSFER_TIMEOUT = 5000
+        const val TRANSFER_TIMEOUT = 5000
     }
 }

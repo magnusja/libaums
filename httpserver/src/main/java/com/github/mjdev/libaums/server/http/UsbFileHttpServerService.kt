@@ -112,6 +112,6 @@ class UsbFileHttpServerService : Service() {
 
         private val TAG = UsbFileHttpServerService::class.java.simpleName
 
-        private val ONGOING_NOTIFICATION_ID = 1
+        private const val ONGOING_NOTIFICATION_ID = 1
     }
 }
