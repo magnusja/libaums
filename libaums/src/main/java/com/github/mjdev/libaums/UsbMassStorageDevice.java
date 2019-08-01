@@ -228,7 +228,7 @@ public class UsbMassStorageDevice {
 		byte[] b = new byte[1];
 		deviceConnection.controlTransfer(0b10100001, 0b11111110, 0, usbInterface.getId(), b, 1, 5000);
 		Log.i(TAG, "MAX LUN " + (int)b[0]);
-		blockDevice = BlockDeviceDriverFactory.createBlockDevice(communication);
+		blockDevice = BlockDeviceDriverFactory.INSTANCE.createBlockDevice(communication);
 		blockDevice.init();
 		partitionTable = PartitionTableFactory.createPartitionTable(blockDevice);
 		initPartitions();

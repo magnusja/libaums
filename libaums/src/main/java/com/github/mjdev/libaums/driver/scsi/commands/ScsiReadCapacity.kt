@@ -15,32 +15,31 @@
  * 
  */
 
-package com.github.mjdev.libaums.driver.scsi.commands;
+package com.github.mjdev.libaums.driver.scsi.commands
 
-import java.nio.ByteBuffer;
+import java.nio.ByteBuffer
 
 /**
  * Represents the command to read the capacity from the mass storage device.
- * <p>
+ *
+ *
  * The data is transferred in the data phase.
- * 
+ *
  * @author mjahnen
  * @see com.github.mjdev.libaums.driver.scsi.commands.ScsiReadCapacityResponse
  */
-public class ScsiReadCapacity extends CommandBlockWrapper {
+class ScsiReadCapacity : CommandBlockWrapper(RESPONSE_LENGTH, CommandBlockWrapper.Direction.IN, 0.toByte(), LENGTH) {
 
-	private static final int RESPONSE_LENGTH = 0x8;
-	private static final byte LENGTH = 0x10;
-	private static final byte OPCODE = 0x25;
+    override fun serialize(buffer: ByteBuffer) {
+        super.serialize(buffer)
+        buffer.put(OPCODE)
+    }
 
-	public ScsiReadCapacity() {
-		super(RESPONSE_LENGTH, Direction.IN, (byte) 0, LENGTH);
-	}
+    companion object {
 
-	@Override
-	public void serialize(ByteBuffer buffer) {
-		super.serialize(buffer);
-		buffer.put(OPCODE);
-	}
+        private val RESPONSE_LENGTH = 0x8
+        private val LENGTH: Byte = 0x10
+        private val OPCODE: Byte = 0x25
+    }
 
 }
