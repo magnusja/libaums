@@ -60,8 +60,8 @@ public class Fat32FileSystemProducer implements IProducer<Pair<Fat32FileSystem, 
             blockDevice = new ByteBlockDevice(
                     new FileBlockDeviceDriver(
                             tempFile,
-                            expecteValues.get("blockSize").asInt(),
-                            expecteValues.get("blockSize").asInt() * expecteValues.get("fileSystemOffset").asInt()));
+                            expecteValues.get("blockSize").asInt() * expecteValues.get("fileSystemOffset").asInt(),
+                            expecteValues.get("blockSize").asInt()));
             blockDevice.init();
             return new Pair<>(Fat32FileSystem.read(blockDevice), expecteValues);
         } catch (IOException e) {

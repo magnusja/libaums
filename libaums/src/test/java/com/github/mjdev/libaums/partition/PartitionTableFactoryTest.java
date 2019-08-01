@@ -31,7 +31,7 @@ public class PartitionTableFactoryTest {
     public void testFileSystemCreate() throws Exception {
         BlockDeviceDriver blockDevice = new FileBlockDeviceDriver(
                 new URL("https://www.dropbox.com/s/3bxngiqmwitlucd/mbr_fat32.img?dl=1"),
-                2 * 512);
+                0, 2 * 512);
         blockDevice.init();
 
         PartitionTable table = PartitionTableFactory.INSTANCE.createPartitionTable(blockDevice);
