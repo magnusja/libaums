@@ -45,8 +45,8 @@ import com.github.mjdev.libaums.driver.scsi.commands.ScsiWrite10
  * @see com.github.mjdev.libaums.driver.scsi.commands
  */
 class ScsiBlockDevice(private val usbCommunication: UsbCommunication) : BlockDeviceDriver {
-    private val outBuffer: ByteBuffer
-    private val cswBuffer: ByteBuffer
+    private val outBuffer: ByteBuffer = ByteBuffer.allocate(31)
+    private val cswBuffer: ByteBuffer = ByteBuffer.allocate(CommandStatusWrapper.SIZE)
 
     override var blockSize: Int = 0
         private set
@@ -55,11 +55,6 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication) : BlockDev
     private val writeCommand = ScsiWrite10()
     private val readCommand = ScsiRead10()
     private val csw = CommandStatusWrapper()
-
-    init {
-        outBuffer = ByteBuffer.allocate(31)
-        cswBuffer = ByteBuffer.allocate(CommandStatusWrapper.SIZE)
-    }
 
     /**
      * Issues a SCSI Inquiry to determine the connected device. After that it is
