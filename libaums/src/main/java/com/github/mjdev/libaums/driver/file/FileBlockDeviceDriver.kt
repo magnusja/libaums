@@ -24,7 +24,7 @@ class FileBlockDeviceDriver : BlockDeviceDriver {
 
     @Throws(FileNotFoundException::class)
     @JvmOverloads
-    constructor(file: File, blockSize: Int = 512, byteOffset: Int = 0) {
+    constructor(file: File, byteOffset: Int = 0, blockSize: Int = 512) {
         this.file = RandomAccessFile(file, "rw")
         this.blockSize = blockSize
         this.byteOffset = byteOffset
@@ -32,7 +32,7 @@ class FileBlockDeviceDriver : BlockDeviceDriver {
 
     @Throws(IOException::class)
     @JvmOverloads
-    constructor(url: URL, blockSize: Int = 512, byteOffset: Int = 0) {
+    constructor(url: URL, byteOffset: Int = 0, blockSize: Int = 512) {
         this.byteOffset = byteOffset
         val rbc = Channels.newChannel(url.openStream())
         val tempFile = File.createTempFile("libaums_file_blockdevice", ".bin")
