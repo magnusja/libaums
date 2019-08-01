@@ -10,7 +10,7 @@ import java.io.IOException
  */
 interface HttpServer {
     val isAlive: Boolean
-    val hostname: String?
+    val hostname: String
     val listeningPort: Int
     @Throws(IOException::class)
     fun start()
