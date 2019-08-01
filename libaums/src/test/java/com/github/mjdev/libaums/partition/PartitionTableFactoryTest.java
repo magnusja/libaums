@@ -22,7 +22,7 @@ public class PartitionTableFactoryTest {
                 new URL("https://www.dropbox.com/s/w3x12zw6d6lc6x5/mbr_1_partition_hfs%2B.bin?dl=1"));
         blockDevice.init();
 
-        PartitionTable table = PartitionTableFactory.createPartitionTable(blockDevice);
+        PartitionTable table = PartitionTableFactory.INSTANCE.createPartitionTable(blockDevice);
 
         assertTrue(table instanceof MasterBootRecord);
     }
@@ -34,9 +34,9 @@ public class PartitionTableFactoryTest {
                 2 * 512);
         blockDevice.init();
 
-        PartitionTable table = PartitionTableFactory.createPartitionTable(blockDevice);
+        PartitionTable table = PartitionTableFactory.INSTANCE.createPartitionTable(blockDevice);
 
-        assertTrue(table instanceof FileSystemPartitionTable);
+        assertTrue(table instanceof MasterBootRecord);
     }
 
 }

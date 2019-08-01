@@ -15,32 +15,30 @@
  * 
  */
 
-package com.github.mjdev.libaums.partition;
-
-import java.util.List;
+package com.github.mjdev.libaums.partition
 
 /**
  * This interface represents a partition table.
- * <p>
+ *
+ *
  * Normally a block device has a partition table at the beginning of the device
  * which says something about the partitions on the mass storage device. For
  * example where they start and end and which file system a specific partition
  * has.
- * 
+ *
  * @author mjahnen
- * 
  */
-public interface PartitionTable {
-	/**
-	 * 
-	 * @return The size in bytes the partition table occupies.
-	 */
-	int getSize();
+interface PartitionTable {
+    /**
+     *
+     * @return The size in bytes the partition table occupies.
+     */
+    val size: Int
 
-	/**
-	 * 
-	 * @return A collection of {@link PartitionTableEntry}s located on the block
-	 *         device.
-	 */
-	List<PartitionTableEntry> getPartitionTableEntries();
+    /**
+     *
+     * @return A collection of [PartitionTableEntry]s located on the block
+     * device.
+     */
+    val partitionTableEntries: List<PartitionTableEntry>
 }
