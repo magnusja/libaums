@@ -15,36 +15,31 @@
  * 
  */
 
-package com.github.mjdev.libaums.driver.scsi.commands;
+package com.github.mjdev.libaums.driver.scsi.commands
 
-import java.nio.ByteBuffer;
+import java.nio.ByteBuffer
 
 /**
  * This class is used to issue a SCSI request sense when a command has failed.
- * 
+ *
  * @author mjahnen
  * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper
- *      #getbCswStatus()
+ * .getbCswStatus
  */
-public class ScsiRequestSense extends CommandBlockWrapper {
-    private static final byte OPCODE = 0x3;
-    private static final byte LENGTH = 0x6;
+class ScsiRequestSense(private val allocationLength: Byte) : CommandBlockWrapper(0, CommandBlockWrapper.Direction.NONE, 0.toByte(), LENGTH) {
 
-    private byte allocationLength;
-
-    public ScsiRequestSense(byte allocationLength) {
-        super(0, Direction.NONE, (byte) 0, LENGTH);
-        this.allocationLength = allocationLength;
+    override fun serialize(buffer: ByteBuffer) {
+        super.serialize(buffer)
+        buffer.put(OPCODE)
+        buffer.put(0.toByte())
+        buffer.put(0.toByte())
+        buffer.put(0.toByte())
+        buffer.put(allocationLength)
     }
 
-    @Override
-    public void serialize(ByteBuffer buffer) {
-        super.serialize(buffer);
-        buffer.put(OPCODE);
-        buffer.put((byte) 0);
-        buffer.put((byte) 0);
-        buffer.put((byte) 0);
-        buffer.put(allocationLength);
+    companion object {
+        private val OPCODE: Byte = 0x3
+        private val LENGTH: Byte = 0x6
     }
 
 }

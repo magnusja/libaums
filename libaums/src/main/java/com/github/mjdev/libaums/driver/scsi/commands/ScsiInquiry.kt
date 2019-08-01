@@ -15,41 +15,36 @@
  * 
  */
 
-package com.github.mjdev.libaums.driver.scsi.commands;
+package com.github.mjdev.libaums.driver.scsi.commands
 
-import java.nio.ByteBuffer;
+import java.nio.ByteBuffer
 
 /**
  * This class represents a SCSI Inquiry command. It is used to get important
  * information about the connected mass storage device. This information include
  * the supported SCSI commands.
- * <p>
+ *
+ *
  * The response is sent in the data phase.
- * 
+ *
  * @author mjahnen
  * @see com.github.mjdev.libaums.driver.scsi.commands.ScsiInquiryResponse
  */
-public class ScsiInquiry extends CommandBlockWrapper {
+class ScsiInquiry(private val allocationLength: Byte) : CommandBlockWrapper(allocationLength.toInt(), CommandBlockWrapper.Direction.IN, 0.toByte(), LENGTH) {
 
-	private static final byte LENGTH = 0x6;
-	private static final byte OPCODE = 0x12;
+    override fun serialize(buffer: ByteBuffer) {
+        super.serialize(buffer)
+        buffer.put(OPCODE)
+        buffer.put(0.toByte())
+        buffer.put(0.toByte())
+        buffer.put(0.toByte())
+        buffer.put(allocationLength)
+    }
 
-	private byte allocationLength;
+    companion object {
 
-	public ScsiInquiry(byte allocationLength) {
-		super(allocationLength, Direction.IN, (byte) 0, LENGTH);
-
-        this.allocationLength = allocationLength;
-	}
-
-	@Override
-	public void serialize(ByteBuffer buffer) {
-		super.serialize(buffer);
-		buffer.put(OPCODE);
-		buffer.put((byte) 0);
-		buffer.put((byte) 0);
-		buffer.put((byte) 0);
-		buffer.put(allocationLength);
-	}
+        private val LENGTH: Byte = 0x6
+        private val OPCODE: Byte = 0x12
+    }
 
 }

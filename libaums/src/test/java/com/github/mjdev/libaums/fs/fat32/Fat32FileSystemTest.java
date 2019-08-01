@@ -42,8 +42,8 @@ public class Fat32FileSystemTest {
                             blockDevice = new ByteBlockDevice(
                                     new FileBlockDeviceDriver(
                                     new URL("https://www.dropbox.com/s/3bxngiqmwitlucd/mbr_fat32.img?dl=1"),
-                                    obj.get("blockSize").asInt(),
-                                    obj.get("blockSize").asInt() * obj.get("fileSystemOffset").asInt()));
+                                    obj.get("blockSize").asInt() * obj.get("fileSystemOffset").asInt(),
+                                    obj.get("blockSize").asInt()));
                             blockDevice.init();
                         }
                         return new Pair<>(Fat32FileSystem.read(blockDevice), obj);

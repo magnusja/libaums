@@ -15,35 +15,33 @@
  * 
  */
 
-package com.github.mjdev.libaums.driver.scsi.commands;
+package com.github.mjdev.libaums.driver.scsi.commands
 
-import java.nio.ByteBuffer;
+import java.nio.ByteBuffer
 
 /**
  * This command is used to determine if the logical unit of the mass storage
  * device is ready. Sometimes this command fails even if the unit can process
  * all commands successfully. Thus this command issues only a warning in the
- * {@link com.github.mjdev.libaums.driver.scsi.ScsiBlockDevice}.
- * <p>
+ * [com.github.mjdev.libaums.driver.scsi.ScsiBlockDevice].
+ *
+ *
  * This command has no data phase, the result is determined by
- * {@link com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper #getbCswStatus()}.
- * 
+ * [#getbCswStatus()][com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper].
+ *
  * @author mjahnen
- * 
  */
-public class ScsiTestUnitReady extends CommandBlockWrapper {
+class ScsiTestUnitReady : CommandBlockWrapper(0, CommandBlockWrapper.Direction.NONE, 0.toByte(), LENGTH) {
 
-	private static final byte LENGTH = 0x6;
-	private static final byte OPCODE = 0x0;
+    override fun serialize(buffer: ByteBuffer) {
+        super.serialize(buffer)
+        buffer.put(OPCODE)
+    }
 
-	public ScsiTestUnitReady() {
-		super(0, Direction.NONE, (byte) 0, LENGTH);
-	}
+    companion object {
 
-	@Override
-	public void serialize(ByteBuffer buffer) {
-		super.serialize(buffer);
-		buffer.put(OPCODE);
-	}
+        private val LENGTH: Byte = 0x6
+        private val OPCODE: Byte = 0x0
+    }
 
 }

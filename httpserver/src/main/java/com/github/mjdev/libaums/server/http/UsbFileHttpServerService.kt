@@ -47,7 +47,7 @@ class UsbFileHttpServerService : Service() {
     var server: UsbFileHttpServer? = null
 
     val isServerRunning: Boolean
-        get() = server != null && server!!.isAlive
+        get() = server?.isAlive ?: false
 
     inner class ServiceBinder : Binder() {
         val service: UsbFileHttpServerService
@@ -60,12 +60,12 @@ class UsbFileHttpServerService : Service() {
         startAsForeground(notificationChannelId, notificationName)
 
         this.server = UsbFileHttpServer(file, server)
-        this.server!!.start()
+        this.server?.start()
     }
 
     fun stopServer() {
         try {
-            server!!.stop()
+            server?.stop()
         } catch (e: IOException) {
             Log.e(TAG, "exception stopping server", e)
         }
@@ -112,6 +112,6 @@ class UsbFileHttpServerService : Service() {
 
         private val TAG = UsbFileHttpServerService::class.java.simpleName
 
-        private val ONGOING_NOTIFICATION_ID = 1
+        private const val ONGOING_NOTIFICATION_ID = 1
     }
 }

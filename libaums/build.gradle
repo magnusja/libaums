@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 apply plugin: 'jacoco-android'
 
 ext {
@@ -64,9 +66,15 @@ dependencies {
 
     api 'androidx.annotation:annotation:1.0.0-beta01'
     javadocDeps 'androidx.annotation:annotation:1.0.0-beta01'
+    api 'androidx.core:core:1.1.0-beta01'
+    api "androidx.core:core-ktx:1.0.2"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 task bintray {
     apply from: '../install.gradle'
     apply from: '../bintray.gradle'
+}
+repositories {
+    mavenCentral()
 }
