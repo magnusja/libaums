@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2014 mjahnen <jahnen@in.tum.de>
+ * (C) Copyright 2014-2019 magnusja <github@mgns.tech>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,23 +139,22 @@ private constructor(private val usbManager: UsbManager,
     @Throws(IOException::class)
     private fun setupDevice() {
         Log.d(TAG, "setup device")
-        deviceConnection = usbManager.openDevice(usbDevice)
-        if (deviceConnection == null) {
-            throw IOException("deviceConnection is null!")
-        }
+        val deviceConnection: UsbDeviceConnection = usbManager.openDevice(usbDevice) ?: throw IOException("deviceConnection is null!")
+        this.deviceConnection = deviceConnection
 
-        val claim = deviceConnection!!.claimInterface(usbInterface, true)
+        val claim = deviceConnection.claimInterface(usbInterface, true)
         if (!claim) {
             throw IOException("could not claim interface!")
         }
 
-        val communication = UsbCommunicationFactory.createUsbCommunication(deviceConnection!!, outEndpoint, inEndpoint)
+        val communication = UsbCommunicationFactory.createUsbCommunication(deviceConnection, outEndpoint, inEndpoint)
         val b = ByteArray(1)
-        deviceConnection!!.controlTransfer(161, 254, 0, usbInterface.id, b, 1, 5000)
+        deviceConnection.controlTransfer(161, 254, 0, usbInterface.id, b, 1, 5000)
         Log.i(TAG, "MAX LUN " + b[0].toInt())
-        blockDevice = BlockDeviceDriverFactory.createBlockDevice(communication)
-        blockDevice!!.init()
-        partitionTable = PartitionTableFactory.createPartitionTable(blockDevice!!)
+        val blockDevice = BlockDeviceDriverFactory.createBlockDevice(communication)
+        blockDevice.init()
+        this.blockDevice = blockDevice
+        partitionTable = PartitionTableFactory.createPartitionTable(blockDevice)
         initPartitions()
     }
 
@@ -186,13 +185,13 @@ private constructor(private val usbManager: UsbManager,
      */
     fun close() {
         Log.d(TAG, "close device")
-        if (deviceConnection == null) return
+        val deviceConnection = this.deviceConnection?.let { it } ?: return
 
-        val release = deviceConnection!!.releaseInterface(usbInterface)
+        val release = deviceConnection.releaseInterface(usbInterface)
         if (!release) {
             Log.e(TAG, "could not release interface!")
         }
-        deviceConnection!!.close()
+        deviceConnection.close()
         inited = false
     }
 
@@ -238,8 +237,7 @@ private constructor(private val usbManager: UsbManager,
             for (device in usbManager.deviceList.values) {
                 Log.i(TAG, "found usb device: $device")
 
-                val interfaceCount = device.interfaceCount
-                for (i in 0 until interfaceCount) {
+                for (i in 0 until device.interfaceCount) {
                     val usbInterface = device.getInterface(i)
                     Log.i(TAG, "found usb interface: $usbInterface")
 
