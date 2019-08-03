@@ -31,6 +31,7 @@ import android.util.Log
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.driver.BlockDeviceDriverFactory
+import com.github.mjdev.libaums.driver.scsi.UnitNotReady
 import com.github.mjdev.libaums.partition.Partition
 import com.github.mjdev.libaums.partition.PartitionTable
 import com.github.mjdev.libaums.partition.PartitionTableFactory
@@ -151,7 +152,17 @@ private constructor(private val usbManager: UsbManager,
 
         for (i in 0 until maxLun[0]) {
             val blockDevice = BlockDeviceDriverFactory.createBlockDevice(communication, lun=i.toByte())
-            blockDevice.init()
+            try {
+                blockDevice.init()
+            } catch (e: UnitNotReady) {
+                if (maxLun[0] == 0.toByte()) {
+                    throw e
+                }
+                // else:  seems to support multiple logical units (e.g. card reader)
+                // so some LUNs may not be inserted. Silently fail in this case and
+                // continue with next LUN
+                continue
+            }
 
             val partitionTable = PartitionTableFactory.createPartitionTable(blockDevice)
             val partitions = initPartitions(partitionTable, blockDevice)
