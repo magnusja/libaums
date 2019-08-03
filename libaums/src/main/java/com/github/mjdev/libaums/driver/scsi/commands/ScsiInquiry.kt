@@ -30,7 +30,7 @@ import java.nio.ByteBuffer
  * @author mjahnen
  * @see com.github.mjdev.libaums.driver.scsi.commands.ScsiInquiryResponse
  */
-class ScsiInquiry(private val allocationLength: Byte) : CommandBlockWrapper(allocationLength.toInt(), CommandBlockWrapper.Direction.IN, 0.toByte(), LENGTH) {
+class ScsiInquiry(private val allocationLength: Byte, lun: Byte) : CommandBlockWrapper(allocationLength.toInt(), Direction.IN, lun, LENGTH) {
 
     override fun serialize(buffer: ByteBuffer) {
         super.serialize(buffer)
@@ -43,8 +43,8 @@ class ScsiInquiry(private val allocationLength: Byte) : CommandBlockWrapper(allo
 
     companion object {
 
-        private val LENGTH: Byte = 0x6
-        private val OPCODE: Byte = 0x12
+        private const val LENGTH: Byte = 0x6
+        private const val OPCODE: Byte = 0x12
     }
 
 }

@@ -36,6 +36,8 @@ import com.github.mjdev.libaums.driver.scsi.commands.ScsiReadCapacityResponse
 import com.github.mjdev.libaums.driver.scsi.commands.ScsiTestUnitReady
 import com.github.mjdev.libaums.driver.scsi.commands.ScsiWrite10
 
+class UnitNotReady: IOException("Device is not ready (Unsuccessful ScsiTestUnitReady Csw status)")
+
 /**
  * This class is responsible for handling mass storage devices which follow the
  * SCSI standard. This class communicates with the mass storage device via the
@@ -44,7 +46,7 @@ import com.github.mjdev.libaums.driver.scsi.commands.ScsiWrite10
  * @author mjahnen
  * @see com.github.mjdev.libaums.driver.scsi.commands
  */
-class ScsiBlockDevice(private val usbCommunication: UsbCommunication) : BlockDeviceDriver {
+class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private val lun: Byte) : BlockDeviceDriver {
     private val outBuffer: ByteBuffer = ByteBuffer.allocate(31)
     private val cswBuffer: ByteBuffer = ByteBuffer.allocate(CommandStatusWrapper.SIZE)
 
@@ -52,8 +54,8 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication) : BlockDev
         private set
     private var lastBlockAddress: Int = 0
 
-    private val writeCommand = ScsiWrite10()
-    private val readCommand = ScsiRead10()
+    private val writeCommand = ScsiWrite10(lun=lun)
+    private val readCommand = ScsiRead10(lun=lun)
     private val csw = CommandStatusWrapper()
 
     /**
@@ -77,10 +79,9 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication) : BlockDev
     @Throws(IOException::class)
     override fun init() {
         val inBuffer = ByteBuffer.allocate(36)
-        val inquiry = ScsiInquiry(inBuffer.array().size.toByte())
+        val inquiry = ScsiInquiry(inBuffer.array().size.toByte(), lun=lun)
         transferCommand(inquiry, inBuffer)
         inBuffer.clear()
-        // TODO support multiple luns!
         val inquiryResponse = ScsiInquiryResponse.read(inBuffer)
         Log.d(TAG, "inquiry response: $inquiryResponse")
 
@@ -88,12 +89,21 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication) : BlockDev
             throw IOException("unsupported PeripheralQualifier or PeripheralDeviceType")
         }
 
-        val testUnit = ScsiTestUnitReady()
-        if (!transferCommand(testUnit, ByteBuffer.allocate(0))) {
-            Log.w(TAG, "unit not ready!")
+        val testUnit = ScsiTestUnitReady(lun=lun)
+        try {
+            if (!transferCommand(testUnit, ByteBuffer.allocate(0))) {
+                Log.e(TAG, "unit not ready!")
+                throw UnitNotReady()
+            }
+        } catch (e: IOException) {
+            if (e.message.equals("Unsuccessful Csw status: 1")) {
+                throw UnitNotReady()
+            } else {
+                throw e
+            }
         }
 
-        val readCapacity = ScsiReadCapacity()
+        val readCapacity = ScsiReadCapacity(lun=lun)
         inBuffer.clear()
         transferCommand(readCapacity, inBuffer)
         inBuffer.clear()

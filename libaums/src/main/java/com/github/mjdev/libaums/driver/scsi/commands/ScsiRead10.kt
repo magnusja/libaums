@@ -41,7 +41,7 @@ class ScsiRead10 : CommandBlockWrapper {
      * Constructs a new read command without any information.
      * Be sure to call [.init] before transfering command to device.
      */
-    constructor() : super(0, CommandBlockWrapper.Direction.IN, 0.toByte(), LENGTH) {}
+    constructor(lun: Byte) : super(0, Direction.IN, lun, LENGTH)
 
     /**
      * Constructs a new read command with the given information.
@@ -53,7 +53,7 @@ class ScsiRead10 : CommandBlockWrapper {
      * @param blockSize
      * The block size of the mass storage device.
      */
-    constructor(blockAddress: Int, transferBytes: Int, blockSize: Int) : super(transferBytes, CommandBlockWrapper.Direction.IN, 0.toByte(), LENGTH) {
+    constructor(blockAddress: Int, transferBytes: Int, blockSize: Int) : super(transferBytes, Direction.IN, 0.toByte(), LENGTH) {
         init(blockAddress, transferBytes, blockSize)
     }
 

@@ -26,7 +26,7 @@ import java.nio.ByteBuffer
  * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper
  * .getbCswStatus
  */
-class ScsiRequestSense(private val allocationLength: Byte) : CommandBlockWrapper(0, CommandBlockWrapper.Direction.NONE, 0.toByte(), LENGTH) {
+class ScsiRequestSense(private val allocationLength: Byte, lun: Byte) : CommandBlockWrapper(0, Direction.NONE, lun, LENGTH) {
 
     override fun serialize(buffer: ByteBuffer) {
         super.serialize(buffer)
