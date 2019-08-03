@@ -92,9 +92,6 @@ private constructor(private val usbManager: UsbManager,
      *
      * @return The BlockDeviceDriver implementation
      */
-    var blockDevice: BlockDeviceDriver? = null
-        private set
-    private var partitionTable: PartitionTable? = null
     private val partitions = ArrayList<Partition>()
     // TODO this is never used, should we only allow one init() call?
     private var inited = false
@@ -153,9 +150,9 @@ private constructor(private val usbManager: UsbManager,
         Log.i(TAG, "MAX LUN " + b[0].toInt())
         val blockDevice = BlockDeviceDriverFactory.createBlockDevice(communication)
         blockDevice.init()
-        this.blockDevice = blockDevice
-        partitionTable = PartitionTableFactory.createPartitionTable(blockDevice)
-        initPartitions()
+
+        val partitionTable = PartitionTableFactory.createPartitionTable(blockDevice)
+        initPartitions(partitionTable, blockDevice)
     }
 
     /**
@@ -166,14 +163,12 @@ private constructor(private val usbManager: UsbManager,
      * If reading from the [.blockDevice] fails.
      */
     @Throws(IOException::class)
-    private fun initPartitions() {
-        val partitionEntrys = partitionTable!!.partitionTableEntries
+    private fun initPartitions(partitionTable: PartitionTable, blockDevice: BlockDeviceDriver) {
+        val partitionEntrys = partitionTable.partitionTableEntries
 
         for (entry in partitionEntrys) {
-            val partition = Partition.createPartition(entry, blockDevice!!)
-            if (partition != null) {
-                partitions.add(partition)
-            }
+            val partition = Partition.createPartition(entry, blockDevice)
+            partition?.let { partitions.add(it) }
         }
     }
 
