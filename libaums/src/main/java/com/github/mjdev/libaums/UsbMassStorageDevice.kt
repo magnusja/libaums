@@ -150,7 +150,7 @@ private constructor(private val usbManager: UsbManager,
         deviceConnection.controlTransfer(161, 254, 0, usbInterface.id, maxLun, 1, 5000)
         Log.i(TAG, "MAX LUN " + maxLun[0].toInt())
 
-        for (i in 0 until maxLun[0]) {
+        for (i in 0 until maxLun[0] + 1) {
             val blockDevice = BlockDeviceDriverFactory.createBlockDevice(communication, lun=i.toByte())
             try {
                 blockDevice.init()
