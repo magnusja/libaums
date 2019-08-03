@@ -28,7 +28,7 @@ import java.nio.ByteBuffer
  * @author mjahnen
  * @see com.github.mjdev.libaums.driver.scsi.commands.ScsiReadCapacityResponse
  */
-class ScsiReadCapacity : CommandBlockWrapper(RESPONSE_LENGTH, CommandBlockWrapper.Direction.IN, 0.toByte(), LENGTH) {
+class ScsiReadCapacity(lun: Byte) : CommandBlockWrapper(RESPONSE_LENGTH, Direction.IN, lun, LENGTH) {
 
     override fun serialize(buffer: ByteBuffer) {
         super.serialize(buffer)

@@ -31,7 +31,7 @@ import java.nio.ByteBuffer
  *
  * @author mjahnen
  */
-class ScsiTestUnitReady : CommandBlockWrapper(0, CommandBlockWrapper.Direction.NONE, 0.toByte(), LENGTH) {
+class ScsiTestUnitReady(lun: Byte) : CommandBlockWrapper(0, Direction.NONE, lun, LENGTH) {
 
     override fun serialize(buffer: ByteBuffer) {
         super.serialize(buffer)

@@ -41,7 +41,7 @@ class ScsiWrite10 : CommandBlockWrapper {
      * Constructs a new write command without any information.
      * Be sure to call [.init] before transfering command to device.
      */
-    constructor() : super(0, CommandBlockWrapper.Direction.OUT, 0.toByte(), LENGTH) {}
+    constructor(lun: Byte) : super(0, Direction.OUT, lun, LENGTH)
 
     /**
      * Constructs a new write command with the given information.
@@ -53,7 +53,7 @@ class ScsiWrite10 : CommandBlockWrapper {
      * @param blockSize
      * The block size of the mass storage device.
      */
-    constructor(blockAddress: Int, transferBytes: Int, blockSize: Int) : super(transferBytes, CommandBlockWrapper.Direction.OUT, 0.toByte(), LENGTH) {
+    constructor(blockAddress: Int, transferBytes: Int, blockSize: Int) : super(transferBytes, Direction.OUT, 0.toByte(), LENGTH) {
         init(blockAddress, transferBytes, blockSize)
     }
 
@@ -88,8 +88,8 @@ class ScsiWrite10 : CommandBlockWrapper {
     companion object {
 
         // private static final String TAG = ScsiWrite10.class.getSimpleName();
-        private val LENGTH: Byte = 10
-        private val OPCODE: Byte = 0x2a
+        private const val LENGTH: Byte = 10
+        private const val OPCODE: Byte = 0x2a
     }
 
 }

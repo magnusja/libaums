@@ -31,6 +31,7 @@ import android.util.Log
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.driver.BlockDeviceDriverFactory
+import com.github.mjdev.libaums.driver.scsi.UnitNotReady
 import com.github.mjdev.libaums.partition.Partition
 import com.github.mjdev.libaums.partition.PartitionTable
 import com.github.mjdev.libaums.partition.PartitionTableFactory
@@ -145,14 +146,28 @@ private constructor(private val usbManager: UsbManager,
         }
 
         val communication = UsbCommunicationFactory.createUsbCommunication(deviceConnection, outEndpoint, inEndpoint)
-        val b = ByteArray(1)
-        deviceConnection.controlTransfer(161, 254, 0, usbInterface.id, b, 1, 5000)
-        Log.i(TAG, "MAX LUN " + b[0].toInt())
-        val blockDevice = BlockDeviceDriverFactory.createBlockDevice(communication)
-        blockDevice.init()
+        val maxLun = ByteArray(1)
+        deviceConnection.controlTransfer(161, 254, 0, usbInterface.id, maxLun, 1, 5000)
+        Log.i(TAG, "MAX LUN " + maxLun[0].toInt())
 
-        val partitionTable = PartitionTableFactory.createPartitionTable(blockDevice)
-        initPartitions(partitionTable, blockDevice)
+        for (i in 0 until maxLun[0] + 1) {
+            val blockDevice = BlockDeviceDriverFactory.createBlockDevice(communication, lun=i.toByte())
+            try {
+                blockDevice.init()
+            } catch (e: UnitNotReady) {
+                if (maxLun[0] == 0.toByte()) {
+                    throw e
+                }
+                // else:  seems to support multiple logical units (e.g. card reader)
+                // so some LUNs may not be inserted. Silently fail in this case and
+                // continue with next LUN
+                continue
+            }
+
+            val partitionTable = PartitionTableFactory.createPartitionTable(blockDevice)
+            val partitions = initPartitions(partitionTable, blockDevice)
+            this.partitions.addAll(partitions)
+        }
     }
 
     /**
@@ -163,13 +178,16 @@ private constructor(private val usbManager: UsbManager,
      * If reading from the [.blockDevice] fails.
      */
     @Throws(IOException::class)
-    private fun initPartitions(partitionTable: PartitionTable, blockDevice: BlockDeviceDriver) {
+    private fun initPartitions(partitionTable: PartitionTable, blockDevice: BlockDeviceDriver): ArrayList<Partition> {
         val partitionEntrys = partitionTable.partitionTableEntries
 
+        val partitions = ArrayList<Partition>()
         for (entry in partitionEntrys) {
             val partition = Partition.createPartition(entry, blockDevice)
             partition?.let { partitions.add(it) }
         }
+
+        return partitions
     }
 
     /**

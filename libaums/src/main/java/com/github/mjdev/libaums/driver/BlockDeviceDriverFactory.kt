@@ -36,8 +36,8 @@ object BlockDeviceDriverFactory {
      * The underlying USB communication.
      * @return A driver which can handle the USB mass storage device.
      */
-    fun createBlockDevice(usbCommunication: UsbCommunication): BlockDeviceDriver {
+    fun createBlockDevice(usbCommunication: UsbCommunication, lun: Byte): BlockDeviceDriver {
         // we currently only support scsi transparent command set
-        return ScsiBlockDevice(usbCommunication)
+        return ScsiBlockDevice(usbCommunication, lun)
     }
 }
