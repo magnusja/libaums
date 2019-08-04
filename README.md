@@ -76,7 +76,7 @@ usbManager.requestPermission(device.getUsbDevice(), permissionIntent);
 
 #### Kotlin
 
-``kotlin
+```kotlin
 val permissionIntent = PendingIntent.getBroadcast(this, 0, Intent(ACTION_USB_PERMISSION), 0);
 usbManager.requestPermission(device.usDevice, permissionIntent);
 ```
