@@ -13,7 +13,7 @@ A library to access USB mass storage devices (pen drives, external HDDs, card re
 The library can be included into your project like this:
 
 ```ruby
-compile 'com.github.mjdev:libaums:0.6.0'
+compile 'com.github.mjdev:libaums:0.7.0'
 ```
 
 If you need the HTTP or the storage provider module:
@@ -25,6 +25,8 @@ compile 'com.github.mjdev:libaums-storageprovider:0.5.1'
 
 ### Basics
 #### Getting mass storage devices
+
+#### Java
 
 ```java
 UsbMassStorageDevice[] devices = UsbMassStorageDevice.getMassStorageDevices(this /* Context or Activity */);
@@ -43,18 +45,47 @@ for(UsbMassStorageDevice device: devices) {
 }
 ```
 
+#### Kotlin
+
+```kotlin
+val devices = UsbMassStorageDevice.getMassStorageDevices(this /* Context or Activity */)
+
+for (device in devices) {
+
+    // before interacting with a device you need to call init()!
+    device.init()
+
+    // Only uses the first partition on the device
+    val currentFs = device.getPartitions().get(0).getFileSystem()
+    Log.d(TAG, "Capacity: " + currentFs.getCapacity())
+    Log.d(TAG, "Occupied Space: " + currentFs.getOccupiedSpace())
+    Log.d(TAG, "Free Space: " + currentFs.getFreeSpace())
+    Log.d(TAG, "Chunk size: " + currentFs.getChunkSize())
+}
+```
+
 #### Permissions
 
 Your app needs to get permission from the user at run time to be able to communicate the device. From a `UsbMassStorageDevice` you can get the underlying `android.usb.UsbDevice` to do so.
 
+#### Java
 ```java
 PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
 usbManager.requestPermission(device.getUsbDevice(), permissionIntent);
+````
+
+#### Kotlin
+
+``kotlin
+val permissionIntent = PendingIntent.getBroadcast(this, 0, Intent(ACTION_USB_PERMISSION), 0);
+usbManager.requestPermission(device.usDevice, permissionIntent);
 ```
 
 For more information regarding permissions please check out the Android documentation: https://developer.android.com/guide/topics/connectivity/usb/host.html#permission-d
 
 #### Working with files and folders
+
+##### Java
 
 ```java
 UsbFile root = currentFs.getRootDirectory();
@@ -80,6 +111,33 @@ os.close();
 InputStream is = new UsbFileInputStream(file);
 byte[] buffer = new byte[currentFs.getChunkSize()];
 is.read(buffer);
+```
+
+##### Kotlin
+```kotlin
+val root = currentFs.rootDirectory
+
+val files = root.listFiles()
+for (file in files) {
+    Log.d(TAG, file.name)
+    if (file.isDirectory) {
+        Log.d(TAG, file.length)
+    }
+}
+
+val newDir = root.createDirectory("foo")
+val file = newDir.createFile("bar.txt")
+
+// write to a file
+val os = UsbFileOutputStream(file)
+
+os.write("hello".toByteArray())
+os.close()
+
+// read from a file
+val ins = UsbFileInputStream(file)
+val buffer = ByteArray(currentFs.chunkSize)
+ins.read(buffer)
 ```
 
 #### Using buffered streams for more efficency
@@ -134,6 +192,8 @@ libaums currently supports two different HTTP server libraries.
 
 You can spin up a server pretty easy, you just have to decide for a HTTP server implementation. If you do not have special requirements, you can just go for one, it should not make much of a difference.
 
+#### Java
+
 ```java
 UsbFile file = ... // can be directory or file
 
@@ -145,12 +205,28 @@ UsbFileHttpServer fileServer = new UsbFileHttpServer(file, server);
 fileServer.start();
 ```
 
-The file you privde can either be an actual file or a directory:
+#### Kotlin
+
+```kotlin
+val file: UsbFile
+// can be directory or file
+
+val server = AsyncHttpServer(8000) // port 8000
+// or
+val server = NanoHttpdServer(8000) // port 8000
+
+val fileServer = UsbFileHttpServer(file, server)
+fileServer.start()
+```
+
+The file you provide can either be an actual file or a directory:
 
 1. File: Accessible either via "/" or "/FILE_NAME"
 2. Directory: All files in this directory und sub directories are accessable via their names. Directory listing is not supported!
 
 If you want to be able to access these files when your app is in background, you should implement a service for that. There is an example available in the `httpserver` module. You can use it, but should subclass it or create your own to adapt it to your needs.
+
+#### Java
 
 ```java
 private UsbFileHttpServerService serverService;
@@ -189,6 +265,36 @@ private void startHttpServer(final UsbFile file) {
 ...
     serverService.startServer(file, new AsyncHttpServer(8000));
 ...
+}
+```
+
+#### Kotlin
+
+```kotlin
+private var serverService: UsbFileHttpServerService? = null
+
+internal var serviceConnection: ServiceConnection = object : ServiceConnection() {
+    override fun onServiceConnected(name: ComponentName, service: IBinder) {
+        Log.d(TAG, "on service connected $name")
+        val binder = service as UsbFileHttpServerService.ServiceBinder
+        serverService = binder.getService()
+    }
+
+    override fun onServiceDisconnected(name: ComponentName) {
+        Log.d(TAG, "on service disconnected $name")
+        serverService = null
+    }
+}
+
+override protected fun onCreate(savedInstanceState: Bundle) {
+    serviceIntent = Intent(this, UsbFileHttpServerService::class.java)
+}
+
+override protected fun onStart() {
+    super.onStart()
+
+    startService(serviceIntent)
+    bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
 }
 ```
 
