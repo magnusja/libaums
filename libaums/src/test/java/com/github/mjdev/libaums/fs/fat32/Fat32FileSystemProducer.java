@@ -38,7 +38,8 @@ public class Fat32FileSystemProducer implements IProducer<Pair<Fat32FileSystem, 
 
             URL url = new URL(imageUrl);
             ReadableByteChannel rbc = Channels.newChannel(url.openStream());
-            File tempFile = File.createTempFile("blockdevice", ".bin");
+            File tempFile = File.createTempFile("libaums_test_blockdevice", ".bin");
+            tempFile.deleteOnExit();
             FileOutputStream fos = new FileOutputStream(tempFile);
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 
@@ -59,8 +60,8 @@ public class Fat32FileSystemProducer implements IProducer<Pair<Fat32FileSystem, 
             blockDevice = new ByteBlockDevice(
                     new FileBlockDeviceDriver(
                             tempFile,
-                            expecteValues.get("blockSize").asInt(),
-                            expecteValues.get("blockSize").asInt() * expecteValues.get("fileSystemOffset").asInt()));
+                            expecteValues.get("blockSize").asInt() * expecteValues.get("fileSystemOffset").asInt(),
+                            expecteValues.get("blockSize").asInt()));
             blockDevice.init();
             return new Pair<>(Fat32FileSystem.read(blockDevice), expecteValues);
         } catch (IOException e) {
@@ -74,7 +75,8 @@ public class Fat32FileSystemProducer implements IProducer<Pair<Fat32FileSystem, 
     public synchronized void cleanUp() {
         try {
             ReadableByteChannel rbc = Channels.newChannel(new FileInputStream(originalFile));
-            File tempFile = File.createTempFile("tmp_blockdevice", ".bin");
+            File tempFile = File.createTempFile("libaums_test_blockdevice", ".bin");
+            tempFile.deleteOnExit();
             FileOutputStream fos = new FileOutputStream(tempFile);
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
 

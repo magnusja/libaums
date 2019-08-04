@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 
 project.archivesBaseName = 'libaums-httpserver'
 
@@ -40,12 +42,17 @@ dependencies {
     api 'com.koushikdutta.async:androidasync:2.+'
 
     api fileTree(include: ['*.jar'], dir: 'libs')
-    api 'androidx.annotation:annotation:1.0.0-beta01'
-    api 'androidx.core:core:1.0.0-beta01'
+    api 'androidx.annotation:annotation:1.1.0'
+    api 'androidx.core:core:1.1.0-beta01'
     api project(':libaums')
+    api "androidx.core:core-ktx:1.0.2"
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 task bintray {
     apply from: '../install.gradle'
     apply from: '../bintray.gradle'
+}
+repositories {
+    mavenCentral()
 }

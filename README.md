@@ -13,13 +13,13 @@ A library to access USB mass storage devices (pen drives, external HDDs, card re
 The library can be included into your project like this:
 
 ```ruby
-compile 'com.github.mjdev:libaums:0.5.5'
+compile 'com.github.mjdev:libaums:0.6.0'
 ```
 
 If you need the HTTP or the storage provider module:
 
 ```ruby
-compile 'com.github.mjdev:libaums-httpserver:0.5.2'
+compile 'com.github.mjdev:libaums-httpserver:0.5.3'
 compile 'com.github.mjdev:libaums-storageprovider:0.5.1'
 ```
 
@@ -48,7 +48,7 @@ for(UsbMassStorageDevice device: devices) {
 Your app needs to get permission from the user at run time to be able to communicate the device. From a `UsbMassStorageDevice` you can get the underlying `android.usb.UsbDevice` to do so.
 
 ```java
-PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Inten(ACTION_USB_PERMISSION), 0);
+PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
 usbManager.requestPermission(device.getUsbDevice(), permissionIntent);
 ```
 

@@ -83,7 +83,7 @@ public class MasterBootRecordTest {
             ByteBuffer buffer = ByteBuffer.allocate(512);
             blockDevice.read(0, buffer);
             buffer.flip();
-            MasterBootRecord mbr = MasterBootRecord.read(buffer);
+            MasterBootRecord mbr = MasterBootRecord.Companion.read(buffer);
 
             List<PartitionTableEntry> table = mbr.getPartitionTableEntries();
             Assert.assertEquals(mbrUrl.getFile(), partitionTableInfo.size(), table.size());
@@ -104,13 +104,13 @@ public class MasterBootRecordTest {
     @Test(expected = IOException.class)
     public void testSizeMismatch() throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(3);
-        MasterBootRecord.read(buffer);
+        MasterBootRecord.Companion.read(buffer);
     }
 
     @Test
     public void testEmptyBuffer() throws Exception {
         ByteBuffer buffer = ByteBuffer.allocate(512);
-        Assert.assertNull(MasterBootRecord.read(buffer));
+        Assert.assertNull(MasterBootRecord.Companion.read(buffer));
     }
 
 }
