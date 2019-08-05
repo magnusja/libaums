@@ -158,11 +158,11 @@ public class ClusterChain {
 			int clusters = 1;
 
 			// we write multiple clusters at a time, to speed up the write performance enormously
-			// currently only 8 or fewer clusters are written at the same time. Set this value too high may cause problems
-			if (remainingClusters > 8) {
-				size = (int) (clusterSize * 8);
-				clusters = 8;
-				remainingClusters -= 8;
+			// currently only 4 or fewer clusters are written at the same time. Set this value too high may cause problems
+			if (remainingClusters > 4) {
+				size = (int) (clusterSize * 4);
+				clusters = 4;
+				remainingClusters -= 4;
 			} else if (remainingClusters > 0) {
 				size = (int) (clusterSize * remainingClusters);
 				clusters = remainingClusters;
