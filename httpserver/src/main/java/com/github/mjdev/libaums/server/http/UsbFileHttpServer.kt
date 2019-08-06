@@ -51,7 +51,7 @@ class UsbFileHttpServer(private val rootFile: UsbFile, private val server: HttpS
         get() = server.isAlive
 
     init {
-        server.setUsbFileProvider(this)
+        server.usbFileProvider = this
     }
 
     @Throws(IOException::class)
