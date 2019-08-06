@@ -56,7 +56,7 @@ for (device in devices) {
     device.init()
 
     // Only uses the first partition on the device
-    val currentFs = device.partitions.get(0).fileSystem
+    val currentFs = device.partitions[0].fileSystem
     Log.d(TAG, "Capacity: " + currentFs.capacity)
     Log.d(TAG, "Occupied Space: " + currentFs.occupiedSpace)
     Log.d(TAG, "Free Space: " + currentFs.freeSpace)

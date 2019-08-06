@@ -93,7 +93,7 @@ private constructor(private val usbManager: UsbManager,
      *
      * @return The BlockDeviceDriver implementation
      */
-    private val partitions = ArrayList<Partition>()
+    val partitions = ArrayList<Partition>()
     // TODO this is never used, should we only allow one init() call?
     private var inited = false
 
@@ -206,16 +206,6 @@ private constructor(private val usbManager: UsbManager,
         }
         deviceConnection.close()
         inited = false
-    }
-
-    /**
-     * Returns the available partitions of the mass storage device. You have to
-     * call [.init] before calling this method!
-     *
-     * @return List of partitions.
-     */
-    fun getPartitions(): List<Partition> {
-        return partitions
     }
 
     companion object {
