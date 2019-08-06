@@ -149,17 +149,31 @@ public class ClusterChain {
 			length -= size;
 		}
 
+		int remainingClusters = (int) (length / clusterSize);
+
 		// now we can proceed reading the clusters without an offset in the
 		// cluster
 		while (length > 0) {
-			// we always write one cluster at a time, or if remaining size is
-			// less than the cluster size, only "size" bytes
-			int size = (int) Math.min(clusterSize, length);
+			int size;
+			int clusters = 1;
+
+			// we write multiple clusters at a time, to speed up the write performance enormously
+			// currently only 4 or fewer clusters are written at the same time. Set this value too high may cause problems
+			if (remainingClusters > 4) {
+				size = (int) (clusterSize * 4);
+				clusters = 4;
+				remainingClusters -= 4;
+			} else if (remainingClusters > 0) {
+				size = (int) (clusterSize * remainingClusters);
+				clusters = remainingClusters;
+				remainingClusters = 0;
+			} else size = length;
+
 			source.limit(source.position() + size);
 
 			blockDevice.write(getFileSystemOffset(chain[chainIndex], 0), source);
 
-			chainIndex++;
+			chainIndex += clusters;
 			length -= size;
 		}
 	}

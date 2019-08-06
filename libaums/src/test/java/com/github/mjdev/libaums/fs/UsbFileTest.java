@@ -14,6 +14,7 @@ import org.xenei.junit.contract.Contract;
 import org.xenei.junit.contract.ContractTest;
 import org.xenei.junit.contract.IProducer;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -339,6 +340,35 @@ public class UsbFileTest {
 
     }
 
+    /**
+     * shamelessly stolen from IOUtils of apache commons to increase buffer size
+     * Copy bytes from a large (over 2GB) <code>InputStream</code> to an
+     * <code>OutputStream</code>.
+     * <p>
+     * This method uses the provided buffer, so there is no need to use a
+     * <code>BufferedInputStream</code>.
+     * <p>
+     *
+     * @param input  the <code>InputStream</code> to read from
+     * @param output  the <code>OutputStream</code> to write to
+     * @param buffer the buffer to use for the copy
+     * @return the number of bytes copied
+     * @throws NullPointerException if the input or output is null
+     * @throws IOException if an I/O error occurs
+     * @since 2.2
+     */
+    static long copyLarge(InputStream input, OutputStream output, byte[] buffer)
+            throws IOException {
+        long count = 0;
+        int n = 0;
+        while (-1 != (n = input.read(buffer))) {
+            output.write(buffer, 0, n);
+            count += n;
+        }
+        output.close();
+        return count;
+    }
+
     @ContractTest
     public void write() throws Exception {
 
@@ -364,9 +394,16 @@ public class UsbFileTest {
         UsbFile bigFile = root.createFile("bigwritetest");
         IOUtils.copy(bigFileUrl.openStream(), new UsbFileOutputStream(bigFile));
 
-        IOUtils.contentEquals(bigFileUrl.openStream(), new UsbFileInputStream(bigFile));
+        assertTrue(IOUtils.contentEquals(bigFileUrl.openStream(), new UsbFileInputStream(bigFile)));
 
-        assertEquals(numberOfFiles + 2, root.listFiles().length);
+        UsbFile bigFileLargeBuffer = root.createFile("bigwritetestlargebuffer");
+        copyLarge(new UsbFileInputStream(bigFile),
+                new UsbFileOutputStream(bigFileLargeBuffer), new byte[7 * 32768]);
+
+
+        assertTrue(IOUtils.contentEquals(bigFileUrl.openStream(), new UsbFileInputStream(bigFileLargeBuffer)));
+
+        assertEquals(numberOfFiles + 3, root.listFiles().length);
 
         newInstance();
 
@@ -379,9 +416,16 @@ public class UsbFileTest {
 
         bigFile = root.search("bigwritetest");
 
-        IOUtils.contentEquals(bigFileUrl.openStream(), new UsbFileInputStream(bigFile));
+        assertTrue(IOUtils.contentEquals(bigFileUrl.openStream(), new UsbFileInputStream(bigFile)));
 
-        assertEquals(numberOfFiles + 2, root.listFiles().length);
+
+        bigFile = root.search("bigwritetestlargebuffer");
+
+        assertEquals(bigFileLargeBuffer.getLength(), bigFile.getLength());
+
+        assertTrue(IOUtils.contentEquals(bigFileUrl.openStream(), new UsbFileInputStream(bigFile)));
+
+        assertEquals(numberOfFiles + 3, root.listFiles().length);
     }
 
     @ContractTest
