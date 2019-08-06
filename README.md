@@ -56,11 +56,11 @@ for (device in devices) {
     device.init()
 
     // Only uses the first partition on the device
-    val currentFs = device.getPartitions().get(0).getFileSystem()
-    Log.d(TAG, "Capacity: " + currentFs.getCapacity())
-    Log.d(TAG, "Occupied Space: " + currentFs.getOccupiedSpace())
-    Log.d(TAG, "Free Space: " + currentFs.getFreeSpace())
-    Log.d(TAG, "Chunk size: " + currentFs.getChunkSize())
+    val currentFs = device.partitions.get(0).fileSystem
+    Log.d(TAG, "Capacity: " + currentFs.capacity)
+    Log.d(TAG, "Occupied Space: " + currentFs.occupiedSpace)
+    Log.d(TAG, "Free Space: " + currentFs.freeSpace)
+    Log.d(TAG, "Chunk size: " + currentFs.chunkSize)
 }
 ```
 
