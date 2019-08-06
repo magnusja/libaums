@@ -420,6 +420,8 @@ public class UsbFileTest {
 
         bigFile = root.search("bigwritetestlargebuffer");
 
+        assertEquals(bigFile.getLength(), bigFileLargeBuffer.getLength());
+
         assertTrue(IOUtils.contentEquals(bigFileUrl.openStream(), new UsbFileInputStream(bigFile)));
 
         assertEquals(numberOfFiles + 3, root.listFiles().length);
