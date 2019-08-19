@@ -33,7 +33,7 @@ interface BlockDeviceDriver {
      * read and store bytes in a specific block with a certain size.
      *
      *
-     * That means that it is only possible to read or write hole blocks!
+     * That means that it is only possible to read or write whole blocks!
      *
      * @return The block size in bytes, mostly 512 bytes.
      */
