@@ -79,14 +79,6 @@ private constructor(private val usbManager: UsbManager,
 
     private lateinit var deviceConnection: UsbDeviceConnection
 
-    /**
-     * Returns the block device interface for this device.
-     *
-     * Only use this if you know what you are doing, for a interacting (listing/reading/writing files)
-     * with a pen drive this is usually not needed
-     *
-     * @return The BlockDeviceDriver implementation
-     */
     val partitions = ArrayList<Partition>()
 
     // TODO this is never used, should we only allow one init() call?
