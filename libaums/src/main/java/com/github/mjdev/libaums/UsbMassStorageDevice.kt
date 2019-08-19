@@ -29,7 +29,6 @@ import com.github.mjdev.libaums.partition.PartitionTableFactory
 import com.github.mjdev.libaums.usb.UsbCommunication
 import com.github.mjdev.libaums.usb.UsbCommunicationFactory
 import java.io.IOException
-import java.util.*
 
 /**
  * Class representing a connected USB mass storage device. You can enumerate
@@ -79,7 +78,7 @@ private constructor(private val usbManager: UsbManager,
 
     private lateinit var deviceConnection: UsbDeviceConnection
 
-    val partitions = ArrayList<Partition>()
+    lateinit var partitions: List<Partition>
 
     // TODO this is never used, should we only allow one init() call?
     private var inited = false
@@ -137,25 +136,28 @@ private constructor(private val usbManager: UsbManager,
         deviceConnection.controlTransfer(161, 254, 0, usbInterface.id, maxLun, 1, 5000)
         Log.i(TAG, "MAX LUN " + maxLun[0].toInt())
 
-        (0..maxLun[0]).map { lun ->
-            BlockDeviceDriverFactory.createBlockDevice(communication, lun = lun.toByte())
-        }.forEach { blockDevice ->
-            try {
-                blockDevice.init()
-            } catch (e: UnitNotReady) {
-                if (maxLun[0] == 0.toByte()) {
-                    throw e
+        this.partitions = (0..maxLun[0])
+                .map { lun ->
+                    BlockDeviceDriverFactory.createBlockDevice(communication, lun = lun.toByte())
                 }
-                // else:  seems to support multiple logical units (e.g. card reader)
-                // so some LUNs may not be inserted. Silently fail in this case and
-                // continue with next LUN
-                return@forEach
-            }
+                .mapNotNull { blockDevice ->
+                    try {
+                        blockDevice.init()
+                    } catch (e: UnitNotReady) {
+                        if (maxLun[0] == 0.toByte()) {
+                            throw e
+                        }
+                        // else:  seems to support multiple logical units (e.g. card reader)
+                        // so some LUNs may not be inserted. Silently fail in this case and
+                        // continue with next LUN
+                        return@mapNotNull null
+                    }
 
-            val partitionTable = PartitionTableFactory.createPartitionTable(blockDevice)
-            val partitions = initPartitions(partitionTable, blockDevice)
-            this.partitions.addAll(partitions)
-        }
+                    val partitionTable = PartitionTableFactory.createPartitionTable(blockDevice)
+
+                    initPartitions(partitionTable, blockDevice)
+                }
+                .flatten()
     }
 
     /**
