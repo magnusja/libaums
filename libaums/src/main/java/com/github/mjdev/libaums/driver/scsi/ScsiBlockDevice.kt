@@ -17,24 +17,14 @@
 
 package com.github.mjdev.libaums.driver.scsi
 
+import android.util.Log
+import com.github.mjdev.libaums.driver.BlockDeviceDriver
+import com.github.mjdev.libaums.driver.scsi.commands.*
+import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper.Direction
+import com.github.mjdev.libaums.usb.UsbCommunication
 import java.io.IOException
 import java.nio.ByteBuffer
-import java.util.Arrays
-
-import android.util.Log
-
-import com.github.mjdev.libaums.usb.UsbCommunication
-import com.github.mjdev.libaums.driver.BlockDeviceDriver
-import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper
-import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper.Direction
-import com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper
-import com.github.mjdev.libaums.driver.scsi.commands.ScsiInquiry
-import com.github.mjdev.libaums.driver.scsi.commands.ScsiInquiryResponse
-import com.github.mjdev.libaums.driver.scsi.commands.ScsiRead10
-import com.github.mjdev.libaums.driver.scsi.commands.ScsiReadCapacity
-import com.github.mjdev.libaums.driver.scsi.commands.ScsiReadCapacityResponse
-import com.github.mjdev.libaums.driver.scsi.commands.ScsiTestUnitReady
-import com.github.mjdev.libaums.driver.scsi.commands.ScsiWrite10
+import java.util.*
 
 class UnitNotReady: IOException("Device is not ready (Unsuccessful ScsiTestUnitReady Csw status)")
 
@@ -57,6 +47,13 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
     private val writeCommand = ScsiWrite10(lun=lun)
     private val readCommand = ScsiRead10(lun=lun)
     private val csw = CommandStatusWrapper()
+
+    /**
+     * The size of the block device, in blocks of [blockSize] bytes,
+     *
+     * @return The block device size in blocks
+     */
+    override val blocks: Long = lastBlockAddress.toLong()
 
     /**
      * Issues a SCSI Inquiry to determine the connected device. After that it is

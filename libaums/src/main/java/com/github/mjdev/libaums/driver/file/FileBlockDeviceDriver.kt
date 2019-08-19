@@ -1,16 +1,10 @@
 package com.github.mjdev.libaums.driver.file
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
-
-import java.io.File
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.RandomAccessFile
+import java.io.*
 import java.net.URL
 import java.nio.ByteBuffer
 import java.nio.channels.Channels
-import java.nio.channels.ReadableByteChannel
 
 /**
  * Created by magnusja on 01/08/17.
@@ -21,6 +15,9 @@ class FileBlockDeviceDriver : BlockDeviceDriver {
     override var blockSize: Int = 0
         private set
     private var byteOffset: Int = 0
+
+    override val blocks: Long
+        get() = file.length() / blockSize
 
     @Throws(FileNotFoundException::class)
     @JvmOverloads

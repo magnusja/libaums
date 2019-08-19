@@ -1,7 +1,5 @@
 package com.github.mjdev.libaums.driver
 
-import android.util.Log
-
 import java.io.IOException
 import java.nio.ByteBuffer
 
@@ -15,6 +13,9 @@ open class ByteBlockDevice @JvmOverloads constructor(private val targetBlockDevi
     override val blockSize: Int
         get() = targetBlockDevice.blockSize
 
+    override val blocks: Long
+        get() = targetBlockDevice.blocks
+    
     @Throws(IOException::class)
     override fun init() {
         targetBlockDevice.init()
