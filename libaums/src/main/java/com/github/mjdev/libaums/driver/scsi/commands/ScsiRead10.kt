@@ -71,12 +71,14 @@ class ScsiRead10 : CommandBlockWrapper {
 
     override fun serialize(buffer: ByteBuffer) {
         super.serialize(buffer)
-        buffer.order(ByteOrder.BIG_ENDIAN)
-        buffer.put(OPCODE)
-        buffer.put(0.toByte())
-        buffer.putInt(blockAddress)
-        buffer.put(0.toByte())
-        buffer.putShort(transferBlocks)
+        buffer.apply {
+            order(ByteOrder.BIG_ENDIAN)
+            put(OPCODE)
+            put(0.toByte())
+            putInt(blockAddress)
+            put(0.toByte())
+            putShort(transferBlocks)
+        }
     }
 
     override fun toString(): String {
@@ -86,7 +88,6 @@ class ScsiRead10 : CommandBlockWrapper {
     }
 
     companion object {
-
         // private static final String TAG = ScsiRead10.class.getSimpleName();
         private val LENGTH: Byte = 10
         private val OPCODE: Byte = 0x28
