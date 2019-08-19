@@ -61,10 +61,11 @@ class ScsiReadCapacityResponse private constructor() {
          */
         fun read(buffer: ByteBuffer): ScsiReadCapacityResponse {
             buffer.order(ByteOrder.BIG_ENDIAN)
-            val res = ScsiReadCapacityResponse()
-            res.logicalBlockAddress = buffer.int
-            res.blockLength = buffer.int
-            return res
+
+            return ScsiReadCapacityResponse().apply {
+                logicalBlockAddress = buffer.int
+                blockLength = buffer.int
+            }
         }
     }
 }

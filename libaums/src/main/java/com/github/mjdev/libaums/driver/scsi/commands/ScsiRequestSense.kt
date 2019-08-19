@@ -30,11 +30,13 @@ class ScsiRequestSense(private val allocationLength: Byte, lun: Byte) : CommandB
 
     override fun serialize(buffer: ByteBuffer) {
         super.serialize(buffer)
-        buffer.put(OPCODE)
-        buffer.put(0.toByte())
-        buffer.put(0.toByte())
-        buffer.put(0.toByte())
-        buffer.put(allocationLength)
+        buffer.apply {
+            put(OPCODE)
+            put(0.toByte())
+            put(0.toByte())
+            put(0.toByte())
+            put(allocationLength)
+        }
     }
 
     companion object {

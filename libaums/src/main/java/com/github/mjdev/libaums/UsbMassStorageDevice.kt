@@ -17,18 +17,9 @@
 
 package com.github.mjdev.libaums
 
-import java.io.IOException
-import java.util.ArrayList
-
 import android.content.Context
-import android.hardware.usb.UsbConstants
-import android.hardware.usb.UsbDevice
-import android.hardware.usb.UsbDeviceConnection
-import android.hardware.usb.UsbEndpoint
-import android.hardware.usb.UsbInterface
-import android.hardware.usb.UsbManager
+import android.hardware.usb.*
 import android.util.Log
-
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.driver.BlockDeviceDriverFactory
 import com.github.mjdev.libaums.driver.scsi.UnitNotReady
@@ -37,6 +28,7 @@ import com.github.mjdev.libaums.partition.PartitionTable
 import com.github.mjdev.libaums.partition.PartitionTableFactory
 import com.github.mjdev.libaums.usb.UsbCommunication
 import com.github.mjdev.libaums.usb.UsbCommunicationFactory
+import java.io.IOException
 
 /**
  * Class representing a connected USB mass storage device. You can enumerate
@@ -83,17 +75,11 @@ private constructor(private val usbManager: UsbManager,
                      */
                     val usbDevice: UsbDevice,
                     private val usbInterface: UsbInterface, private val inEndpoint: UsbEndpoint, private val outEndpoint: UsbEndpoint) {
-    private var deviceConnection: UsbDeviceConnection? = null
 
-    /**
-     * Returns the block device interface for this device.
-     *
-     * Only use this if you know what you are doing, for a interacting (listing/reading/writing files)
-     * with a pen drive this is usually not needed
-     *
-     * @return The BlockDeviceDriver implementation
-     */
-    val partitions = ArrayList<Partition>()
+    private lateinit var deviceConnection: UsbDeviceConnection
+
+    lateinit var partitions: List<Partition>
+
     // TODO this is never used, should we only allow one init() call?
     private var inited = false
 
@@ -137,8 +123,8 @@ private constructor(private val usbManager: UsbManager,
     @Throws(IOException::class)
     private fun setupDevice() {
         Log.d(TAG, "setup device")
-        val deviceConnection: UsbDeviceConnection = usbManager.openDevice(usbDevice) ?: throw IOException("deviceConnection is null!")
-        this.deviceConnection = deviceConnection
+        deviceConnection = usbManager.openDevice(usbDevice)
+                ?: throw IOException("deviceConnection is null!")
 
         val claim = deviceConnection.claimInterface(usbInterface, true)
         if (!claim) {
@@ -150,24 +136,28 @@ private constructor(private val usbManager: UsbManager,
         deviceConnection.controlTransfer(161, 254, 0, usbInterface.id, maxLun, 1, 5000)
         Log.i(TAG, "MAX LUN " + maxLun[0].toInt())
 
-        for (i in 0 until maxLun[0] + 1) {
-            val blockDevice = BlockDeviceDriverFactory.createBlockDevice(communication, lun=i.toByte())
-            try {
-                blockDevice.init()
-            } catch (e: UnitNotReady) {
-                if (maxLun[0] == 0.toByte()) {
-                    throw e
+        this.partitions = (0..maxLun[0])
+                .map { lun ->
+                    BlockDeviceDriverFactory.createBlockDevice(communication, lun = lun.toByte())
                 }
-                // else:  seems to support multiple logical units (e.g. card reader)
-                // so some LUNs may not be inserted. Silently fail in this case and
-                // continue with next LUN
-                continue
-            }
+                .mapNotNull { blockDevice ->
+                    try {
+                        blockDevice.init()
+                    } catch (e: UnitNotReady) {
+                        if (maxLun[0] == 0.toByte()) {
+                            throw e
+                        }
+                        // else:  seems to support multiple logical units (e.g. card reader)
+                        // so some LUNs may not be inserted. Silently fail in this case and
+                        // continue with next LUN
+                        return@mapNotNull null
+                    }
 
-            val partitionTable = PartitionTableFactory.createPartitionTable(blockDevice)
-            val partitions = initPartitions(partitionTable, blockDevice)
-            this.partitions.addAll(partitions)
-        }
+                    val partitionTable = PartitionTableFactory.createPartitionTable(blockDevice)
+
+                    initPartitions(partitionTable, blockDevice)
+                }
+                .flatten()
     }
 
     /**
@@ -178,17 +168,10 @@ private constructor(private val usbManager: UsbManager,
      * If reading from the [.blockDevice] fails.
      */
     @Throws(IOException::class)
-    private fun initPartitions(partitionTable: PartitionTable, blockDevice: BlockDeviceDriver): ArrayList<Partition> {
-        val partitionEntrys = partitionTable.partitionTableEntries
-
-        val partitions = ArrayList<Partition>()
-        for (entry in partitionEntrys) {
-            val partition = Partition.createPartition(entry, blockDevice)
-            partition?.let { partitions.add(it) }
-        }
-
-        return partitions
-    }
+    private fun initPartitions(partitionTable: PartitionTable, blockDevice: BlockDeviceDriver) =
+            partitionTable.partitionTableEntries.mapNotNull {
+                Partition.createPartition(it, blockDevice)
+            }
 
     /**
      * Releases the [android.hardware.usb.UsbInterface] and closes the
@@ -198,7 +181,9 @@ private constructor(private val usbManager: UsbManager,
      */
     fun close() {
         Log.d(TAG, "close device")
-        val deviceConnection = this.deviceConnection?.let { it } ?: return
+
+        if (!::deviceConnection.isInitialized)
+            return
 
         val release = deviceConnection.releaseInterface(usbInterface)
         if (!release) {
@@ -223,6 +208,56 @@ private constructor(private val usbManager: UsbManager,
          */
         private const val INTERFACE_PROTOCOL = 80
 
+        @JvmStatic
+        fun UsbDevice.getMassStorageDevices(context: Context): List<UsbMassStorageDevice> {
+            val usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
+
+            return (0 until this.interfaceCount)
+                    .map { getInterface(it) }
+                    .filter {
+                        // we currently only support SCSI transparent command set with
+                        // bulk transfers only!
+                        it.interfaceClass == UsbConstants.USB_CLASS_MASS_STORAGE
+                                && it.interfaceSubclass == INTERFACE_SUBCLASS
+                                && it.interfaceProtocol == INTERFACE_PROTOCOL
+                    }
+                    .map { usbInterface ->
+                        Log.i(TAG, "Found usb interface: $usbInterface")
+
+                        // Every mass storage device has exactly two endpoints
+                        // One IN and one OUT endpoint
+                        val endpointCount = usbInterface.endpointCount
+                        if (endpointCount != 2) {
+                            Log.w(TAG, "Interface endpoint count != 2")
+                        }
+
+                        var outEndpoint: UsbEndpoint? = null
+                        var inEndpoint: UsbEndpoint? = null
+
+                        for (j in 0 until endpointCount) {
+                            val endpoint = usbInterface.getEndpoint(j)
+                            Log.i(TAG, "Found usb endpoint: $endpoint")
+                            if (endpoint.type == UsbConstants.USB_ENDPOINT_XFER_BULK) {
+                                if (endpoint.direction == UsbConstants.USB_DIR_OUT) {
+                                    outEndpoint = endpoint
+                                } else {
+                                    inEndpoint = endpoint
+                                }
+                            }
+                        }
+
+                        if (outEndpoint == null || inEndpoint == null) {
+                            Log.e(TAG, "Not all needed endpoints found. In: ${outEndpoint != null}, Out: ${outEndpoint != null}")
+                            return@map null
+                        }
+
+                        return@map UsbMassStorageDevice(
+                                usbManager, this, usbInterface, inEndpoint, outEndpoint
+                        )
+                    }
+                    .filterNotNull()
+        }
+
         /**
          * This method iterates through all connected USB devices and searches for
          * mass storage devices.
@@ -235,57 +270,15 @@ private constructor(private val usbManager: UsbManager,
         @JvmStatic
         fun getMassStorageDevices(context: Context): Array<UsbMassStorageDevice> {
             val usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
-            val result = ArrayList<UsbMassStorageDevice>()
 
-            for (device in usbManager.deviceList.values) {
-                Log.i(TAG, "found usb device: $device")
-
-                for (i in 0 until device.interfaceCount) {
-                    val usbInterface = device.getInterface(i)
-                    Log.i(TAG, "found usb interface: $usbInterface")
-
-                    // we currently only support SCSI transparent command set with
-                    // bulk transfers only!
-                    if (usbInterface.interfaceClass != UsbConstants.USB_CLASS_MASS_STORAGE
-                            || usbInterface.interfaceSubclass != INTERFACE_SUBCLASS
-                            || usbInterface.interfaceProtocol != INTERFACE_PROTOCOL) {
-                        Log.i(TAG, "device interface not suitable!")
-                        continue
+            return usbManager.deviceList
+                    .map {
+                        val device = it.value
+                        Log.i(TAG, "found usb device: $it")
+                        device.getMassStorageDevices(context)
                     }
-
-                    // Every mass storage device has exactly two endpoints
-                    // One IN and one OUT endpoint
-                    val endpointCount = usbInterface.endpointCount
-                    if (endpointCount != 2) {
-                        Log.w(TAG, "inteface endpoint count != 2")
-                    }
-
-                    var outEndpoint: UsbEndpoint? = null
-                    var inEndpoint: UsbEndpoint? = null
-                    for (j in 0 until endpointCount) {
-                        val endpoint = usbInterface.getEndpoint(j)
-                        Log.i(TAG, "found usb endpoint: $endpoint")
-                        if (endpoint.type == UsbConstants.USB_ENDPOINT_XFER_BULK) {
-                            if (endpoint.direction == UsbConstants.USB_DIR_OUT) {
-                                outEndpoint = endpoint
-                            } else {
-                                inEndpoint = endpoint
-                            }
-                        }
-                    }
-
-                    if (outEndpoint == null || inEndpoint == null) {
-                        Log.e(TAG, "Not all needed endpoints found!")
-                        continue
-                    }
-
-                    result.add(UsbMassStorageDevice(usbManager, device, usbInterface, inEndpoint,
-                            outEndpoint))
-
-                }
-            }
-
-            return result.toTypedArray()
+                    .flatten()
+                    .toTypedArray()
         }
     }
 }

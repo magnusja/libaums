@@ -100,13 +100,15 @@ protected constructor(protected var dCbwDataTransferLength: Int,
      * The buffer were the serialized data should be copied to.
      */
     open fun serialize(buffer: ByteBuffer) {
-        buffer.order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(D_CBW_SIGNATURE)
-        buffer.putInt(dCbwTag)
-        buffer.putInt(dCbwDataTransferLength)
-        buffer.put(bmCbwFlags)
-        buffer.put(bCbwLun)
-        buffer.put(bCbwcbLength)
+        buffer.apply {
+            order(ByteOrder.LITTLE_ENDIAN)
+            putInt(D_CBW_SIGNATURE)
+            putInt(dCbwTag)
+            putInt(dCbwDataTransferLength)
+            put(bmCbwFlags)
+            put(bCbwLun)
+            put(bCbwcbLength)
+        }
     }
 
     /**
