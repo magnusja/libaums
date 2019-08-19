@@ -40,6 +40,13 @@ interface BlockDeviceDriver {
     val blockSize: Int
 
     /**
+     * The size of the block device, in blocks of [blockSize] bytes,
+     *
+     * @return The block device size in blocks
+     */
+    val blocks: Long
+
+    /**
      * Initializes the block device for further use. This method should be
      * called before doing anything else on the block device.
      *
