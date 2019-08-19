@@ -12,20 +12,11 @@ import java.nio.ByteBuffer
  */
 
 internal class UsbRequestCommunication(private val deviceConnection: UsbDeviceConnection, outEndpoint: UsbEndpoint, inEndpoint: UsbEndpoint) : UsbCommunication {
-    private val outRequest: UsbRequest
-    private val inRequest: UsbRequest
+    private val outRequest = UsbRequest().apply { initialize(deviceConnection, outEndpoint) }
+    private val inRequest = UsbRequest().apply { initialize(deviceConnection, inEndpoint) }
     private val workaroundBuffer = ByteBuffer.allocate(1024 * 32 * 4)
 
-    init {
-        var request = UsbRequest()
-        request.initialize(deviceConnection, outEndpoint)
-        this.outRequest = request
-
-        request = UsbRequest()
-        request.initialize(deviceConnection, inEndpoint)
-        this.inRequest = request
-    }
-
+    
     @Synchronized
     @Throws(IOException::class)
     override fun bulkOutTransfer(src: ByteBuffer): Int {
