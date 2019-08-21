@@ -210,4 +210,8 @@ public class FatFile extends AbstractUsbFile {
 		return false;
 	}
 
+	@Override
+	public boolean isEmpty() {
+		throw new UnsupportedOperationException("This is a file!");
+	}
 }

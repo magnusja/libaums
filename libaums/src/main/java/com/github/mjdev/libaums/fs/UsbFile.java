@@ -246,4 +246,10 @@ public interface UsbFile extends Closeable {
 	 * @return True if the current directory is the root directory, false if not or a file.
 	 */
 	boolean isRoot();
+
+	/**
+	 *
+	 * @return True if the current directory is empty, false if not
+	 */
+	boolean isEmpty();
 }
