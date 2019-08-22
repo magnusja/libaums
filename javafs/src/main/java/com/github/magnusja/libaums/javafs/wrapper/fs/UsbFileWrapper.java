@@ -1,7 +1,5 @@
 package com.github.magnusja.libaums.javafs.wrapper.fs;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.util.Log;
 
 import com.github.mjdev.libaums.fs.AbstractUsbFile;
@@ -234,14 +232,14 @@ public class UsbFileWrapper extends AbstractUsbFile {
 
     @Override
     public boolean isEmpty() {
-        if (dir == null){
+        if (dir == null) {
             throw new UnsupportedOperationException("This is a file!");
         }
 
         try {
             return !dir.iterator().hasNext();
         } catch (IOException e) {
-            Log.d(TAG, "error msg", e);
+            Log.d(TAG, "error getting iterator from directory", e);
             return false;
         }
     }
