@@ -68,7 +68,7 @@ interface UsbFile : Closeable {
      *
      * @return The parent directory or null.
      */
-    val parent: UsbFile
+    val parent: UsbFile?
 
     /**
      * Returns the file length or throws an exception if called on a directory.

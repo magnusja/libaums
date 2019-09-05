@@ -359,7 +359,7 @@ public class FatDirectory extends AbstractUsbFile {
 		// write changes immediately to disk
 		write();
 
-		return FatFile.create(entry, blockDevice, fat, bootSector, this);
+		return new FatFile(blockDevice, fat, bootSector, entry, this);
 	}
 
 	@Override
@@ -492,7 +492,7 @@ public class FatDirectory extends AbstractUsbFile {
             if (entry.isDirectory()) {
                 list.add(FatDirectory.create(entry, blockDevice, fat, bootSector, this));
             } else {
-                list.add(FatFile.create(entry, blockDevice, fat, bootSector, this));
+                list.add(new FatFile(blockDevice, fat, bootSector, entry, this));
             }
         }
 

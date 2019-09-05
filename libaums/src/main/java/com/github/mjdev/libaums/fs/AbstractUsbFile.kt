@@ -16,9 +16,11 @@ abstract class AbstractUsbFile : UsbFile {
                 return "/"
             }
 
-            return if (parent.isRoot) {
-                "/$name"
-            } else parent.absolutePath + UsbFile.separator + name
+            return parent?.let { parent ->
+                if (parent.isRoot) {
+                    "/$name"
+                } else parent.absolutePath + UsbFile.separator + name
+            }.orEmpty() // should never happen
         }
 
     @Throws(IOException::class)
