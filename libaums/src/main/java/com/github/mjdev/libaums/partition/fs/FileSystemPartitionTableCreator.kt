@@ -4,6 +4,7 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.driver.ByteBlockDevice
 import com.github.mjdev.libaums.fs.FileSystemFactory
 import com.github.mjdev.libaums.partition.PartitionTable
+import com.github.mjdev.libaums.partition.PartitionTableEntry
 import com.github.mjdev.libaums.partition.PartitionTableFactory
 
 import java.io.IOException
@@ -17,7 +18,7 @@ class FileSystemPartitionTableCreator : PartitionTableFactory.PartitionTableCrea
     override fun read(blockDevice: BlockDeviceDriver): PartitionTable? {
         return try {
             FileSystemPartitionTable(blockDevice,
-                    FileSystemFactory.createFileSystem(null, ByteBlockDevice(blockDevice)))
+                    FileSystemFactory.createFileSystem(PartitionTableEntry(0, 0, 0), ByteBlockDevice(blockDevice)))
         } catch (e: FileSystemFactory.UnsupportedFileSystemException) {
             null
         }
