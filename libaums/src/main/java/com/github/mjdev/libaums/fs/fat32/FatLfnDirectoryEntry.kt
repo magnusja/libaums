@@ -136,6 +136,20 @@ internal class FatLfnDirectoryEntry
     val isDirectory: Boolean
         get() = actualEntry.isDirectory
 
+
+    /**
+     * Creates a completely new [.FatLfnDirectoryEntry].
+     *
+     * @param name
+     * The long file name.
+     * @param shortName
+     * The generated short name.
+     * @return The newly created entry.
+     */
+    constructor(name: String?, shortName: ShortName): this(FatDirectoryEntry(), name) {
+        actualEntry.shortName = shortName
+    }
+
     /**
      * Serializes the long file name and the actual entry in the order needed
      * into the buffer. Updates the position of the buffer.
@@ -205,22 +219,6 @@ internal class FatLfnDirectoryEntry
     }
 
     companion object {
-
-        /**
-         * Creates a completely new [.FatLfnDirectoryEntry].
-         *
-         * @param name
-         * The long file name.
-         * @param shortName
-         * The generated short name.
-         * @return The newly created entry.
-         */
-        fun createNew(name: String?, shortName: ShortName): FatLfnDirectoryEntry {
-            val actualEntry = FatDirectoryEntry.createNew()
-            actualEntry.shortName = shortName
-
-            return FatLfnDirectoryEntry(actualEntry, name)
-        }
 
         /**
          * Reads a [.FatLfnDirectoryEntry] with the given information.

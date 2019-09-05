@@ -349,7 +349,7 @@ public class FatDirectory extends AbstractUsbFile {
 
 		ShortName shortName = ShortNameGenerator.INSTANCE.generateShortName(name, shortNameMap.keySet());
 
-		FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.Companion.createNew(name, shortName);
+		FatLfnDirectoryEntry entry = new FatLfnDirectoryEntry(name, shortName);
 		// alloc completely new chain
 		long newStartCluster = fat.alloc(new Long[0], 1)[0];
 		entry.setStartCluster(newStartCluster);
@@ -371,7 +371,7 @@ public class FatDirectory extends AbstractUsbFile {
 
 		ShortName shortName = ShortNameGenerator.INSTANCE.generateShortName(name, shortNameMap.keySet());
 
-		FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.Companion.createNew(name, shortName);
+		FatLfnDirectoryEntry entry = new FatLfnDirectoryEntry(name, shortName);
 		entry.setDirectory();
 		// alloc completely new chain
 		long newStartCluster = fat.alloc(new Long[0], 1)[0];
@@ -388,8 +388,7 @@ public class FatDirectory extends AbstractUsbFile {
 		result.entries = new ArrayList<FatLfnDirectoryEntry>(); // initialise entries before adding sub-directories
 
 		// first create the dot entry which points to the dir just created
-		FatLfnDirectoryEntry dotEntry = FatLfnDirectoryEntry.Companion
-				.createNew(null, new ShortName(".", ""));
+		FatLfnDirectoryEntry dotEntry = new FatLfnDirectoryEntry(null, new ShortName(".", ""));
 		dotEntry.setDirectory();
 		dotEntry.setStartCluster(newStartCluster);
 		FatLfnDirectoryEntry.Companion.copyDateTime(entry, dotEntry);
@@ -397,7 +396,7 @@ public class FatDirectory extends AbstractUsbFile {
 
 		// Second the dotdot entry which points to the parent directory (this)
 		// if parent is the root dir then set start cluster to zero
-		FatLfnDirectoryEntry dotDotEntry = FatLfnDirectoryEntry.Companion.createNew(null, new ShortName("..",
+		FatLfnDirectoryEntry dotDotEntry = new FatLfnDirectoryEntry(null, new ShortName("..",
 				""));
 		dotDotEntry.setDirectory();
 		dotDotEntry.setStartCluster(isRoot() ? 0 : this.entry.getStartCluster());

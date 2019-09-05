@@ -58,19 +58,25 @@ import kotlin.experimental.and
  *
  * @author mjahnen
  */
-internal class FatDirectoryEntry {
+internal class FatDirectoryEntry
+/**
+ * Constructs a new [.FatDirectoryEntry] with the given data.
+ *
+ * @param data
+ * The buffer where entry is located.
+ */ private constructor(
+        /**
+         * Holds the data like it would be stored on the disk.
+         */
+        private var data: ByteBuffer = ByteBuffer.allocate(SIZE)) {
 
-    /**
-     * Holds the data like it would be stored on the disk.
-     */
-    private var data: ByteBuffer? = null
     /**
      * The 8.3 short name of the entry, when entry represents a directory or
      * file.
      */
     var shortName: ShortName? = null
         get() {
-            return if (data!!.get(0).toInt() == 0)
+            return if (data.get(0).toInt() == 0)
                 null
             else {
                 field
@@ -79,27 +85,12 @@ internal class FatDirectoryEntry {
         set(sn) {
             field = sn
             // clear just in case
-            data!!.clear()
-            field?.serialize(data!!)
+            data.clear()
+            field?.serialize(data)
             // clear buffer because short name put 13 bytes
-            data!!.clear()
+            data.clear()
         }
 
-
-    /**
-     * Sets the short name for this [.FatDirectoryEntry] and writes it
-     * to the data array.
-     *
-     * @param shortName
-     * The new short name.
-     * @see .getShortName
-     */
-    fun asetShortName(shortName: ShortName) {
-        this.shortName = shortName
-        shortName.serialize(data!!)
-        // clear buffer because short name put 13 bytes
-        data!!.clear()
-    }
 
     /**
      * Returns the flags in the [.FatDirectoryEntry].
@@ -119,13 +110,13 @@ internal class FatDirectoryEntry {
      * @see .FLAG_VOLUME_ID
      */
     private val flags: Int
-        get() = data!!.get(ATTR_OFF).toInt()
+        get() = data.get(ATTR_OFF).toInt()
 
     val isShortNameLowerCase: Boolean
-        get() = data!!.get(SHORTNAME_CASE_OFF) and 0x8.toByte() != 0.toByte()
+        get() = data.get(SHORTNAME_CASE_OFF) and 0x8.toByte() != 0.toByte()
 
     val isShortNameExtLowerCase: Boolean
-        get() = data!!.get(SHORTNAME_CASE_OFF) and 0x10.toByte() != 0.toByte()
+        get() = data.get(SHORTNAME_CASE_OFF) and 0x10.toByte() != 0.toByte()
 
     /**
      * Returns true if the current [.FatDirectoryEntry] is an long
@@ -259,7 +250,7 @@ internal class FatDirectoryEntry {
             val builder = StringBuilder()
 
             for (i in 0..10) {
-                val b = data!!.get(i)
+                val b = data.get(i)
                 if (b.toInt() == 0)
                     break
                 builder.append(b.toChar())
@@ -291,19 +282,27 @@ internal class FatDirectoryEntry {
         get() = getUnsignedInt32(FILE_SIZE_OFF)
         set(newSize) = setUnsignedInt32(FILE_SIZE_OFF, newSize)
 
-    private constructor()
 
     /**
-     * Constructs a new [.FatDirectoryEntry] with the given data.
+     * Creates a completely new [.FatDirectoryEntry]. Do not forget to
+     * set the start cluster! The time fields ([.setCreatedDateTime]
+     * , [.setLastAccessedDateTime],
+     * [.setLastModifiedDateTime]) are all set to the current time.
      *
-     * @param data
-     * The buffer where entry is located.
+     * @return The newly constructed entry.
+     * @see .setStartCluster
+     * @see .setDirectory
      */
-    private constructor(data: ByteBuffer) {
-        this.data = data
+    constructor() : this(data = ByteBuffer.allocate(SIZE)) {
+        val now = System.currentTimeMillis()
+        createdDateTime = now
+        lastAccessedDateTime = now
+        lastModifiedDateTime = now
+    }
+
+    init {
         data.order(ByteOrder.LITTLE_ENDIAN)
         shortName = ShortName.parse(data)
-        // clear buffer because short name took 13 bytes
         data.clear()
     }
 
@@ -315,7 +314,7 @@ internal class FatDirectoryEntry {
      * The buffer data shall be written to.
      */
     fun serialize(buffer: ByteBuffer) {
-        buffer.put(data!!.array())
+        buffer.put(data.array())
     }
 
     /**
@@ -338,7 +337,7 @@ internal class FatDirectoryEntry {
      */
     private fun setFlag(flag: Int) {
         val flags = flags
-        data!!.put(ATTR_OFF, (flag or flags).toByte())
+        data.put(ATTR_OFF, (flag or flags).toByte())
     }
 
     /**
@@ -385,19 +384,19 @@ internal class FatDirectoryEntry {
      */
     fun extractLfnPart(builder: StringBuilder) {
         val name = CharArray(13)
-        name[0] = data!!.getShort(1).toChar()
-        name[1] = data!!.getShort(3).toChar()
-        name[2] = data!!.getShort(5).toChar()
-        name[3] = data!!.getShort(7).toChar()
-        name[4] = data!!.getShort(9).toChar()
-        name[5] = data!!.getShort(14).toChar()
-        name[6] = data!!.getShort(16).toChar()
-        name[7] = data!!.getShort(18).toChar()
-        name[8] = data!!.getShort(20).toChar()
-        name[9] = data!!.getShort(22).toChar()
-        name[10] = data!!.getShort(24).toChar()
-        name[11] = data!!.getShort(28).toChar()
-        name[12] = data!!.getShort(30).toChar()
+        name[0] = data.getShort(1).toChar()
+        name[1] = data.getShort(3).toChar()
+        name[2] = data.getShort(5).toChar()
+        name[3] = data.getShort(7).toChar()
+        name[4] = data.getShort(9).toChar()
+        name[5] = data.getShort(14).toChar()
+        name[6] = data.getShort(16).toChar()
+        name[7] = data.getShort(18).toChar()
+        name[8] = data.getShort(20).toChar()
+        name[9] = data.getShort(22).toChar()
+        name[10] = data.getShort(24).toChar()
+        name[11] = data.getShort(28).toChar()
+        name[12] = data.getShort(30).toChar()
 
         var len = 0
         while (len < 13 && name[len] != '\u0000')
@@ -407,33 +406,33 @@ internal class FatDirectoryEntry {
     }
 
     private fun getUnsignedInt8(offset: Int): Int {
-        return data!!.get(offset).toInt() and 0xff
+        return data.get(offset).toInt() and 0xff
     }
 
     private fun getUnsignedInt16(offset: Int): Int {
-        val i1 = data!!.get(offset).toInt() and 0xff
-        val i2 = data!!.get(offset + 1).toInt() and 0xff
+        val i1 = data.get(offset).toInt() and 0xff
+        val i2 = data.get(offset + 1).toInt() and 0xff
         return i2 shl 8 or i1
     }
 
     private fun getUnsignedInt32(offset: Int): Long {
-        val i1 = (data!!.get(offset).toInt() and 0xff).toLong()
-        val i2 = (data!!.get(offset + 1).toInt() and 0xff).toLong()
-        val i3 = (data!!.get(offset + 2).toInt() and 0xff).toLong()
-        val i4 = (data!!.get(offset + 3).toInt() and 0xff).toLong()
+        val i1 = (data.get(offset).toInt() and 0xff).toLong()
+        val i2 = (data.get(offset + 1).toInt() and 0xff).toLong()
+        val i3 = (data.get(offset + 2).toInt() and 0xff).toLong()
+        val i4 = (data.get(offset + 3).toInt() and 0xff).toLong()
         return i4 shl 24 or (i3 shl 16) or (i2 shl 8) or i1
     }
 
     private fun setUnsignedInt16(offset: Int, value: Int) {
-        data!!.put(offset, (value and 0xff).toByte())
-        data!!.put(offset + 1, (value.ushr(8) and 0xff).toByte())
+        data.put(offset, (value and 0xff).toByte())
+        data.put(offset + 1, (value.ushr(8) and 0xff).toByte())
     }
 
     private fun setUnsignedInt32(offset: Int, value: Long) {
-        data!!.put(offset, (value and 0xff).toByte())
-        data!!.put(offset + 1, (value.ushr(8) and 0xff).toByte())
-        data!!.put(offset + 2, (value.ushr(16) and 0xff).toByte())
-        data!!.put(offset + 3, (value.ushr(24) and 0xff).toByte())
+        data.put(offset, (value and 0xff).toByte())
+        data.put(offset + 1, (value.ushr(8) and 0xff).toByte())
+        data.put(offset + 2, (value.ushr(16) and 0xff).toByte())
+        data.put(offset + 3, (value.ushr(24) and 0xff).toByte())
     }
 
     override fun toString(): String {
@@ -465,27 +464,6 @@ internal class FatDirectoryEntry {
 
         const val ENTRY_DELETED = 0xe5
 
-        /**
-         * Creates a completely new [.FatDirectoryEntry]. Do not forget to
-         * set the start cluster! The time fields ([.setCreatedDateTime]
-         * , [.setLastAccessedDateTime],
-         * [.setLastModifiedDateTime]) are all set to the current time.
-         *
-         * @return The newly constructed entry.
-         * @see .setStartCluster
-         * @see .setDirectory
-         */
-        fun createNew(): FatDirectoryEntry {
-            val result = FatDirectoryEntry()
-            result.data = ByteBuffer.allocate(SIZE)
-
-            val now = System.currentTimeMillis()
-            result.createdDateTime = now
-            result.lastAccessedDateTime = now
-            result.lastModifiedDateTime = now
-
-            return result
-        }
 
         /**
          * Reads a directory [.FatDirectoryEntry] from the given buffer and
