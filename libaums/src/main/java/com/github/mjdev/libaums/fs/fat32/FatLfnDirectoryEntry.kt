@@ -144,7 +144,7 @@ internal class FatLfnDirectoryEntry
      * The buffer were the serialized data shall be stored.
      */
     fun serialize(buffer: ByteBuffer) {
-        if (lfnName != null) {
+        lfnName?.let{ lfnName ->
             val checksum = actualEntry.shortName!!.calculateCheckSum()
             val entrySize = entryCount
 
