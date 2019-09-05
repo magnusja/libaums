@@ -273,7 +273,7 @@ public class FatDirectory extends AbstractUsbFile {
 
 		removeEntry(lfnEntry);
 		lfnEntry.setName(newName,
-				ShortNameGenerator.generateShortName(newName, shortNameMap.keySet()));
+				ShortNameGenerator.INSTANCE.generateShortName(newName, shortNameMap.keySet()));
 		addEntry(lfnEntry, lfnEntry.getActualEntry());
 		write();
 	}
@@ -347,7 +347,7 @@ public class FatDirectory extends AbstractUsbFile {
 
 		init(); // initialise the directory before creating files
 
-		ShortName shortName = ShortNameGenerator.generateShortName(name, shortNameMap.keySet());
+		ShortName shortName = ShortNameGenerator.INSTANCE.generateShortName(name, shortNameMap.keySet());
 
 		FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.createNew(name, shortName);
 		// alloc completely new chain
@@ -369,7 +369,7 @@ public class FatDirectory extends AbstractUsbFile {
 
 		init(); // initialise the directory before creating files
 
-		ShortName shortName = ShortNameGenerator.generateShortName(name, shortNameMap.keySet());
+		ShortName shortName = ShortNameGenerator.INSTANCE.generateShortName(name, shortNameMap.keySet());
 
 		FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.createNew(name, shortName);
 		entry.setDirectory();

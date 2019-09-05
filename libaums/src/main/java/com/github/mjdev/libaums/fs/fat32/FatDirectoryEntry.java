@@ -104,7 +104,7 @@ import java.util.Calendar;
 	private FatDirectoryEntry(ByteBuffer data) {
 		this.data = data;
 		data.order(ByteOrder.LITTLE_ENDIAN);
-		shortName = ShortName.parse(data);
+		shortName = ShortName.Companion.parse(data);
 		// clear buffer because short name took 13 bytes
 		data.clear();
 	}
