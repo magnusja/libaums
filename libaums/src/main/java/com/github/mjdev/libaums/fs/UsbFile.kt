@@ -252,10 +252,5 @@ interface UsbFile : Closeable {
 
     companion object {
         const val separator = "/"
-
-        fun getTmpSeperator(): String {
-            // TODO remove this!!
-            return separator
-        }
     }
 }
