@@ -15,63 +15,63 @@
  * 
  */
 
-package com.github.mjdev.libaums.fs;
+package com.github.mjdev.libaums.fs
 
 /**
  * This class represents a file system.
- * 
+ *
  * @author mjahnen
- * 
  */
-public interface FileSystem {
+interface FileSystem {
 
-	/**
-	 * This method returns the root directory of the file system.
-	 * 
-	 * @return The root directory of the file system.
-	 */
-	UsbFile getRootDirectory();
+    /**
+     * This method returns the root directory of the file system.
+     *
+     * @return The root directory of the file system.
+     */
+    val rootDirectory: UsbFile
 
-	/**
-	 * This method returns the name of the volume which is mostly saved in the
-	 * file system.
-	 * <p>
-	 * In Windows the name of a volume is shown in the explorer before the drive
-	 * letter.
-	 * 
-	 * @return
-	 */
-	String getVolumeLabel();
+    /**
+     * This method returns the name of the volume which is mostly saved in the
+     * file system.
+     *
+     *
+     * In Windows the name of a volume is shown in the explorer before the drive
+     * letter.
+     *
+     * @return
+     */
+    val volumeLabel: String
 
     /**
      *
      * @return The total "capacity" of the file system in bytes.
      */
-    long getCapacity();
+    val capacity: Long
 
     /**
      * ATTENTION: This value can be inaccurate, depending on actual file system and certain file
      * system specific properties. Use as an estimation.
      * @return Occupied space in the file system in bytes (estimate).
      */
-    long getOccupiedSpace();
+    val occupiedSpace: Long
 
     /**
      * ATTENTION: This value can be inaccurate, depending on actual file system and certain file
      * system specific properties. Use as an estimation.
      * @return Free space in the file system in bytes (estimate).
      */
-    long getFreeSpace();
+    val freeSpace: Long
 
-	/**
-	 *
-	 * @return returns the optimal chuck size in bytes (you should read and write in multiples of that)
+    /**
+     *
+     * @return returns the optimal chuck size in bytes (you should read and write in multiples of that)
      */
-	int getChunkSize();
+    val chunkSize: Int
 
-	/**
-	 *
-	 * @return file system type {@link com.github.mjdev.libaums.partition.PartitionTypes}
-	 */
-	int getType();
+    /**
+     *
+     * @return file system type [com.github.mjdev.libaums.partition.PartitionTypes]
+     */
+    val type: Int
 }

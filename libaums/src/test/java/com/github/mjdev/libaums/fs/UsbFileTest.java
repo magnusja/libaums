@@ -444,12 +444,12 @@ public class UsbFileTest {
         UsbFile subDir = directory.createDirectory("new subdir");
 
         assertTrue(root.search(directory.getName()).isDirectory());
-        assertTrue(root.search(directory.getName() + UsbFile.separator + subDir.getName()).isDirectory());
+        assertTrue(root.search(directory.getName() + UsbFile.Companion.getTmpSeperator() + subDir.getName()).isDirectory());
 
         newInstance();
 
         assertTrue(root.search(directory.getName()).isDirectory());
-        assertTrue(root.search(directory.getName() + UsbFile.separator + subDir.getName()).isDirectory());
+        assertTrue(root.search(directory.getName() + UsbFile.Companion.getTmpSeperator() + subDir.getName()).isDirectory());
 
         try {
             root.search(expectedValues.get("fileToCreateDirectoryOrFileOn").asString())
@@ -478,14 +478,14 @@ public class UsbFileTest {
         assertFalse(root.search(file.getName()).isDirectory());
         assertFalse(root.search(specialCharFile.getName()).isDirectory());
         assertFalse(root.search(specialCharFile2.getName()).isDirectory());
-        assertFalse(root.search(expectedValues.get("createFileInDir").asString() + UsbFile.separator + subFile.getName()).isDirectory());
+        assertFalse(root.search(expectedValues.get("createFileInDir").asString() + UsbFile.Companion.getTmpSeperator() + subFile.getName()).isDirectory());
 
         newInstance();
 
         assertFalse(root.search(file.getName()).isDirectory());
         assertFalse(root.search("as~!@#$%^&()_-{},.=[]`'öäL@=(!\\\"&$%(!$)asdqweasdqweasd111°!§!§`´´").isDirectory());
         assertFalse(root.search("as~!@#$%^&()_-{},.=[]`'öäL@=(!\\\"&$%(!$)asdqweasdqweasd111°!§!§`´´2").isDirectory());
-        assertFalse(root.search(expectedValues.get("createFileInDir").asString() + UsbFile.separator + subFile.getName()).isDirectory());
+        assertFalse(root.search(expectedValues.get("createFileInDir").asString() + UsbFile.Companion.getTmpSeperator() + subFile.getName()).isDirectory());
 
         try {
             root.search(expectedValues.get("fileToCreateDirectoryOrFileOn").asString())
@@ -536,7 +536,7 @@ public class UsbFileTest {
             assertNull(file);
 
             String path = member.getName();
-            int lastSep = path.lastIndexOf(UsbFile.separator);
+            int lastSep = path.lastIndexOf(UsbFile.Companion.getTmpSeperator());
             if (lastSep == -1) lastSep = 0;
             assertFalse(dest.search(path.substring(lastSep))
                     .isDirectory());
@@ -550,7 +550,7 @@ public class UsbFileTest {
             assertNull(file);
 
             String path = member.getName();
-            int lastSep = path.lastIndexOf(UsbFile.separator);
+            int lastSep = path.lastIndexOf(UsbFile.Companion.getTmpSeperator());
             if (lastSep == -1) lastSep = 0;
             file = dest.search(path.substring(lastSep));
             assertFalse(file.isDirectory());
@@ -574,7 +574,7 @@ public class UsbFileTest {
             assertNull(file);
 
             String path = member.getName();
-            int lastSep = path.lastIndexOf(UsbFile.separator);
+            int lastSep = path.lastIndexOf(UsbFile.Companion.getTmpSeperator());
             if (lastSep == -1) lastSep = 0;
             assertTrue(dest.search(path.substring(lastSep))
                     .isDirectory());
@@ -589,7 +589,7 @@ public class UsbFileTest {
             assertNull(file);
 
             String path = member.getName();
-            int lastSep = path.lastIndexOf(UsbFile.separator);
+            int lastSep = path.lastIndexOf(UsbFile.Companion.getTmpSeperator());
             if (lastSep == -1) lastSep = 0;
             assertTrue(dest.search(path.substring(lastSep))
                     .isDirectory());
@@ -668,17 +668,17 @@ public class UsbFileTest {
 
     private void checkAbsolutePathRecursive(String currentDir, UsbFile dir) throws IOException {
         for (UsbFile file : dir.listFiles()) {
-            String test = currentDir + UsbFile.separator + file.getName();
-            if (currentDir.equals(UsbFile.separator)) {
-                test = UsbFile.separator + file.getName();
+            String test = currentDir + UsbFile.Companion.getTmpSeperator() + file.getName();
+            if (currentDir.equals(UsbFile.Companion.getTmpSeperator())) {
+                test = UsbFile.Companion.getTmpSeperator() + file.getName();
             }
 
             assertEquals(test, file.getAbsolutePath());
 
             if (file.isDirectory()) {
-                String nextDir = currentDir + UsbFile.separator + file.getName();
-                if (currentDir.equals(UsbFile.separator)) {
-                    nextDir = UsbFile.separator + file.getName();
+                String nextDir = currentDir + UsbFile.Companion.getTmpSeperator() + file.getName();
+                if (currentDir.equals(UsbFile.Companion.getTmpSeperator())) {
+                    nextDir = UsbFile.Companion.getTmpSeperator() + file.getName();
                 }
                 checkAbsolutePathRecursive(nextDir, file);
             }
@@ -690,7 +690,7 @@ public class UsbFileTest {
 
         assertEquals("/", root.getAbsolutePath());
 
-        checkAbsolutePathRecursive(UsbFile.separator, root);
+        checkAbsolutePathRecursive(UsbFile.Companion.getTmpSeperator(), root);
     }
 
     private void checkEqualsRecursive(UsbFile dir) throws IOException {
@@ -713,7 +713,7 @@ public class UsbFileTest {
     @ContractTest
     public void testIssue187() throws IOException {
         UsbFile file = root.createFile("testissue187");
-        OutputStream outputStream = UsbFileStreamFactory.createBufferedOutputStream(file, fs);
+        OutputStream outputStream = UsbFileStreamFactory.INSTANCE.createBufferedOutputStream(file, fs);
         outputStream.write("START\n".getBytes());
         int i;
 
@@ -728,8 +728,8 @@ public class UsbFileTest {
         UsbFile srcPtr = root.search("testissue187");
         long srcLen = srcPtr.getLength();
         UsbFile dstPtr = root.createFile("testissue187_copy");
-        InputStream inputStream = UsbFileStreamFactory.createBufferedInputStream(srcPtr, fs);
-        OutputStream outStream  = UsbFileStreamFactory.createBufferedOutputStream(dstPtr, fs);
+        InputStream inputStream = UsbFileStreamFactory.INSTANCE.createBufferedInputStream(srcPtr, fs);
+        OutputStream outStream  = UsbFileStreamFactory.INSTANCE.createBufferedOutputStream(dstPtr, fs);
 
         byte[] bytes = new byte[fs.getChunkSize()];
 
@@ -743,8 +743,8 @@ public class UsbFileTest {
         outStream.close();
 
 
-        InputStream inputStream1 = UsbFileStreamFactory.createBufferedInputStream(srcPtr, fs);
-        InputStream inputStream2  = UsbFileStreamFactory.createBufferedInputStream(dstPtr, fs);
+        InputStream inputStream1 = UsbFileStreamFactory.INSTANCE.createBufferedInputStream(srcPtr, fs);
+        InputStream inputStream2  = UsbFileStreamFactory.INSTANCE.createBufferedInputStream(dstPtr, fs);
         assertTrue(IOUtils.contentEquals(inputStream1, inputStream2));
     }
 
