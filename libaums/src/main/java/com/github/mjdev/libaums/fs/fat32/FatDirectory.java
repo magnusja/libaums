@@ -212,7 +212,7 @@ public class FatDirectory extends AbstractUsbFile {
 				continue;
 			}
 
-			FatLfnDirectoryEntry lfnEntry = FatLfnDirectoryEntry.read(e, list);
+			FatLfnDirectoryEntry lfnEntry = FatLfnDirectoryEntry.Companion.read(e, list);
 			addEntry(lfnEntry, e);
 			list.clear();
 		}
@@ -349,7 +349,7 @@ public class FatDirectory extends AbstractUsbFile {
 
 		ShortName shortName = ShortNameGenerator.INSTANCE.generateShortName(name, shortNameMap.keySet());
 
-		FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.createNew(name, shortName);
+		FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.Companion.createNew(name, shortName);
 		// alloc completely new chain
 		long newStartCluster = fat.alloc(new Long[0], 1)[0];
 		entry.setStartCluster(newStartCluster);
@@ -371,7 +371,7 @@ public class FatDirectory extends AbstractUsbFile {
 
 		ShortName shortName = ShortNameGenerator.INSTANCE.generateShortName(name, shortNameMap.keySet());
 
-		FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.createNew(name, shortName);
+		FatLfnDirectoryEntry entry = FatLfnDirectoryEntry.Companion.createNew(name, shortName);
 		entry.setDirectory();
 		// alloc completely new chain
 		long newStartCluster = fat.alloc(new Long[0], 1)[0];
@@ -388,20 +388,20 @@ public class FatDirectory extends AbstractUsbFile {
 		result.entries = new ArrayList<FatLfnDirectoryEntry>(); // initialise entries before adding sub-directories
 
 		// first create the dot entry which points to the dir just created
-		FatLfnDirectoryEntry dotEntry = FatLfnDirectoryEntry
+		FatLfnDirectoryEntry dotEntry = FatLfnDirectoryEntry.Companion
 				.createNew(null, new ShortName(".", ""));
 		dotEntry.setDirectory();
 		dotEntry.setStartCluster(newStartCluster);
-		FatLfnDirectoryEntry.copyDateTime(entry, dotEntry);
+		FatLfnDirectoryEntry.Companion.copyDateTime(entry, dotEntry);
 		result.addEntry(dotEntry, dotEntry.getActualEntry());
 
 		// Second the dotdot entry which points to the parent directory (this)
 		// if parent is the root dir then set start cluster to zero
-		FatLfnDirectoryEntry dotDotEntry = FatLfnDirectoryEntry.createNew(null, new ShortName("..",
+		FatLfnDirectoryEntry dotDotEntry = FatLfnDirectoryEntry.Companion.createNew(null, new ShortName("..",
 				""));
 		dotDotEntry.setDirectory();
 		dotDotEntry.setStartCluster(isRoot() ? 0 : this.entry.getStartCluster());
-		FatLfnDirectoryEntry.copyDateTime(entry, dotDotEntry);
+		FatLfnDirectoryEntry.Companion.copyDateTime(entry, dotDotEntry);
 		result.addEntry(dotDotEntry, dotDotEntry.getActualEntry());
 
 		// write changes immediately to disk
