@@ -189,7 +189,7 @@ public class FAT {
 			cluster = -1;
 
 		long lastAllocated = fsInfoStructure.getLastAllocatedClusterHint();
-		if (lastAllocated == FsInfoStructure.INVALID_VALUE) {
+		if (lastAllocated == FsInfoStructure.getINVALID_VALUE()) {
 			// we have to start from the beginning because there is no hint!
 			lastAllocated = 2;
 		}
