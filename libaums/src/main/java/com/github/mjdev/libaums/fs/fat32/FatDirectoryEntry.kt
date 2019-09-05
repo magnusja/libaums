@@ -17,13 +17,11 @@
 
 package com.github.mjdev.libaums.fs.fat32
 
-import com.github.mjdev.libaums.fs.FileSystem
 import com.github.mjdev.libaums.fs.FileSystemFactory
-
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.charset.Charset
-import java.util.Calendar
+import java.util.*
 import kotlin.experimental.and
 
 /**
@@ -70,7 +68,38 @@ internal class FatDirectoryEntry {
      * The 8.3 short name of the entry, when entry represents a directory or
      * file.
      */
-    private var shortName: ShortName? = null
+    var shortName: ShortName? = null
+        get() {
+            return if (data!!.get(0).toInt() == 0)
+                null
+            else {
+                field
+            }
+        }
+        set(sn) {
+            field = sn
+            // clear just in case
+            data!!.clear()
+            field?.serialize(data!!)
+            // clear buffer because short name put 13 bytes
+            data!!.clear()
+        }
+
+
+    /**
+     * Sets the short name for this [.FatDirectoryEntry] and writes it
+     * to the data array.
+     *
+     * @param shortName
+     * The new short name.
+     * @see .getShortName
+     */
+    fun asetShortName(shortName: ShortName) {
+        this.shortName = shortName
+        shortName.serialize(data!!)
+        // clear buffer because short name put 13 bytes
+        data!!.clear()
+    }
 
     /**
      * Returns the flags in the [.FatDirectoryEntry].
@@ -345,35 +374,6 @@ internal class FatDirectoryEntry {
     }
 
     /**
-     * Returns the short name of the [.FatDirectoryEntry].
-     *
-     * @return Newly constructed short name.
-     * @see .setShortName
-     */
-    fun getShortName(): ShortName? {
-        return if (data!!.get(0).toInt() == 0)
-            null
-        else {
-            shortName
-        }
-    }
-
-    /**
-     * Sets the short name for this [.FatDirectoryEntry] and writes it
-     * to the data array.
-     *
-     * @param shortName
-     * The new short name.
-     * @see .getShortName
-     */
-    fun setShortName(shortName: ShortName) {
-        this.shortName = shortName
-        shortName.serialize(data!!)
-        // clear buffer because short name put 13 bytes
-        data!!.clear()
-    }
-
-    /**
      * This method extracts the long filename part of the
      * [.FatDirectoryEntry]. It appends the long filename part to the
      * StringBuilder given.
@@ -442,28 +442,28 @@ internal class FatDirectoryEntry {
 
     companion object {
 
-        val SIZE = 32
+        const val SIZE = 32
 
-        private val ATTR_OFF = 0x0b
-        private val FILE_SIZE_OFF = 0x1c
-        private val MSB_CLUSTER_OFF = 0x14
-        private val LSB_CLUSTER_OFF = 0x1a
-        private val CREATED_DATE_OFF = 0x10
-        private val CREATED_TIME_OFF = 0x0e
-        private val LAST_WRITE_DATE_OFF = 0x18
-        private val LAST_WRITE_TIME_OFF = 0x16
-        private val LAST_ACCESSED_DATE_OFF = 0x12
+        private const val ATTR_OFF = 0x0b
+        private const val FILE_SIZE_OFF = 0x1c
+        private const val MSB_CLUSTER_OFF = 0x14
+        private const val LSB_CLUSTER_OFF = 0x1a
+        private const val CREATED_DATE_OFF = 0x10
+        private const val CREATED_TIME_OFF = 0x0e
+        private const val LAST_WRITE_DATE_OFF = 0x18
+        private const val LAST_WRITE_TIME_OFF = 0x16
+        private const val LAST_ACCESSED_DATE_OFF = 0x12
 
-        private val FLAG_READONLY = 0x01
-        private val FLAG_HIDDEN = 0x02
-        private val FLAG_SYSTEM = 0x04
-        private val FLAG_VOLUME_ID = 0x08
-        private val FLAG_DIRECTORY = 0x10
-        private val FLAG_ARCHIVE = 0x20
+        private const val FLAG_READONLY = 0x01
+        private const val FLAG_HIDDEN = 0x02
+        private const val FLAG_SYSTEM = 0x04
+        private const val FLAG_VOLUME_ID = 0x08
+        private const val FLAG_DIRECTORY = 0x10
+        private const val FLAG_ARCHIVE = 0x20
 
-        private val SHORTNAME_CASE_OFF = 0x0c
+        private const val SHORTNAME_CASE_OFF = 0x0c
 
-        val ENTRY_DELETED = 0xe5
+        const val ENTRY_DELETED = 0xe5
 
         /**
          * Creates a completely new [.FatDirectoryEntry]. Do not forget to
@@ -552,7 +552,7 @@ internal class FatDirectoryEntry {
          * @see .isLfnEntry
          */
         fun createLfnPart(unicode: String, offset: Int, checksum: Byte,
-                                        index: Int, isLast: Boolean): FatDirectoryEntry {
+                          index: Int, isLast: Boolean): FatDirectoryEntry {
             var unicode = unicode
             var offset = offset
             val result = FatDirectoryEntry()

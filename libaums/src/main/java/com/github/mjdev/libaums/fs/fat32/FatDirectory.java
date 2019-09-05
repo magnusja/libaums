@@ -299,7 +299,7 @@ public class FatDirectory extends AbstractUsbFile {
 		if (writeVolumeLabel)
 			totalEntryCount++;
 
-		long totalBytes = totalEntryCount * FatDirectoryEntry.Companion.getSIZE();
+		long totalBytes = totalEntryCount * FatDirectoryEntry.SIZE;
 		chain.setLength(totalBytes);
 
 		ByteBuffer buffer = ByteBuffer.allocate((int) chain.getLength());
