@@ -310,7 +310,7 @@ internal constructor(
 
         val entry = FatLfnDirectoryEntry(name, shortName)
         // alloc completely new chain
-        val newStartCluster = fat.alloc(arrayOfNulls(0), 1)[0]
+        val newStartCluster = fat.alloc(arrayOf(), 1)[0]
         entry.startCluster = newStartCluster
 
         Log.d(TAG, "adding entry: $entry with short name: $shortName")
@@ -333,7 +333,7 @@ internal constructor(
         val entry = FatLfnDirectoryEntry(name, shortName)
         entry.setDirectory()
         // alloc completely new chain
-        val newStartCluster = fat.alloc(arrayOfNulls(0), 1)[0]
+        val newStartCluster = fat.alloc(arrayOf(), 1)[0]
         entry.startCluster = newStartCluster
 
         Log.d(TAG, "adding entry: $entry with short name: $shortName")
