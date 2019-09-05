@@ -90,7 +90,7 @@ internal class FatLfnDirectoryEntry
         get() {
             lfnName?.let { return it }
             // https://en.wikipedia.org/wiki/8.3_filename#Compatibility
-            val sname = actualEntry.shortName!!.string
+            val sname = actualEntry.getShortName()!!.string
             var name = sname
             var ext = ""
 
@@ -145,7 +145,7 @@ internal class FatLfnDirectoryEntry
      */
     fun serialize(buffer: ByteBuffer) {
         lfnName?.let{ lfnName ->
-            val checksum = actualEntry.shortName!!.calculateCheckSum()
+            val checksum = actualEntry.getShortName()!!.calculateCheckSum()
             val entrySize = entryCount
 
             // long filename is stored in reverse order
@@ -176,7 +176,7 @@ internal class FatLfnDirectoryEntry
      */
     fun setName(newName: String, shortName: ShortName) {
         lfnName = newName
-        actualEntry.shortName = shortName
+        actualEntry.setShortName(shortName)
     }
 
     /**
@@ -217,7 +217,7 @@ internal class FatLfnDirectoryEntry
          */
         fun createNew(name: String?, shortName: ShortName): FatLfnDirectoryEntry {
             val actualEntry = FatDirectoryEntry.createNew()
-            actualEntry.shortName = shortName
+            actualEntry.setShortName(shortName)
 
             return FatLfnDirectoryEntry(actualEntry, name)
         }

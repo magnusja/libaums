@@ -187,7 +187,7 @@ public class FatDirectory extends AbstractUsbFile {
 		ArrayList<FatDirectoryEntry> list = new ArrayList<FatDirectoryEntry>();
 		buffer.flip();
 		while (buffer.remaining() > 0) {
-			FatDirectoryEntry e = FatDirectoryEntry.read(buffer);
+			FatDirectoryEntry e = FatDirectoryEntry.Companion.read(buffer);
 			if (e == null) {
 				break;
 			}
@@ -299,14 +299,14 @@ public class FatDirectory extends AbstractUsbFile {
 		if (writeVolumeLabel)
 			totalEntryCount++;
 
-		long totalBytes = totalEntryCount * FatDirectoryEntry.SIZE;
+		long totalBytes = totalEntryCount * FatDirectoryEntry.Companion.getSIZE();
 		chain.setLength(totalBytes);
 
 		ByteBuffer buffer = ByteBuffer.allocate((int) chain.getLength());
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 
 		if (writeVolumeLabel)
-			FatDirectoryEntry.createVolumeLabel(volumeLabel).serialize(buffer);
+			FatDirectoryEntry.Companion.createVolumeLabel(volumeLabel).serialize(buffer);
 
 		for (FatLfnDirectoryEntry entry : entries) {
 			entry.serialize(buffer);
