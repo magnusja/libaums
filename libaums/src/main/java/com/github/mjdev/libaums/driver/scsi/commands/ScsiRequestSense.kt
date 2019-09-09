@@ -40,8 +40,8 @@ class ScsiRequestSense(private val allocationLength: Byte, lun: Byte) : CommandB
     }
 
     companion object {
-        private val OPCODE: Byte = 0x3
-        private val LENGTH: Byte = 0x6
+        private const val OPCODE: Byte = 0x3
+        private const val LENGTH: Byte = 0x6
     }
 
 }

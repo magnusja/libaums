@@ -147,7 +147,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
             throw IOException("Writing all bytes on command $command failed!")
         }
 
-        val transferLength = command.getdCbwDataTransferLength()
+        val transferLength = command.dCbwDataTransferLength
         var read = 0
         if (transferLength > 0) {
 
@@ -182,15 +182,15 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
         cswBuffer.clear()
 
         csw.read(cswBuffer)
-        if (csw.getbCswStatus().toInt() != CommandStatusWrapper.COMMAND_PASSED) {
-            throw IOException("Unsuccessful Csw status: " + csw.getbCswStatus())
+        if (csw.bCswStatus.toInt() != CommandStatusWrapper.COMMAND_PASSED) {
+            throw IOException("Unsuccessful Csw status: " + csw.bCswStatus)
         }
 
-        if (csw.getdCswTag() != command.getdCbwTag()) {
+        if (csw.dCswTag != command.dCbwTag) {
             throw IOException("wrong csw tag!")
         }
 
-        return csw.getbCswStatus().toInt() == CommandStatusWrapper.COMMAND_PASSED
+        return csw.bCswStatus.toInt() == CommandStatusWrapper.COMMAND_PASSED
     }
 
     /**

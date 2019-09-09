@@ -84,13 +84,13 @@ class ScsiRead10 : CommandBlockWrapper {
     override fun toString(): String {
         return ("ScsiRead10 [blockAddress=" + blockAddress + ", transferBytes=" + transferBytes
                 + ", blockSize=" + blockSize + ", transferBlocks=" + transferBlocks
-                + ", getdCbwDataTransferLength()=" + getdCbwDataTransferLength() + "]")
+                + ", getdCbwDataTransferLength()=" + dCbwDataTransferLength + "]")
     }
 
     companion object {
         // private static final String TAG = ScsiRead10.class.getSimpleName();
-        private val LENGTH: Byte = 10
-        private val OPCODE: Byte = 0x28
+        private const val LENGTH: Byte = 10
+        private const val OPCODE: Byte = 0x28
     }
 
 }

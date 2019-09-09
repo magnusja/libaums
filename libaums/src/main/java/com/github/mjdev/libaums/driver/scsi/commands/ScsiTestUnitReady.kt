@@ -40,8 +40,8 @@ class ScsiTestUnitReady(lun: Byte) : CommandBlockWrapper(0, Direction.NONE, lun,
 
     companion object {
 
-        private val LENGTH: Byte = 0x6
-        private val OPCODE: Byte = 0x0
+        private const val LENGTH: Byte = 0x6
+        private const val OPCODE: Byte = 0x0
     }
 
 }
