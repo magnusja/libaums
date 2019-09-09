@@ -108,8 +108,7 @@ internal constructor(
         get() = if (entry != null) entry!!.name else "/"
         @Throws(IOException::class)
         set(newName) {
-            if (isRoot)
-                throw IllegalStateException("Cannot rename root dir!")
+            check(!isRoot) { "Cannot rename root dir!" }
             parent!!.renameEntry(entry, newName)
         }
 
@@ -369,20 +368,17 @@ internal constructor(
     }
 
     override fun createdAt(): Long {
-        if (isRoot)
-            throw IllegalStateException("root dir!")
+        check(!isRoot) { "root dir!" }
         return entry!!.actualEntry.createdDateTime
     }
 
     override fun lastModified(): Long {
-        if (isRoot)
-            throw IllegalStateException("root dir!")
+        check(!isRoot) { "root dir!" }
         return entry!!.actualEntry.lastModifiedDateTime
     }
 
     override fun lastAccessed(): Long {
-        if (isRoot)
-            throw IllegalStateException("root dir!")
+        check(!isRoot) { "root dir!" }
         return entry!!.actualEntry.lastAccessedDateTime
     }
 
@@ -442,13 +438,10 @@ internal constructor(
 
     @Throws(IOException::class)
     override fun moveTo(destination: UsbFile) {
-        if (isRoot)
-            throw IllegalStateException("cannot move root dir!")
+        check(!isRoot) { "cannot move root dir!" }
+        check(destination.isDirectory) { "destination cannot be a file!" }
+        check(destination is FatDirectory) { "cannot move between different filesystems!" }
 
-        if (!destination.isDirectory)
-            throw IllegalStateException("destination cannot be a file!")
-        if (destination !is FatDirectory)
-            throw IllegalStateException("cannot move between different filesystems!")
         // TODO check if destination is really on the same physical device or
         // partition!
 
@@ -487,10 +480,9 @@ internal constructor(
      */
     /* package */@Throws(IOException::class)
     internal fun move(entry: FatLfnDirectoryEntry, destination: UsbFile) {
-        if (!destination.isDirectory)
-            throw IllegalStateException("destination cannot be a file!")
-        if (destination !is FatDirectory)
-            throw IllegalStateException("cannot move between different filesystems!")
+        check(destination.isDirectory) { "destination cannot be a file!" }
+        check(destination is FatDirectory) { "cannot move between different filesystems!" }
+
         // TODO check if destination is really on the same physical device or
         // partition!
 
@@ -510,8 +502,7 @@ internal constructor(
 
     @Throws(IOException::class)
     override fun delete() {
-        if (isRoot)
-            throw IllegalStateException("Root dir cannot be deleted!")
+        check(!isRoot) { "Root dir cannot be deleted!" }
 
         init()
         val subElements = listFiles()

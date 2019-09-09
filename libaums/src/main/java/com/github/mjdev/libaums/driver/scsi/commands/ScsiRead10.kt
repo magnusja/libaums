@@ -63,9 +63,7 @@ class ScsiRead10 : CommandBlockWrapper {
         this.transferBytes = transferBytes
         this.blockSize = blockSize
         val transferBlocks = (transferBytes / blockSize).toShort()
-        if (transferBytes % blockSize != 0) {
-            throw IllegalArgumentException("transfer bytes is not a multiple of block size")
-        }
+        require(transferBytes % blockSize == 0) { "transfer bytes is not a multiple of block size" }
         this.transferBlocks = transferBlocks
     }
 

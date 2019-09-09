@@ -307,9 +307,7 @@ class FAT
         val buffer = ByteBuffer.allocate(bufferSize)
         buffer.order(ByteOrder.LITTLE_ENDIAN)
 
-        if (offsetInChain < 0)
-            throw IllegalStateException(
-                    "trying to remove more clusters in chain than currently exist!")
+        check(offsetInChain >= 0) { "trying to remove more clusters in chain than currently exist!" }
 
         var currentCluster: Long
 
