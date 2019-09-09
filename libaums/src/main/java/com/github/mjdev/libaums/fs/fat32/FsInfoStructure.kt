@@ -34,7 +34,7 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver
  *
  * @author mjahnen
  */
-/* package */internal class FsInfoStructure
+internal class FsInfoStructure
 /**
  * Constructs a new info structure.
  *
@@ -61,7 +61,7 @@ private constructor(private val blockDevice: BlockDeviceDriver, private val offs
      * @see .getFreeClusterCount
      * @see .decreaseClusterCount
      */
-    /* package */ var freeClusterCount: Long
+    var freeClusterCount: Long
         get() = buffer.getInt(FREE_COUNT_OFF).toLong()
         set(value) {
             buffer.putInt(FREE_COUNT_OFF, value.toInt())
@@ -76,7 +76,7 @@ private constructor(private val blockDevice: BlockDeviceDriver, private val offs
      * call [.write].
      *
      */
-    /* package */
+
     var lastAllocatedClusterHint: Long
         get() = buffer.getInt(NEXT_FREE_OFFSET).toLong()
         set(value) {
@@ -106,7 +106,7 @@ private constructor(private val blockDevice: BlockDeviceDriver, private val offs
      * @see .setFreeClusterCount
      * @see .getFreeClusterCount
      */
-    /* package */ fun decreaseClusterCount(numberOfClusters: Long) {
+    fun decreaseClusterCount(numberOfClusters: Long) {
         var freeClusterCount = freeClusterCount
         if (freeClusterCount != FsInfoStructure.INVALID_VALUE.toLong()) {
             freeClusterCount -= numberOfClusters
@@ -121,7 +121,7 @@ private constructor(private val blockDevice: BlockDeviceDriver, private val offs
      * @throws IOException
      * If writing to device fails.
      */
-    /* package */@Throws(IOException::class)
+    @Throws(IOException::class)
     fun write() {
         Log.d(TAG, "writing to device")
         blockDevice.write(offset.toLong(), buffer)
@@ -156,7 +156,6 @@ private constructor(private val blockDevice: BlockDeviceDriver, private val offs
          * @throws IOException
          * If reading fails.
          */
-        /* package */
         @Throws(IOException::class)
         @JvmStatic
         fun read(blockDevice: BlockDeviceDriver, offset: Int): FsInfoStructure {

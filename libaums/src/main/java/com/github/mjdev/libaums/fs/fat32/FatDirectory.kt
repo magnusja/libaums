@@ -222,7 +222,7 @@ internal constructor(
      * The long filename entry to remove.
      * @see .addEntry
      */
-    /* package */internal fun removeEntry(lfnEntry: FatLfnDirectoryEntry?) {
+    internal fun removeEntry(lfnEntry: FatLfnDirectoryEntry?) {
         entries!!.remove(lfnEntry)
         lfnMap.remove(lfnEntry!!.name.toLowerCase(Locale.getDefault()))
         shortNameMap.remove(lfnEntry.actualEntry.shortName)
@@ -242,7 +242,7 @@ internal constructor(
      * @throws IOException
      * If writing the change to the disk fails.
      */
-    /* package */@Throws(IOException::class)
+    @Throws(IOException::class)
     internal fun renameEntry(lfnEntry: FatLfnDirectoryEntry?, newName: String) {
         if (lfnEntry!!.name == newName)
             return
@@ -263,7 +263,7 @@ internal constructor(
      * @throws IOException
      * @see {@link .write
      */
-    /* package */@Throws(IOException::class)
+    @Throws(IOException::class)
     internal fun write() {
         init()
         val writeVolumeLabel = isRoot && volumeLabel != null
@@ -478,7 +478,7 @@ internal constructor(
      * If the destination is not a directory or destination is on a
      * different file system.
      */
-    /* package */@Throws(IOException::class)
+    @Throws(IOException::class)
     internal fun move(entry: FatLfnDirectoryEntry, destination: UsbFile) {
         check(destination.isDirectory) { "destination cannot be a file!" }
         check(destination is FatDirectory) { "cannot move between different filesystems!" }
