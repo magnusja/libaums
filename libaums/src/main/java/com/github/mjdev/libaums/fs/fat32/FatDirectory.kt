@@ -108,8 +108,7 @@ internal constructor(
         get() = if (entry != null) entry!!.name else "/"
         @Throws(IOException::class)
         set(newName) {
-            if (isRoot)
-                throw IllegalStateException("Cannot rename root dir!")
+            check(!isRoot) { "Cannot rename root dir!" }
             parent!!.renameEntry(entry, newName)
         }
 
@@ -223,7 +222,7 @@ internal constructor(
      * The long filename entry to remove.
      * @see .addEntry
      */
-    /* package */internal fun removeEntry(lfnEntry: FatLfnDirectoryEntry?) {
+    internal fun removeEntry(lfnEntry: FatLfnDirectoryEntry?) {
         entries!!.remove(lfnEntry)
         lfnMap.remove(lfnEntry!!.name.toLowerCase(Locale.getDefault()))
         shortNameMap.remove(lfnEntry.actualEntry.shortName)
@@ -243,7 +242,7 @@ internal constructor(
      * @throws IOException
      * If writing the change to the disk fails.
      */
-    /* package */@Throws(IOException::class)
+    @Throws(IOException::class)
     internal fun renameEntry(lfnEntry: FatLfnDirectoryEntry?, newName: String) {
         if (lfnEntry!!.name == newName)
             return
@@ -264,7 +263,7 @@ internal constructor(
      * @throws IOException
      * @see {@link .write
      */
-    /* package */@Throws(IOException::class)
+    @Throws(IOException::class)
     internal fun write() {
         init()
         val writeVolumeLabel = isRoot && volumeLabel != null
@@ -369,20 +368,17 @@ internal constructor(
     }
 
     override fun createdAt(): Long {
-        if (isRoot)
-            throw IllegalStateException("root dir!")
+        check(!isRoot) { "root dir!" }
         return entry!!.actualEntry.createdDateTime
     }
 
     override fun lastModified(): Long {
-        if (isRoot)
-            throw IllegalStateException("root dir!")
+        check(!isRoot) { "root dir!" }
         return entry!!.actualEntry.lastModifiedDateTime
     }
 
     override fun lastAccessed(): Long {
-        if (isRoot)
-            throw IllegalStateException("root dir!")
+        check(!isRoot) { "root dir!" }
         return entry!!.actualEntry.lastAccessedDateTime
     }
 
@@ -442,13 +438,10 @@ internal constructor(
 
     @Throws(IOException::class)
     override fun moveTo(destination: UsbFile) {
-        if (isRoot)
-            throw IllegalStateException("cannot move root dir!")
+        check(!isRoot) { "cannot move root dir!" }
+        check(destination.isDirectory) { "destination cannot be a file!" }
+        check(destination is FatDirectory) { "cannot move between different filesystems!" }
 
-        if (!destination.isDirectory)
-            throw IllegalStateException("destination cannot be a file!")
-        if (destination !is FatDirectory)
-            throw IllegalStateException("cannot move between different filesystems!")
         // TODO check if destination is really on the same physical device or
         // partition!
 
@@ -485,12 +478,11 @@ internal constructor(
      * If the destination is not a directory or destination is on a
      * different file system.
      */
-    /* package */@Throws(IOException::class)
+    @Throws(IOException::class)
     internal fun move(entry: FatLfnDirectoryEntry, destination: UsbFile) {
-        if (!destination.isDirectory)
-            throw IllegalStateException("destination cannot be a file!")
-        if (destination !is FatDirectory)
-            throw IllegalStateException("cannot move between different filesystems!")
+        check(destination.isDirectory) { "destination cannot be a file!" }
+        check(destination is FatDirectory) { "cannot move between different filesystems!" }
+
         // TODO check if destination is really on the same physical device or
         // partition!
 
@@ -510,8 +502,7 @@ internal constructor(
 
     @Throws(IOException::class)
     override fun delete() {
-        if (isRoot)
-            throw IllegalStateException("Root dir cannot be deleted!")
+        check(!isRoot) { "Root dir cannot be deleted!" }
 
         init()
         val subElements = listFiles()

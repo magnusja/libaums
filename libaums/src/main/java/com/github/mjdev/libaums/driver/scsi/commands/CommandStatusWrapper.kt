@@ -31,28 +31,7 @@ import android.util.Log
  */
 class CommandStatusWrapper {
 
-    private var dCswSignature: Int = 0
-    private var dCswTag: Int = 0
-    private var dCswDataResidue: Int = 0
-    private var bCswStatus: Byte = 0
-
-    /**
-     * Reads command block wrapper from the specified buffer and stores it into this object.
-     *
-     * @param buffer
-     * The data where the command block wrapper is located.
-     */
-    fun read(buffer: ByteBuffer) {
-        buffer.order(ByteOrder.LITTLE_ENDIAN)
-
-        dCswSignature = buffer.int
-        if (dCswSignature != D_CSW_SIGNATURE) {
-            Log.e(TAG, "unexpected dCSWSignature $dCswSignature")
-        }
-        dCswTag = buffer.int
-        dCswDataResidue = buffer.int
-        bCswStatus = buffer.get()
-    }
+    private var dCswSignature: Int = D_CSW_SIGNATURE
 
     /**
      * Returns the tag which can be used to determine the corresponding
@@ -62,9 +41,8 @@ class CommandStatusWrapper {
      * @see com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper
      * .getdCswTag
      */
-    fun getdCswTag(): Int {
-        return dCswTag
-    }
+    var dCswTag: Int = 0
+        private set
 
     /**
      * Returns the amount of bytes which has not been processed yet in the data
@@ -72,10 +50,8 @@ class CommandStatusWrapper {
      *
      * @return The amount of bytes.
      */
-    fun getdCswDataResidue(): Int {
-        return dCswDataResidue
-    }
-
+    var dCswDataResidue: Int = 0
+        private set
     /**
      * Returns the status of execution of the transmitted SCSI command.
      *
@@ -89,8 +65,28 @@ class CommandStatusWrapper {
      * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper
      * .PHASE_ERROR
      */
-    fun getbCswStatus(): Byte {
-        return bCswStatus
+    var bCswStatus: Byte = 0
+        private set
+
+     /**
+     * Reads command block wrapper from the specified buffer and stores it into this object.
+     *
+     * @param buffer
+     * The data where the command block wrapper is located.
+     */
+    fun read(buffer: ByteBuffer) {
+         buffer.order(ByteOrder.LITTLE_ENDIAN)
+
+         this.apply {
+
+            dCswSignature = buffer.int
+            if (dCswSignature != D_CSW_SIGNATURE) {
+                Log.e(TAG, "unexpected dCSWSignature $dCswSignature")
+            }
+            dCswTag = buffer.int
+            dCswDataResidue = buffer.int
+            bCswStatus = buffer.get()
+         }
     }
 
     companion object {
@@ -98,27 +94,27 @@ class CommandStatusWrapper {
         /**
          * SCSI command has successfully been executed.
          */
-        val COMMAND_PASSED = 0
+        const val COMMAND_PASSED = 0
         /**
          * SCSI command could not be executed, host should issue an SCSI request
          * sense.
          *
          * @see com.github.mjdev.libaums.driver.scsi.commands.ScsiRequestSense
          */
-        val COMMAND_FAILED = 1
+        const val COMMAND_FAILED = 1
         /**
          * SCSI command could not be executed, host should issue a mass storage
          * reset.
          */
-        val PHASE_ERROR = 2
+        const val PHASE_ERROR = 2
 
         /**
          * Every CSW has the same size.
          */
-        val SIZE = 13
+        const val SIZE = 13
 
         private val TAG = CommandStatusWrapper::class.java.simpleName
 
-        private val D_CSW_SIGNATURE = 0x53425355
+        private const val D_CSW_SIGNATURE = 0x53425355
     }
 }
