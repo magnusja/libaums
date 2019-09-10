@@ -37,6 +37,10 @@ android {
         debug {
             testCoverageEnabled true
         }
+
+        qa {
+
+        }
     }
 
     lintOptions {

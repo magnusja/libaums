@@ -102,7 +102,7 @@ public class UsbMassStorageDevice {
 	 * @param inEndpoint
 	 * @param outEndpoint
 	 */
-	private UsbMassStorageDevice(UsbManager usbManager, UsbDevice usbDevice,
+	public UsbMassStorageDevice(UsbManager usbManager, UsbDevice usbDevice,
 			UsbInterface usbInterface, UsbEndpoint inEndpoint, UsbEndpoint outEndpoint) {
 		this.usbManager = usbManager;
 		this.usbDevice = usbDevice;
