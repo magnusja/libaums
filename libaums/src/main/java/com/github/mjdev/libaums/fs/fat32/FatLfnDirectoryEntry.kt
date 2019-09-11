@@ -85,8 +85,7 @@ internal class FatLfnDirectoryEntry
      *
      * @return The name of the entry
      */
-    /* package */
-    val name: String
+    internal val name: String
         get() {
             lfnName?.let { return it }
             // https://en.wikipedia.org/wiki/8.3_filename#Compatibility

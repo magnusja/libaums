@@ -56,7 +56,7 @@ class FAT
  * The info structure where the last allocated block and the free
  * clusters are saved.
  */
-/* package */ internal constructor(private val blockDevice: BlockDeviceDriver, bootSector: Fat32BootSector,
+internal constructor(private val blockDevice: BlockDeviceDriver, bootSector: Fat32BootSector,
                                    private val fsInfoStructure: FsInfoStructure) {
     private val fatOffset: LongArray
     private var fatNumbers: IntArray
@@ -92,8 +92,8 @@ class FAT
      * @throws IOException
      * If reading from device fails.
      */
-    /* package */@Throws(IOException::class)
-    fun getChain(startCluster: Long): Array<Long> {
+    @Throws(IOException::class)
+    internal fun getChain(startCluster: Long): Array<Long> {
 
         if (startCluster == 0L) {
             // if the start cluster is 0, we have an empty file
@@ -156,8 +156,8 @@ class FAT
      * @throws IOException
      * If reading or writing to the FAT fails.
      */
-    /* package */@Throws(IOException::class)
-    fun alloc(chain: Array<Long>, numberOfClusters: Int): Array<Long> {
+    @Throws(IOException::class)
+    internal fun alloc(chain: Array<Long>, numberOfClusters: Int): Array<Long> {
         var numberOfClusters = numberOfClusters
 
         // save original number of clusters for fs info structure
@@ -295,8 +295,8 @@ class FAT
      * If more clusters are requested to be freed than currently
      * exist in the chain.
      */
-    /* package */@Throws(IOException::class)
-    fun free(chain: Array<Long>, numberOfClusters: Int): Array<Long> {
+    @Throws(IOException::class)
+    internal fun free(chain: Array<Long>, numberOfClusters: Int): Array<Long> {
         val offsetInChain = chain.size - numberOfClusters
         // for performance reasons we always read or write two times the block
         // size
@@ -307,9 +307,7 @@ class FAT
         val buffer = ByteBuffer.allocate(bufferSize)
         buffer.order(ByteOrder.LITTLE_ENDIAN)
 
-        if (offsetInChain < 0)
-            throw IllegalStateException(
-                    "trying to remove more clusters in chain than currently exist!")
+        check(offsetInChain >= 0) { "trying to remove more clusters in chain than currently exist!" }
 
         var currentCluster: Long
 

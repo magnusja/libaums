@@ -32,7 +32,7 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver
  *
  * @author mjahnen
  */
-class ClusterChain
+internal class ClusterChain
 /**
  * Constructs a new ClusterChain with the given information.
  *

@@ -37,7 +37,7 @@ import kotlin.experimental.and
  *
  * @author mjahnen
  */
-/* package */internal class ShortName {
+internal class ShortName {
 
     private var data: ByteBuffer
 
@@ -46,7 +46,6 @@ import kotlin.experimental.and
      *
      * @return The name.
      */
-    /* package */
     val string: String
         get() {
             val name = CharArray(8)
@@ -82,7 +81,7 @@ import kotlin.experimental.and
      * @param extension
      * The extension, must not be null, but can be empty.
      */
-    /* package */ constructor(name: String, extension: String) {
+    constructor(name: String, extension: String) {
         val tmp = ByteArray(SIZE)
         // fill with spaces
         Arrays.fill(tmp, 0x20.toByte())
@@ -120,7 +119,7 @@ import kotlin.experimental.and
      * @param buffer
      * The buffer where the data shall be stored.
      */
-    /* package */ fun serialize(buffer: ByteBuffer) {
+    fun serialize(buffer: ByteBuffer) {
         buffer.put(data.array(), 0, SIZE)
     }
 
@@ -133,7 +132,7 @@ import kotlin.experimental.and
      *
      * @see FatLfnDirectoryEntry.serialize
      */
-    /* package */ fun calculateCheckSum(): Byte {
+    fun calculateCheckSum(): Byte {
         var sum = 0
 
         for (i in 0 until SIZE) {
@@ -167,7 +166,7 @@ import kotlin.experimental.and
          * @param data
          * The 32 bytes from the entry.
          */
-        /* package */ fun parse(data: ByteBuffer): ShortName {
+        fun parse(data: ByteBuffer): ShortName {
             val tmp = ByteArray(SIZE)
             data.get(tmp)
             return ShortName(ByteBuffer.wrap(tmp))

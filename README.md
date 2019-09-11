@@ -24,7 +24,7 @@ compile 'com.github.mjdev:libaums-storageprovider:0.5.1'
 ```
 
 ### Basics
-#### Getting mass storage devices
+#### Query available mass storage devices
 
 #### Java
 
@@ -157,30 +157,8 @@ device.close();
 
 #### Provide access to external apps
 
-Usually third party apps do not have access to the files on a mass storage device if the Android system does mount the device or this app integrates this library itself. To solve this issue there are two additional modules to provide access to other app. One uses the Storage Access Framework feature of Android (API level >= 19) and the other one spins up an HTTP server to allow downloading or streaming.
+Usually third party apps do not have access to the files on a mass storage device if the Android system does mount (this is usually supported on newer devices, back in 2014 there was no support for that) the device or this app integrates this library itself. To solve this issue there are two additional modules to provide access to other app. One uses the Storage Access Framework feature of Android (API level >= 19) and the other one spins up an HTTP server to allow downloading or streaming of videos or images for instance.
 
-### Storage Access Framework
-[![Javadocs](https://www.javadoc.io/badge/com.github.mjdev/libaums-storageprovider.svg)](https://www.javadoc.io/doc/com.github.mjdev/libaums-storageprovider)
-
-To learn more about this visit: https://developer.android.com/guide/topics/providers/document-provider.html
-
-To integrate this module in your app the only thing you have to do is add the definition in your AndroidManifest.xml.
-
-```xml
-<provider
-    android:name="com.github.mjdev.libaums.storageprovider.UsbDocumentProvider"
-    android:authorities="com.github.mjdev.libaums.storageprovider.documents"
-    android:exported="true"
-    android:grantUriPermissions="true"
-    android:permission="android.permission.MANAGE_DOCUMENTS"
-    android:enabled="@bool/isAtLeastKitKat">
-    <intent-filter>
-        <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
-    </intent-filter>
-</provider>
-```
-
-After that apps using the Storage Access Framework will be able to access the files of the USB mass storage device.
 
 ### HTTP server
 [![Javadocs](https://www.javadoc.io/badge/com.github.mjdev/libaums-httpserver.svg)](https://www.javadoc.io/doc/com.github.mjdev/libaums-httpserver)
@@ -299,6 +277,30 @@ override protected fun onStart() {
 ```
 
 See the example app for additional details on that.
+
+
+### Storage Access Framework
+[![Javadocs](https://www.javadoc.io/badge/com.github.mjdev/libaums-storageprovider.svg)](https://www.javadoc.io/doc/com.github.mjdev/libaums-storageprovider)
+
+To learn more about this visit: https://developer.android.com/guide/topics/providers/document-provider.html
+
+To integrate this module in your app the only thing you have to do is add the definition in your AndroidManifest.xml.
+
+```xml
+<provider
+    android:name="com.github.mjdev.libaums.storageprovider.UsbDocumentProvider"
+    android:authorities="com.github.mjdev.libaums.storageprovider.documents"
+    android:exported="true"
+    android:grantUriPermissions="true"
+    android:permission="android.permission.MANAGE_DOCUMENTS"
+    android:enabled="@bool/isAtLeastKitKat">
+    <intent-filter>
+        <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+    </intent-filter>
+</provider>
+```
+
+After that apps using the Storage Access Framework will be able to access the files of the USB mass storage device.
 
 
 #### Hints
