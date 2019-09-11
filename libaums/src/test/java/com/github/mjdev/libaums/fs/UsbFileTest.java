@@ -14,12 +14,10 @@ import org.xenei.junit.contract.Contract;
 import org.xenei.junit.contract.ContractTest;
 import org.xenei.junit.contract.IProducer;
 
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -746,6 +744,58 @@ public class UsbFileTest {
         InputStream inputStream1 = UsbFileStreamFactory.createBufferedInputStream(srcPtr, fs);
         InputStream inputStream2  = UsbFileStreamFactory.createBufferedInputStream(dstPtr, fs);
         assertTrue(IOUtils.contentEquals(inputStream1, inputStream2));
+    }
+
+    @ContractTest
+    public void testIssue215() throws IOException {
+        UsbFile folder1a = root.createDirectory("Folder1a");
+        UsbFile folder1b = folder1a.createDirectory("Folder1b");
+
+        UsbFile file1b1 = folder1b.createFile("File1b1.txt");
+        UsbFile file1b2 = folder1b.createFile("File1b2.txt");
+        UsbFile file1b3 = folder1b.createFile("File1b3.txt");
+
+
+        UsbFile folder2a = root.createDirectory("Folder2a");
+        UsbFile file2a = folder2a.createFile("File2a.txt");
+
+        UsbFile file = root.createFile("File1.txt");
+
+        OutputStream outputStream = UsbFileStreamFactory.createBufferedOutputStream(file1b1, fs);
+        outputStream.write(file1b1.getName().getBytes());
+        outputStream.close();
+        outputStream = UsbFileStreamFactory.createBufferedOutputStream(file1b2, fs);
+        outputStream.write(file1b2.getName().getBytes());
+        outputStream.close();
+        outputStream = UsbFileStreamFactory.createBufferedOutputStream(file1b3, fs);
+        outputStream.write(file1b3.getName().getBytes());
+        outputStream.close();
+        outputStream = UsbFileStreamFactory.createBufferedOutputStream(file2a, fs);
+        outputStream.write(file2a.getName().getBytes());
+        outputStream.close();
+        outputStream = UsbFileStreamFactory.createBufferedOutputStream(file, fs);
+        outputStream.write(file.getName().getBytes());
+        outputStream.close();
+
+        assertTrue(IOUtils.contentEquals(new UsbFileInputStream(root.search("Folder1a/Folder1b/File1b1.txt")),
+                new ByteArrayInputStream("File1b1.txt".getBytes(StandardCharsets.UTF_8))));
+
+        assertTrue(IOUtils.contentEquals(new UsbFileInputStream(root.search("Folder1a/Folder1b/File1b2.txt")),
+                new ByteArrayInputStream("File1b2.txt".getBytes(StandardCharsets.UTF_8))));
+
+        assertTrue(IOUtils.contentEquals(new UsbFileInputStream(root.search("Folder1a/Folder1b/File1b2.txt")),
+                new ByteArrayInputStream("File1b2.txt".getBytes(StandardCharsets.UTF_8))));
+
+        newInstance();
+
+        assertTrue(IOUtils.contentEquals(new UsbFileInputStream(root.search("Folder1a/Folder1b/File1b1.txt")),
+                new ByteArrayInputStream("File1b1.txt".getBytes(StandardCharsets.UTF_8))));
+
+        assertTrue(IOUtils.contentEquals(new UsbFileInputStream(root.search("Folder1a/Folder1b/File1b2.txt")),
+                new ByteArrayInputStream("File1b2.txt".getBytes(StandardCharsets.UTF_8))));
+
+        assertTrue(IOUtils.contentEquals(new UsbFileInputStream(root.search("Folder1a/Folder1b/File1b2.txt")),
+                new ByteArrayInputStream("File1b2.txt".getBytes(StandardCharsets.UTF_8))));
     }
 
 }
