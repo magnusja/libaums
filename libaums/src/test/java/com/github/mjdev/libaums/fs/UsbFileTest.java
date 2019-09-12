@@ -748,33 +748,27 @@ public class UsbFileTest {
 
     @ContractTest
     public void testIssue215() throws IOException {
-        UsbFile folder1a = root.createDirectory("Folder1a");
-        UsbFile folder1b = folder1a.createDirectory("Folder1b");
+        
+        UsbFile file1b1 = getFile(root, "Folder1a/Folder1b/File1b1.txt");
+        UsbFile file1b2 = getFile(root, "Folder1a/Folder1b/File1b2.txt");
+        UsbFile file1b3 = getFile(root, "Folder1a/Folder1b/File1b3.txt");
+        UsbFile file2a = getFile(root, "Folder2a/File2a.txt");
+        UsbFile file1 = getFile(root, "File1.txt");
 
-        UsbFile file1b1 = folder1b.createFile("File1b1.txt");
-        UsbFile file1b2 = folder1b.createFile("File1b2.txt");
-        UsbFile file1b3 = folder1b.createFile("File1b3.txt");
-
-
-        UsbFile folder2a = root.createDirectory("Folder2a");
-        UsbFile file2a = folder2a.createFile("File2a.txt");
-
-        UsbFile file = root.createFile("File1.txt");
-
-        OutputStream outputStream = UsbFileStreamFactory.createBufferedOutputStream(file1b1, fs);
+        OutputStream outputStream = new UsbFileOutputStream(file1b1);
         outputStream.write(file1b1.getName().getBytes());
         outputStream.close();
-        outputStream = UsbFileStreamFactory.createBufferedOutputStream(file1b2, fs);
+        outputStream = new UsbFileOutputStream(file1b2);
         outputStream.write(file1b2.getName().getBytes());
         outputStream.close();
-        outputStream = UsbFileStreamFactory.createBufferedOutputStream(file1b3, fs);
+        outputStream = new UsbFileOutputStream(file1b3);
         outputStream.write(file1b3.getName().getBytes());
         outputStream.close();
-        outputStream = UsbFileStreamFactory.createBufferedOutputStream(file2a, fs);
+        outputStream = new UsbFileOutputStream(file2a);
         outputStream.write(file2a.getName().getBytes());
         outputStream.close();
-        outputStream = UsbFileStreamFactory.createBufferedOutputStream(file, fs);
-        outputStream.write(file.getName().getBytes());
+        outputStream = new UsbFileOutputStream(file1);
+        outputStream.write(file1.getName().getBytes());
         outputStream.close();
 
         assertTrue(IOUtils.contentEquals(new UsbFileInputStream(root.search("Folder1a/Folder1b/File1b1.txt")),
@@ -783,8 +777,8 @@ public class UsbFileTest {
         assertTrue(IOUtils.contentEquals(new UsbFileInputStream(root.search("Folder1a/Folder1b/File1b2.txt")),
                 new ByteArrayInputStream("File1b2.txt".getBytes(StandardCharsets.UTF_8))));
 
-        assertTrue(IOUtils.contentEquals(new UsbFileInputStream(root.search("Folder1a/Folder1b/File1b2.txt")),
-                new ByteArrayInputStream("File1b2.txt".getBytes(StandardCharsets.UTF_8))));
+        assertTrue(IOUtils.contentEquals(new UsbFileInputStream(root.search("Folder1a/Folder1b/File1b3.txt")),
+                new ByteArrayInputStream("File1b3.txt".getBytes(StandardCharsets.UTF_8))));
 
         newInstance();
 
@@ -794,8 +788,26 @@ public class UsbFileTest {
         assertTrue(IOUtils.contentEquals(new UsbFileInputStream(root.search("Folder1a/Folder1b/File1b2.txt")),
                 new ByteArrayInputStream("File1b2.txt".getBytes(StandardCharsets.UTF_8))));
 
-        assertTrue(IOUtils.contentEquals(new UsbFileInputStream(root.search("Folder1a/Folder1b/File1b2.txt")),
-                new ByteArrayInputStream("File1b2.txt".getBytes(StandardCharsets.UTF_8))));
+        assertTrue(IOUtils.contentEquals(new UsbFileInputStream(root.search("Folder1a/Folder1b/File1b3.txt")),
+                new ByteArrayInputStream("File1b3.txt".getBytes(StandardCharsets.UTF_8))));
+    }
+    
+    private static UsbFile getFile(UsbFile root, String path) throws IOException {
+        String[] items = path.split("/");
+
+        UsbFile child = root;
+        for (int i=0; i<items.length; ++i) {
+            UsbFile next = child.search(items[i]);
+            if (next == null) {
+                for (; i < items.length - 1; ++i)
+                    child = child.createDirectory(items[i]);
+                child = child.createFile(items[i++]);
+            } else {
+                child = next;
+            }
+        }
+
+        return child;
     }
 
 }
