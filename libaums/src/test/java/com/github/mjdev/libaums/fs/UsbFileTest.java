@@ -59,6 +59,34 @@ public class UsbFileTest {
     }
 
     @ContractTest
+    public void testSingleFileReferenceSearch() throws IOException {
+        root.createDirectory("test_single_ref").createDirectory("sub").createFile("file.txt");
+
+        newInstance();
+
+        assertSame(root.search("test_single_ref"), root.search("test_single_ref"));
+        assertSame(root.search("test_single_ref/sub"), root.search("test_single_ref/sub"));
+        assertSame(root.search("test_single_ref/sub/file.txt"), root.search("test_single_ref/sub/file.txt"));
+    }
+
+    @ContractTest
+    public void testSingleFileReferenceCreate() throws IOException {
+        assertSame(root.createDirectory("ref_test"), root.search("ref_test"));
+        assertSame(root.createFile("ref_test.txt"), root.search("ref_test.txt"));
+
+        UsbFile file = root.createDirectory("test_single_ref").createDirectory("sub").createFile("file.txt");
+        assertSame(file, root.search("test_single_ref/sub/file.txt"));
+        assertSame(file.getParent(), root.search("/test_single_ref/sub/"));
+        assertSame(file.getParent().getParent(), root.search("test_single_ref/"));
+
+        newInstance();
+
+        assertNotSame(file, root.search("test_single_ref/sub/file.txt"));
+        assertNotSame(file.getParent(), root.search("/test_single_ref/sub/"));
+        assertNotSame(file.getParent().getParent(), root.search("test_single_ref/"));
+    }
+
+    @ContractTest
     public void search() throws Exception {
         for (JsonValue value : expectedValues.get("search").asArray()) {
             String path = value.asString();
