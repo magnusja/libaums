@@ -47,6 +47,7 @@ class FatDirectory
  * The parent directory of the newly created one.
  */
 internal constructor(
+            private val fs: Fat32FileSystem,
             private val blockDevice: BlockDeviceDriver,
             private val fat: FAT,
             private val bootSector: Fat32BootSector,
@@ -126,7 +127,7 @@ internal constructor(
      */
     @Throws(IOException::class)
     private fun init() {
-        if (!::chain.isInitialized) {
+        if (!isRoot) {
             chain = ClusterChain(entry!!.startCluster, blockDevice, fat, bootSector)
         }
 
@@ -317,7 +318,9 @@ internal constructor(
         // write changes immediately to disk
         write()
 
-        return FatFile(blockDevice, fat, bootSector, entry, this)
+        val file = FatFile(blockDevice, fat, bootSector, entry, this)
+        fs.fileCache[file.absolutePath] = file
+        return file
     }
 
     @Throws(IOException::class)
@@ -340,7 +343,7 @@ internal constructor(
         // write changes immediately to disk
         write()
 
-        val result = FatDirectory(blockDevice, fat, bootSector, entry, this)
+        val result = FatDirectory(fs, blockDevice, fat, bootSector, entry, this)
         result.hasBeenInited = true
 
         result.entries = ArrayList() // initialise entries before adding sub-directories
@@ -364,6 +367,7 @@ internal constructor(
         // write changes immediately to disk
         result.write()
 
+        fs.fileCache[result.absolutePath] = result
         return result
     }
 
@@ -386,8 +390,8 @@ internal constructor(
     override fun list(): Array<String> {
         init()
         val list = ArrayList<String>(entries!!.size)
-        for (i in entries!!.indices) {
-            val name = entries!![i].name
+        for (entry in entries!!) {
+            val name = entry.name
             if (name != "." && name != "..") {
                 list.add(name)
             }
@@ -400,17 +404,25 @@ internal constructor(
     override fun listFiles(): Array<UsbFile> {
         init()
         val list = ArrayList<UsbFile>(entries!!.size)
-        for (i in entries!!.indices) {
-            val entry = entries!![i]
+        for (entry in entries!!) {
             val name = entry.name
             if (name == "." || name == "..")
                 continue
 
-            if (entry.isDirectory) {
-                list.add(FatDirectory(blockDevice, fat, bootSector, entry, this))
+            val entryAbsolutePath = if (isRoot) {
+                UsbFile.separator + entry.name
             } else {
-                list.add(FatFile(blockDevice, fat, bootSector, entry, this))
+                absolutePath + UsbFile.separator + entry.name
             }
+
+            val file = when {
+                fs.fileCache[entryAbsolutePath] != null -> fs.fileCache[entryAbsolutePath]!!
+                entry.isDirectory -> FatDirectory(fs, blockDevice, fat, bootSector, entry, this)
+                else -> FatFile(blockDevice, fat, bootSector, entry, this)
+            }
+
+            fs.fileCache[entryAbsolutePath] = file
+            list.add(file)
         }
 
         return list.toTypedArray()
@@ -535,9 +547,10 @@ internal constructor(
          */
         @JvmStatic
         @Throws(IOException::class)
-        internal fun readRoot(blockDevice: BlockDeviceDriver, fat: FAT,
+        internal fun readRoot(fs: Fat32FileSystem,
+                              blockDevice: BlockDeviceDriver, fat: FAT,
                               bootSector: Fat32BootSector): FatDirectory {
-            val result = FatDirectory(blockDevice, fat, bootSector, null, null)
+            val result = FatDirectory(fs, blockDevice, fat, bootSector, null, null)
             result.chain = ClusterChain(bootSector.rootDirStartCluster, blockDevice, fat,
                     bootSector)
             result.init() // init calls readEntries

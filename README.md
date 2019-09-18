@@ -19,7 +19,7 @@ Thank you!
 The library can be included into your project like this:
 
 ```ruby
-compile 'com.github.mjdev:libaums:0.7.0'
+compile 'com.github.mjdev:libaums:0.7.1'
 ```
 
 If you need the HTTP or the storage provider module:

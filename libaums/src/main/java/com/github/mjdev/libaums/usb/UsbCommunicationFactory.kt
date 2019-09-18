@@ -13,6 +13,7 @@ object UsbCommunicationFactory {
 
     private val TAG = UsbCommunicationFactory::class.java.simpleName
 
+    @JvmStatic
     var underlyingUsbCommunication = UnderlyingUsbCommunication.DEVICE_CONNECTION_SYNC
 
     enum class UnderlyingUsbCommunication {
@@ -21,19 +22,15 @@ object UsbCommunicationFactory {
     }
 
     fun createUsbCommunication(deviceConnection: UsbDeviceConnection, outEndpoint: UsbEndpoint, inEndpoint: UsbEndpoint): UsbCommunication {
-        val communication: UsbCommunication
-
-        if (underlyingUsbCommunication == UnderlyingUsbCommunication.DEVICE_CONNECTION_SYNC) {
+        return if (underlyingUsbCommunication == UnderlyingUsbCommunication.DEVICE_CONNECTION_SYNC) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                communication = JellyBeanMr2Communication(deviceConnection, outEndpoint, inEndpoint)
+                JellyBeanMr2Communication(deviceConnection, outEndpoint, inEndpoint)
             } else {
                 Log.i(TAG, "using workaround usb communication")
-                communication = HoneyCombMr1Communication(deviceConnection, outEndpoint, inEndpoint)
+                HoneyCombMr1Communication(deviceConnection, outEndpoint, inEndpoint)
             }
         } else {
-            communication = UsbRequestCommunication(deviceConnection, outEndpoint, inEndpoint)
+            UsbRequestCommunication(deviceConnection, outEndpoint, inEndpoint)
         }
-
-        return communication
     }
 }
