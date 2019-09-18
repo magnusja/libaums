@@ -58,7 +58,7 @@ interface UsbFile : Closeable {
 
     /**
      * Absolute path of a file or directory.
-     * @return Absolute path seperated with '/' and beginning with an '/'
+     * @return Absolute path separated with '/' and beginning with an '/'
      */
     val absolutePath: String
 

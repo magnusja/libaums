@@ -771,16 +771,27 @@ public class UsbFileTest {
         outputStream.write(file1.getName().getBytes());
         outputStream.close();
 
+        assertSame(file1b1.getParent(), file1b2.getParent());
+        assertSame(file1b1.getParent(), file1b2.getParent());
+
+        assertNotNull(root.search("Folder1a/Folder1b/File1b1.txt"));
+        assertNotNull(root.search("Folder1a/Folder1b/File1b2.txt"));
+        assertNotNull(root.search("Folder1a/Folder1b/File1b3.txt"));
+
+        assertTrue(IOUtils.contentEquals(new UsbFileInputStream(root.search("Folder1a/Folder1b/File1b3.txt")),
+                new ByteArrayInputStream("File1b3.txt".getBytes(StandardCharsets.UTF_8))));
+
         assertTrue(IOUtils.contentEquals(new UsbFileInputStream(root.search("Folder1a/Folder1b/File1b1.txt")),
                 new ByteArrayInputStream("File1b1.txt".getBytes(StandardCharsets.UTF_8))));
 
         assertTrue(IOUtils.contentEquals(new UsbFileInputStream(root.search("Folder1a/Folder1b/File1b2.txt")),
                 new ByteArrayInputStream("File1b2.txt".getBytes(StandardCharsets.UTF_8))));
 
-        assertTrue(IOUtils.contentEquals(new UsbFileInputStream(root.search("Folder1a/Folder1b/File1b3.txt")),
-                new ByteArrayInputStream("File1b3.txt".getBytes(StandardCharsets.UTF_8))));
-
         newInstance();
+
+        assertNotNull(root.search("Folder1a/Folder1b/File1b1.txt"));
+        assertNotNull(root.search("Folder1a/Folder1b/File1b2.txt"));
+        assertNotNull(root.search("Folder1a/Folder1b/File1b3.txt"));
 
         assertTrue(IOUtils.contentEquals(new UsbFileInputStream(root.search("Folder1a/Folder1b/File1b1.txt")),
                 new ByteArrayInputStream("File1b1.txt".getBytes(StandardCharsets.UTF_8))));

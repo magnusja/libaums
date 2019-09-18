@@ -386,8 +386,8 @@ internal constructor(
     override fun list(): Array<String> {
         init()
         val list = ArrayList<String>(entries!!.size)
-        for (i in entries!!.indices) {
-            val name = entries!![i].name
+        for (entry in entries!!) {
+            val name = entry.name
             if (name != "." && name != "..") {
                 list.add(name)
             }
@@ -400,8 +400,7 @@ internal constructor(
     override fun listFiles(): Array<UsbFile> {
         init()
         val list = ArrayList<UsbFile>(entries!!.size)
-        for (i in entries!!.indices) {
-            val entry = entries!![i]
+        for (entry in entries!!) {
             val name = entry.name
             if (name == "." || name == "..")
                 continue
