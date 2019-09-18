@@ -60,13 +60,10 @@ public class UsbFileTest {
 
     @ContractTest
     public void testSingleFileReferenceSearch() throws IOException {
-        root.createDirectory("test_single_ref").createDirectory("sub").createFile("file.txt");
-
-        newInstance();
-
-        assertSame(root.search("test_single_ref"), root.search("test_single_ref"));
-        assertSame(root.search("test_single_ref/sub"), root.search("test_single_ref/sub"));
-        assertSame(root.search("test_single_ref/sub/file.txt"), root.search("test_single_ref/sub/file.txt"));
+        for (JsonValue value : expectedValues.get("search").asArray()) {
+            String path = value.asString();
+            assertSame(root.search(path), root.search(path));
+        }
     }
 
     @ContractTest
@@ -395,7 +392,6 @@ public class UsbFileTest {
         return count;
     }
 
-    @ContractTest
     public void write() throws Exception {
 
         int numberOfFiles = root.listFiles().length;

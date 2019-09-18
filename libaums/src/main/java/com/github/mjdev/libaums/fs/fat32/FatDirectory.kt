@@ -131,10 +131,6 @@ internal constructor(
             chain = ClusterChain(entry!!.startCluster, blockDevice, fat, bootSector)
         }
 
-        if (!isRoot && entry!!.name == "folder 2") {
-            Log.d(TAG, "asd")
-        }
-
         // entries is allocated here
         // an exception will be thrown if entries is used before the directory has been initialised
         // use of uninitialised entries can lead to data loss!
