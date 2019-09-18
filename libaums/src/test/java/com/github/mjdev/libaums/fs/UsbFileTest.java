@@ -392,6 +392,7 @@ public class UsbFileTest {
         return count;
     }
 
+    @ContractTest
     public void write() throws Exception {
 
         int numberOfFiles = root.listFiles().length;

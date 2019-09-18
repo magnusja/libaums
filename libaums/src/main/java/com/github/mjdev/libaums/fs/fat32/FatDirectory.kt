@@ -421,7 +421,7 @@ internal constructor(
                 else -> FatFile(blockDevice, fat, bootSector, entry, this)
             }
 
-            fs.fileCache[absolutePath + UsbFile.separator + entry.name] = file
+            fs.fileCache[entryAbsolutePath] = file
             list.add(file)
         }
 
