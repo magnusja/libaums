@@ -56,6 +56,14 @@ private constructor(blockDevice: BlockDeviceDriver, first512Bytes: ByteBuffer) :
     private val fat: FAT
     private val fsInfoStructure: FsInfoStructure
     override val rootDirectory: FatDirectory
+    /**
+     * Caches UsbFile instances returned by list files method. If we do not do
+     * that we will get a new instance when searching for the same file.
+     * Depending on what you do with the two different instances they can get out
+     * of sync and only the one which is written latest will actually be persisted on
+     * disk. This is especially problematic if you create files on different directory
+     * instances.. See also issue 215.
+     */
     internal val fileCache = WeakHashMap<String, UsbFile>()
 
     override val volumeLabel: String
