@@ -28,7 +28,7 @@ public class FileSystemFactoryTest {
         blockDevice.init();
 
         PartitionTableEntry entry = new PartitionTableEntry(PartitionTypes.FAT32, 2 * 512, 1337);
-        FileSystem fs = FileSystemFactory.createFileSystem(entry, blockDevice);
+        FileSystem fs = FileSystemFactory.INSTANCE.createFileSystem(entry, blockDevice);
 
         assertTrue(fs instanceof Fat32FileSystem);
     }

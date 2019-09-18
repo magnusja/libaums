@@ -49,7 +49,7 @@ abstract class CommandBlockWrapper
  * @param cbwcbLength
  * The length in bytes of the scsi command.
  */
-protected constructor(protected var dCbwDataTransferLength: Int,
+protected constructor(var dCbwDataTransferLength: Int,
                       /**
                        * Returns the direction in the data phase.
                        *
@@ -59,10 +59,21 @@ protected constructor(protected var dCbwDataTransferLength: Int,
                        */
                       val direction: Direction,
                       private val bCbwLun: Byte,
-                      private val bCbwcbLength: Byte) {
+                      /**
+                       * The amount of bytes which should be transmitted in the data
+                       * phase.
+                       */
+                      val bCbwcbLength: Byte) {
 
-    private var dCbwTag: Int = 0
-    private var bmCbwFlags: Byte = 0
+
+    /**
+     * The tag which can be used to determine the corresponding
+     * [ CBW][com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper].
+     *
+     * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper
+     */
+    var dCbwTag: Int = 0
+    var bmCbwFlags: Byte = 0
 
     /**
      * The direction of the data phase of the SCSI command.
@@ -100,52 +111,20 @@ protected constructor(protected var dCbwDataTransferLength: Int,
      * The buffer were the serialized data should be copied to.
      */
     open fun serialize(buffer: ByteBuffer) {
-        buffer.order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(D_CBW_SIGNATURE)
-        buffer.putInt(dCbwTag)
-        buffer.putInt(dCbwDataTransferLength)
-        buffer.put(bmCbwFlags)
-        buffer.put(bCbwLun)
-        buffer.put(bCbwcbLength)
-    }
-
-    /**
-     * Returns the tag which can be used to determine the corresponding
-     * [ CBW][com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper].
-     *
-     * @return The command block wrapper tag.
-     * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper
-     * .getdCswTag
-     */
-    fun getdCbwTag(): Int {
-        return dCbwTag
-    }
-
-    /**
-     * Sets the tag which can be used to determine the corresponding
-     * [ CBW][com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper].
-     *
-     * @param dCbwTag The command block wrapper tag
-     * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper
-     * .getdCswTag
-     */
-    fun setdCbwTag(dCbwTag: Int) {
-        this.dCbwTag = dCbwTag
-    }
-
-    /**
-     * Returns the amount of bytes which should be transmitted in the data
-     * phase.
-     *
-     * @return The length in bytes.
-     */
-    fun getdCbwDataTransferLength(): Int {
-        return dCbwDataTransferLength
+        buffer.apply {
+            order(ByteOrder.LITTLE_ENDIAN)
+            putInt(D_CBW_SIGNATURE)
+            putInt(dCbwTag)
+            putInt(dCbwDataTransferLength)
+            put(bmCbwFlags)
+            put(bCbwLun)
+            put(bCbwcbLength)
+        }
     }
 
     companion object {
 
-        private val D_CBW_SIGNATURE = 0x43425355
+        private const val D_CBW_SIGNATURE = 0x43425355
     }
 
 }

@@ -50,7 +50,7 @@ class Partition(blockDevice: BlockDeviceDriver, entry: PartitionTableEntry) : By
      * @return the file system on the partition which can be used to access
      * files and directories.
      */
-    var fileSystem: FileSystem? = null
+    lateinit var fileSystem: FileSystem
         private set
 
     /**
@@ -61,7 +61,7 @@ class Partition(blockDevice: BlockDeviceDriver, entry: PartitionTableEntry) : By
      * @return Returns the volume label of this partition.
      */
     val volumeLabel: String
-        get() = fileSystem!!.volumeLabel
+        get() = fileSystem.volumeLabel
 
     companion object {
 

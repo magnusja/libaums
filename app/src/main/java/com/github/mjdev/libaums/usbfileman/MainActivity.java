@@ -99,7 +99,7 @@ import com.github.mjdev.libaums.server.http.server.AsyncHttpServer;
 public class MainActivity extends AppCompatActivity implements OnItemClickListener {
 
 	static {
-		FileSystemFactory.registerFileSystem(new JavaFsFileSystemCreator());
+		FileSystemFactory.INSTANCE.registerFileSystem(new JavaFsFileSystemCreator());
 	}
 
 	/**

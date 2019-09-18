@@ -22,7 +22,7 @@ import java.net.URLDecoder
  */
 class AsyncHttpServer(private val port: Int) : HttpServer, HttpServerRequestCallback {
 
-    private var usbFileProvider: UsbFileProvider? = null
+    override lateinit var usbFileProvider: UsbFileProvider
     private val server = com.koushikdutta.async.http.server.AsyncHttpServer()
     override var isAlive = false
     override val hostname: String
@@ -49,10 +49,6 @@ class AsyncHttpServer(private val port: Int) : HttpServer, HttpServerRequestCall
         isAlive = false
     }
 
-    override fun setUsbFileProvider(provider: UsbFileProvider) {
-        usbFileProvider = provider
-    }
-
     override fun onRequest(request: AsyncHttpServerRequest, response: AsyncHttpServerResponse) {
         val uri: String
         try {
@@ -67,7 +63,7 @@ class AsyncHttpServer(private val port: Int) : HttpServer, HttpServerRequestCall
         Log.d(TAG, "Uri: $uri")
 
         try {
-            val fileToServe = usbFileProvider!!.determineFileToServe(uri)
+            val fileToServe = usbFileProvider.determineFileToServe(uri)
             response.sendStream(UsbFileInputStream(fileToServe), fileToServe.length)
         } catch (e: FileNotFoundException) {
             response.code(404)

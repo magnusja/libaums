@@ -50,7 +50,7 @@ class NanoHttpdServer : HttpServer {
 
 
             return try {
-                val fileToServe = usbFileProvider!!.determineFileToServe(uri)
+                val fileToServe = usbFileProvider.determineFileToServe(uri)
 
                 range?.let { serveRangeOfFile(fileToServe, it) }
                         ?: serveCompleteFile(fileToServe)
@@ -141,7 +141,7 @@ class NanoHttpdServer : HttpServer {
         }
     }
 
-    private var usbFileProvider: UsbFileProvider? = null
+    override lateinit var usbFileProvider: UsbFileProvider
     private var httpServer: NHttpServer
 
     constructor(port: Int) {
@@ -150,10 +150,6 @@ class NanoHttpdServer : HttpServer {
 
     constructor(hostname: String, port: Int) {
         httpServer = NHttpServer(hostname, port)
-    }
-
-    override fun setUsbFileProvider(provider: UsbFileProvider) {
-        usbFileProvider = provider
     }
 
     override fun start() {

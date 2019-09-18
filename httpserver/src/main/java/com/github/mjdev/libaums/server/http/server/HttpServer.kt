@@ -12,12 +12,11 @@ interface HttpServer {
     val isAlive: Boolean
     val hostname: String
     val listeningPort: Int
+    var usbFileProvider: UsbFileProvider
     @Throws(IOException::class)
     fun start()
 
     @Throws(IOException::class)
     fun stop()
-
-    fun setUsbFileProvider(provider: UsbFileProvider)
 }
 

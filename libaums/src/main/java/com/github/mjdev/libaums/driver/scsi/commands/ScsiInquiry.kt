@@ -34,15 +34,16 @@ class ScsiInquiry(private val allocationLength: Byte, lun: Byte) : CommandBlockW
 
     override fun serialize(buffer: ByteBuffer) {
         super.serialize(buffer)
-        buffer.put(OPCODE)
-        buffer.put(0.toByte())
-        buffer.put(0.toByte())
-        buffer.put(0.toByte())
-        buffer.put(allocationLength)
+        buffer.apply {
+            put(OPCODE)
+            put(0.toByte())
+            put(0.toByte())
+            put(0.toByte())
+            put(allocationLength)
+        }
     }
 
     companion object {
-
         private const val LENGTH: Byte = 0x6
         private const val OPCODE: Byte = 0x12
     }

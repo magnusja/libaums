@@ -33,11 +33,18 @@ interface BlockDeviceDriver {
      * read and store bytes in a specific block with a certain size.
      *
      *
-     * That means that it is only possible to read or write hole blocks!
+     * That means that it is only possible to read or write whole blocks!
      *
      * @return The block size in bytes, mostly 512 bytes.
      */
     val blockSize: Int
+
+    /**
+     * The size of the block device, in blocks of [blockSize] bytes,
+     *
+     * @return The block device size in blocks
+     */
+    val blocks: Long
 
     /**
      * Initializes the block device for further use. This method should be

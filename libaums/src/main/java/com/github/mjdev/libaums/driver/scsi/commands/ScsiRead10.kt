@@ -63,33 +63,32 @@ class ScsiRead10 : CommandBlockWrapper {
         this.transferBytes = transferBytes
         this.blockSize = blockSize
         val transferBlocks = (transferBytes / blockSize).toShort()
-        if (transferBytes % blockSize != 0) {
-            throw IllegalArgumentException("transfer bytes is not a multiple of block size")
-        }
+        require(transferBytes % blockSize == 0) { "transfer bytes is not a multiple of block size" }
         this.transferBlocks = transferBlocks
     }
 
     override fun serialize(buffer: ByteBuffer) {
         super.serialize(buffer)
-        buffer.order(ByteOrder.BIG_ENDIAN)
-        buffer.put(OPCODE)
-        buffer.put(0.toByte())
-        buffer.putInt(blockAddress)
-        buffer.put(0.toByte())
-        buffer.putShort(transferBlocks)
+        buffer.apply {
+            order(ByteOrder.BIG_ENDIAN)
+            put(OPCODE)
+            put(0.toByte())
+            putInt(blockAddress)
+            put(0.toByte())
+            putShort(transferBlocks)
+        }
     }
 
     override fun toString(): String {
         return ("ScsiRead10 [blockAddress=" + blockAddress + ", transferBytes=" + transferBytes
                 + ", blockSize=" + blockSize + ", transferBlocks=" + transferBlocks
-                + ", getdCbwDataTransferLength()=" + getdCbwDataTransferLength() + "]")
+                + ", getdCbwDataTransferLength()=" + dCbwDataTransferLength + "]")
     }
 
     companion object {
-
         // private static final String TAG = ScsiRead10.class.getSimpleName();
-        private val LENGTH: Byte = 10
-        private val OPCODE: Byte = 0x28
+        private const val LENGTH: Byte = 10
+        private const val OPCODE: Byte = 0x28
     }
 
 }

@@ -80,15 +80,16 @@ class ScsiInquiryResponse private constructor() {
          * @return The parsed [.ScsiInquiryResponse].
          */
         fun read(buffer: ByteBuffer): ScsiInquiryResponse {
-            val response = ScsiInquiryResponse()
             buffer.order(ByteOrder.LITTLE_ENDIAN)
             val b = buffer.get()
-            response.peripheralQualifier = b and 0xe0.toByte()
-            response.peripheralDeviceType = b and 0x1f.toByte()
-            response.isRemovableMedia = buffer.get().toInt() == 0x80
-            response.spcVersion = buffer.get()
-            response.responseDataFormat = buffer.get() and 0x7.toByte()
-            return response
+
+            return ScsiInquiryResponse().apply {
+                peripheralQualifier = b and 0xe0.toByte()
+                peripheralDeviceType = b and 0x1f.toByte()
+                isRemovableMedia = buffer.get().toInt() == 0x80
+                spcVersion = buffer.get()
+                responseDataFormat = buffer.get() and 0x7.toByte()
+            }
         }
     }
 }
