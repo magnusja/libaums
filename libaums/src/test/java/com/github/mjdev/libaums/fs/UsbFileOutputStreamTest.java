@@ -123,7 +123,6 @@ public class UsbFileOutputStreamTest {
         os.close();
 
         verify(file).setLength(longCaptor.capture());
-        verify(file).write(longCaptor.capture(), byteBufferCaptor.capture());
 
         assertEquals(40, longCaptor.getValue().longValue());
     }
