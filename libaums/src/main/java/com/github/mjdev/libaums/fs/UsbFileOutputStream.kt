@@ -25,7 +25,7 @@ import java.nio.ByteBuffer
 /**
  * UsbFileOutputStream provides common OutputStream access to a UsbFile.
  */
-class UsbFileOutputStream(private val file: UsbFile, append: Boolean = false) : OutputStream() {
+class UsbFileOutputStream @JvmOverloads constructor(private val file: UsbFile, append: Boolean = false) : OutputStream() {
     private var currentByteOffset: Long = 0
 
     init {
