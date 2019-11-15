@@ -25,13 +25,16 @@ import java.nio.ByteBuffer
 /**
  * UsbFileOutputStream provides common OutputStream access to a UsbFile.
  */
-class UsbFileOutputStream(private val file: UsbFile) : OutputStream() {
+class UsbFileOutputStream @JvmOverloads constructor(private val file: UsbFile, append: Boolean = false) : OutputStream() {
     private var currentByteOffset: Long = 0
 
     init {
-
         if (file.isDirectory) {
             throw UnsupportedOperationException("UsbFileOutputStream cannot be created on directory!")
+        }
+
+        if (append) {
+            currentByteOffset = file.length
         }
     }
 
