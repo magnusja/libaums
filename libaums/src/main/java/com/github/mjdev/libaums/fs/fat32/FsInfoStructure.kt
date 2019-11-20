@@ -107,8 +107,7 @@ private constructor(private val blockDevice: BlockDeviceDriver, private val offs
      * @see .getFreeClusterCount
      */
     fun decreaseClusterCount(numberOfClusters: Long) {
-        var freeClusterCount = freeClusterCount
-        if (freeClusterCount != FsInfoStructure.INVALID_VALUE.toLong()) {
+        if (freeClusterCount != INVALID_VALUE.toLong()) {
             freeClusterCount -= numberOfClusters
         }
     }
