@@ -69,13 +69,16 @@ public class FileSystemTest {
 
     @ContractTest
     public void getOccupiedSpace() throws Exception {
+        newInstance();
         assertEquals(expectedValues.get("occupiedSpace").asLong(), fs.getOccupiedSpace());
 
         UsbFile root = fs.getRootDirectory();
         UsbFile file = root.createFile("bar.txt");
 
         OutputStream os = new UsbFileOutputStream(file);
-        os.write("hello".getBytes());
+        for(int i = 0; i < 4096; i++) {
+            os.write("hello".getBytes());
+        }
         os.close();
 
         assertNotEquals(expectedValues.get("occupiedSpace").asLong(), fs.getOccupiedSpace());
@@ -83,13 +86,16 @@ public class FileSystemTest {
 
     @ContractTest
     public void getFreeSpace() throws Exception {
+        newInstance();
         assertEquals(expectedValues.get("freeSpace").asLong(), fs.getFreeSpace());
 
         UsbFile root = fs.getRootDirectory();
         UsbFile file = root.createFile("bar2.txt");
 
         OutputStream os = new UsbFileOutputStream(file);
-        os.write("hello".getBytes());
+        for(int i = 0; i < 4096; i++) {
+            os.write("hello".getBytes());
+        }
         os.close();
 
         assertNotEquals(expectedValues.get("freeSpace").asLong(), fs.getFreeSpace());
