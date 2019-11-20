@@ -10,7 +10,10 @@ import org.xenei.junit.contract.Contract;
 import org.xenei.junit.contract.ContractTest;
 import org.xenei.junit.contract.IProducer;
 
+import java.io.OutputStream;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -67,11 +70,29 @@ public class FileSystemTest {
     @ContractTest
     public void getOccupiedSpace() throws Exception {
         assertEquals(expectedValues.get("occupiedSpace").asLong(), fs.getOccupiedSpace());
+
+        UsbFile root = fs.getRootDirectory();
+        UsbFile file = root.createFile("bar.txt");
+
+        OutputStream os = new UsbFileOutputStream(file);
+        os.write("hello".getBytes());
+        os.close();
+
+        assertNotEquals(expectedValues.get("occupiedSpace").asLong(), fs.getOccupiedSpace());
     }
 
     @ContractTest
     public void getFreeSpace() throws Exception {
         assertEquals(expectedValues.get("freeSpace").asLong(), fs.getFreeSpace());
+
+        UsbFile root = fs.getRootDirectory();
+        UsbFile file = root.createFile("bar2.txt");
+
+        OutputStream os = new UsbFileOutputStream(file);
+        os.write("hello".getBytes());
+        os.close();
+
+        assertNotEquals(expectedValues.get("freeSpace").asLong(), fs.getFreeSpace());
     }
 
     @ContractTest
