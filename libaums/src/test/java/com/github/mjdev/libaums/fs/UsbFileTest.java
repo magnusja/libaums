@@ -731,7 +731,27 @@ public class UsbFileTest {
         checkEqualsRecursive(root);
     }
 
+    @ContractTest
+    public void createLotsOfFiles() throws IOException {
+        UsbFile dir = root.createDirectory("test_lots_of_files");
+        List<String> nameList = new ArrayList<>();
 
+        for(int i = 0; i < 4500; i++) {
+            String name = String.format("IMG_09082016_%06d", i);
+            nameList.add(name);
+            dir.createFile(name);
+        }
+
+        assertEquals(nameList.size(), dir.list().length);
+        assertEquals(nameList, dir.list());
+
+        newInstance();
+
+        dir = root.search("test_lots_of_files");
+
+        assertEquals(nameList.size(), dir.list().length);
+        assertEquals(nameList, dir.list());
+    }
 
     @ContractTest
     public void testIssue187() throws IOException {
