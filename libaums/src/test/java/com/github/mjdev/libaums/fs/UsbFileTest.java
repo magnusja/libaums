@@ -743,14 +743,14 @@ public class UsbFileTest {
         }
 
         assertEquals(nameList.size(), dir.list().length);
-        assertEquals(nameList.toArray(), dir.list());
+        assertArrayEquals(nameList.toArray(new String[0]), dir.list());
 
         newInstance();
 
         dir = root.search("test_lots_of_files");
 
         assertEquals(nameList.size(), dir.list().length);
-        assertEquals(nameList.toArray(), dir.list());
+        assertArrayEquals(nameList.toArray(new String[0]), dir.list());
     }
 
     @ContractTest
