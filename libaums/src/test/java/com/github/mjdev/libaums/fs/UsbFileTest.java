@@ -736,7 +736,7 @@ public class UsbFileTest {
         UsbFile dir = root.createDirectory("test_lots_of_files");
         List<String> nameList = new ArrayList<>();
 
-        for(int i = 0; i < 4500; i++) {
+        for(int i = 0; i < 600; i++) {
             String name = String.format("IMG_09082016_%06d", i);
             nameList.add(name);
             dir.createFile(name);
