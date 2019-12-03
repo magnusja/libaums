@@ -127,7 +127,7 @@ internal constructor(
      */
     @Throws(IOException::class)
     private fun init() {
-        if (!isRoot) {
+        if (!::chain.isInitialized) {
             chain = ClusterChain(entry!!.startCluster, blockDevice, fat, bootSector)
         }
 
