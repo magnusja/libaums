@@ -770,7 +770,7 @@ public class UsbFileTest {
         assertEquals(nameList.size(), dir.list().length);
         assertArrayEquals(nameList.toArray(new String[0]), dir.list());
 
-        for(int j = 0; j < 43; j++) {
+        for(int j = 0; j < 12; j++) {
             dir = root.createDirectory("test_lots_of_files_" + j);
 
             for(int i = 0; i < 600; i++) {
@@ -788,7 +788,7 @@ public class UsbFileTest {
         assertEquals(nameList.size(), dir.list().length);
         assertArrayEquals(nameList.toArray(new String[0]), dir.list());
 
-        for(int j = 0; j < 43; j++) {
+        for(int j = 0; j < 12; j++) {
             dir = root.search("test_lots_of_files_" + j);
             assertEquals(nameList.size(), dir.list().length);
             assertArrayEquals(nameList.toArray(new String[0]), dir.list());
