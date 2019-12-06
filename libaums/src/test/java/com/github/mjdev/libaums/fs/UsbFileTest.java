@@ -452,6 +452,32 @@ public class UsbFileTest {
     }
 
     @ContractTest
+    public void writeWithLength() throws Exception {
+
+        int numberOfFiles = root.listFiles().length;
+
+        URL bigFileUrl = new URL(expectedValues.get("bigFileToWrite").asString());
+
+        UsbFile bigFileLargeBuffer = root.createFile("bigwritetestlargebuffer");
+        bigFileLargeBuffer.setLength(9876);
+        copyLarge(bigFileUrl.openStream(),
+                new UsbFileOutputStream(bigFileLargeBuffer), new byte[7 * 32768]);
+
+
+        assertTrue(IOUtils.contentEquals(bigFileUrl.openStream(), new UsbFileInputStream(bigFileLargeBuffer)));
+
+        newInstance();
+
+        UsbFile bigFile = root.search("bigwritetestlargebuffer");
+
+        assertEquals(bigFileLargeBuffer.getLength(), bigFile.getLength());
+
+        assertTrue(IOUtils.contentEquals(bigFileUrl.openStream(), new UsbFileInputStream(bigFile)));
+
+        assertEquals(numberOfFiles + 1, root.listFiles().length);
+    }
+
+    @ContractTest
     public void flush() throws Exception {
         // TODO
     }
@@ -744,7 +770,7 @@ public class UsbFileTest {
         assertEquals(nameList.size(), dir.list().length);
         assertArrayEquals(nameList.toArray(new String[0]), dir.list());
 
-        for(int j = 0; j < 13; j++) {
+        for(int j = 0; j < 43; j++) {
             dir = root.createDirectory("test_lots_of_files_" + j);
 
             for(int i = 0; i < 600; i++) {
@@ -762,7 +788,7 @@ public class UsbFileTest {
         assertEquals(nameList.size(), dir.list().length);
         assertArrayEquals(nameList.toArray(new String[0]), dir.list());
 
-        for(int j = 0; j < 13; j++) {
+        for(int j = 0; j < 43; j++) {
             dir = root.search("test_lots_of_files_" + j);
             assertEquals(nameList.size(), dir.list().length);
             assertArrayEquals(nameList.toArray(new String[0]), dir.list());
