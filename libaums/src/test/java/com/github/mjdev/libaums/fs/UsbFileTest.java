@@ -741,9 +741,19 @@ public class UsbFileTest {
             nameList.add(name);
             dir.createFile(name);
         }
-
         assertEquals(nameList.size(), dir.list().length);
         assertArrayEquals(nameList.toArray(new String[0]), dir.list());
+
+        for(int j = 0; j < 13; j++) {
+            dir = root.createDirectory("test_lots_of_files_" + j);
+
+            for(int i = 0; i < 600; i++) {
+                String name = String.format("IMG_09082016_%06d", i);
+                dir.createFile(name);
+            }
+            assertEquals(nameList.size(), dir.list().length);
+            assertArrayEquals(nameList.toArray(new String[0]), dir.list());
+        }
 
         newInstance();
 
@@ -751,6 +761,12 @@ public class UsbFileTest {
 
         assertEquals(nameList.size(), dir.list().length);
         assertArrayEquals(nameList.toArray(new String[0]), dir.list());
+
+        for(int j = 0; j < 13; j++) {
+            dir = root.search("test_lots_of_files_" + j);
+            assertEquals(nameList.size(), dir.list().length);
+            assertArrayEquals(nameList.toArray(new String[0]), dir.list());
+        }
     }
 
     @ContractTest
