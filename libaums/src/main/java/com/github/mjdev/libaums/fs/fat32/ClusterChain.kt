@@ -17,12 +17,10 @@
 
 package com.github.mjdev.libaums.fs.fat32
 
+import android.util.Log
+import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import java.io.IOException
 import java.nio.ByteBuffer
-
-import android.util.Log
-
-import com.github.mjdev.libaums.driver.BlockDeviceDriver
 
 /**
  * This class represents a cluster chain which can be followed in the FAT of a
@@ -193,35 +191,16 @@ internal constructor(startCluster: Long, private val blockDevice: BlockDeviceDri
             length -= size
         }
 
-        var remainingClusters = (length / clusterSize).toInt()
-
         // now we can proceed reading the clusters without an offset in the
         // cluster
         while (length > 0) {
-            val size: Int
-            var clusters = 1
-
-            // we write multiple clusters at a time, to speed up the write performance enormously
-            // currently only 4 or fewer clusters are written at the same time. Set this value too high may cause problems
-            when {
-                remainingClusters > 4 -> {
-                    size = (clusterSize * 4).toInt()
-                    clusters = 4
-                    remainingClusters -= 4
-                }
-                remainingClusters > 0 -> {
-                    size = (clusterSize * remainingClusters).toInt()
-                    clusters = remainingClusters
-                    remainingClusters = 0
-                }
-                else -> size = length
-            }
+            val size = Math.min(clusterSize, length.toLong()).toInt()
 
             source.limit(source.position() + size)
 
             blockDevice.write(getFileSystemOffset(chain[chainIndex], 0), source)
 
-            chainIndex += clusters
+            chainIndex += 1
             length -= size
         }
     }
