@@ -206,7 +206,7 @@ internal constructor(startCluster: Long, private val blockDevice: BlockDeviceDri
             // https://github.com/magnusja/libaums/pull/236/commits/a4cfe0c57401f922beec849e706b68d94cad3248
             var maxConsecutiveClusters = 1
             for (i in chainIndex until chain.size - 1) {
-                if(chain[chainIndex] == chain[chainIndex + 1] + 1) {
+                if(chain[i] == chain[i + 1] + 1) {
                     maxConsecutiveClusters++
                 } else {
                     break

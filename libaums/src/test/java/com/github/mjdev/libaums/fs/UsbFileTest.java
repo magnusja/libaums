@@ -459,7 +459,7 @@ public class UsbFileTest {
         URL bigFileUrl = new URL(expectedValues.get("bigFileToWrite").asString());
 
         UsbFile bigFileLargeBuffer = root.createFile("bigwritetestlargebuffer");
-        bigFileLargeBuffer.setLength(9876);
+        bigFileLargeBuffer.setLength(29876);
         copyLarge(bigFileUrl.openStream(),
                 new UsbFileOutputStream(bigFileLargeBuffer), new byte[7 * 32768]);
 
