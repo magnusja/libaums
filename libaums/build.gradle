@@ -6,7 +6,7 @@ apply plugin: 'jacoco-android'
 ext {
     artifact = 'libaums'
     bintrayName = 'libaums'
-    libraryVersion = '0.7.2'
+    libraryVersion = '0.7.3'
 }
 
 
@@ -21,8 +21,8 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 29
-        versionCode 72
-        versionName "0.7.2"
+        versionCode 73
+        versionName "0.7.3"
 
         externalNativeBuild {
             cmake {
