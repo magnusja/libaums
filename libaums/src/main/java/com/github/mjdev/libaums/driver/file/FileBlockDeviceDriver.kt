@@ -50,6 +50,11 @@ class FileBlockDeviceDriver : BlockDeviceDriver {
     override fun read(deviceOffset: Long, buffer: ByteBuffer) {
         file.seek(deviceOffset * blockSize + byteOffset)
         val read = file.read(buffer.array(), buffer.position(), buffer.remaining())
+
+        if (read == -1) {
+            throw IOException("EOF")
+        }
+
         buffer.position(buffer.position() + read)
     }
 

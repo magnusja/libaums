@@ -114,4 +114,18 @@ public class UsbFileOutputStreamTest {
         assertEquals(20, longCaptor.getValue().longValue());
     }
 
+    @Test
+    public void testAppend() throws Exception {
+        when(file.getLength()).thenReturn(20L);
+        OutputStream os = new UsbFileOutputStream(file, true);
+
+        os.write(new byte[20]);
+        os.close();
+
+        verify(file).setLength(longCaptor.capture());
+
+        assertEquals(40, longCaptor.getValue().longValue());
+    }
+
+
 }

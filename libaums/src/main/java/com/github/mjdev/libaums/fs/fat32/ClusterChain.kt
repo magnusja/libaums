@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2014 mjahnen <jahnen@in.tum.de>
+ * (C) Copyright 2014 mjahnen <github@mgns.tech>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,8 @@ import java.nio.ByteBuffer
 import android.util.Log
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * This class represents a cluster chain which can be followed in the FAT of a
@@ -182,7 +184,7 @@ internal constructor(startCluster: Long, private val blockDevice: BlockDeviceDri
         // directly in the cluster
         if (offset % clusterSize != 0L) {
             val clusterOffset = (offset % clusterSize).toInt()
-            val size = Math.min(length, (clusterSize - clusterOffset).toInt())
+            val size = min(length, (clusterSize - clusterOffset).toInt())
             source.limit(source.position() + size)
 
             blockDevice.write(getFileSystemOffset(chain[chainIndex], clusterOffset), source)
@@ -193,26 +195,37 @@ internal constructor(startCluster: Long, private val blockDevice: BlockDeviceDri
             length -= size
         }
 
-        var remainingClusters = (length / clusterSize).toInt()
+        var remainingClusters = length / clusterSize
 
         // now we can proceed reading the clusters without an offset in the
         // cluster
         while (length > 0) {
             val size: Int
-            var clusters = 1
+            var numberOfClusters = 1
 
+            // We can only write consecutive clusters, see tests failing in
+            // https://github.com/magnusja/libaums/pull/236/commits/a4cfe0c57401f922beec849e706b68d94cad3248
+            var maxConsecutiveClusters = 1
+            for (i in chainIndex until chain.size - 1) {
+                if (chain[i] + 1 == chain[i + 1]) {
+                    maxConsecutiveClusters++
+                } else {
+                    break
+                }
+            }
             // we write multiple clusters at a time, to speed up the write performance enormously
             // currently only 4 or fewer clusters are written at the same time. Set this value too high may cause problems
+            maxConsecutiveClusters = min(maxConsecutiveClusters, 4)
             when {
-                remainingClusters > 4 -> {
-                    size = (clusterSize * 4).toInt()
-                    clusters = 4
-                    remainingClusters -= 4
+                remainingClusters > maxConsecutiveClusters -> {
+                    size = (clusterSize * maxConsecutiveClusters).toInt()
+                    numberOfClusters = maxConsecutiveClusters
+                    remainingClusters -= maxConsecutiveClusters
                 }
                 remainingClusters > 0 -> {
-                    size = (clusterSize * remainingClusters).toInt()
-                    clusters = remainingClusters
-                    remainingClusters = 0
+                    size = (clusterSize * min(remainingClusters.toInt(), maxConsecutiveClusters)).toInt()
+                    numberOfClusters = min(remainingClusters.toInt(), maxConsecutiveClusters)
+                    remainingClusters -= numberOfClusters
                 }
                 else -> size = length
             }
@@ -221,7 +234,7 @@ internal constructor(startCluster: Long, private val blockDevice: BlockDeviceDri
 
             blockDevice.write(getFileSystemOffset(chain[chainIndex], 0), source)
 
-            chainIndex += clusters
+            chainIndex += numberOfClusters
             length -= size
         }
     }

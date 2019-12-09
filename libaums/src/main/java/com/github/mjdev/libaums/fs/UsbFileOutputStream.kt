@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2016 mjahnen <jahnen@in.tum.de>
+ * (C) Copyright 2016 mjahnen <github@mgns.tech>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,16 @@ import java.nio.ByteBuffer
 /**
  * UsbFileOutputStream provides common OutputStream access to a UsbFile.
  */
-class UsbFileOutputStream(private val file: UsbFile) : OutputStream() {
+class UsbFileOutputStream @JvmOverloads constructor(private val file: UsbFile, append: Boolean = false) : OutputStream() {
     private var currentByteOffset: Long = 0
 
     init {
-
         if (file.isDirectory) {
             throw UnsupportedOperationException("UsbFileOutputStream cannot be created on directory!")
+        }
+
+        if (append) {
+            currentByteOffset = file.length
         }
     }
 

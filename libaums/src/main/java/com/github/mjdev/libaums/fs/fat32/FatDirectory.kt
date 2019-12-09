@@ -1,5 +1,5 @@
 /*
- * (C) Copyright 2014-2016 mjahnen <jahnen@in.tum.de>
+ * (C) Copyright 2014-2016 mjahnen <github@mgns.tech>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,7 @@ internal constructor(
      */
     @Throws(IOException::class)
     private fun init() {
-        if (!isRoot) {
+        if (!::chain.isInitialized) {
             chain = ClusterChain(entry!!.startCluster, blockDevice, fat, bootSector)
         }
 
