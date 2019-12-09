@@ -23,6 +23,7 @@ import java.nio.ByteBuffer
 import android.util.Log
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
+import kotlin.math.max
 import kotlin.math.min
 
 /**
@@ -222,9 +223,9 @@ internal constructor(startCluster: Long, private val blockDevice: BlockDeviceDri
                     remainingClusters -= maxConsecutiveClusters
                 }
                 remainingClusters > 0 -> {
-                    size = (clusterSize * remainingClusters).toInt()
-                    numberOfClusters = remainingClusters.toInt()
-                    remainingClusters = 0
+                    size = (clusterSize * max(remainingClusters.toInt(), maxConsecutiveClusters)).toInt()
+                    numberOfClusters = max(remainingClusters.toInt(), maxConsecutiveClusters)
+                    remainingClusters -= numberOfClusters
                 }
                 else -> size = length
             }
