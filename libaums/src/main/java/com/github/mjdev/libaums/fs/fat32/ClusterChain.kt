@@ -223,8 +223,8 @@ internal constructor(startCluster: Long, private val blockDevice: BlockDeviceDri
                     remainingClusters -= maxConsecutiveClusters
                 }
                 remainingClusters > 0 -> {
-                    size = (clusterSize * max(remainingClusters.toInt(), maxConsecutiveClusters)).toInt()
-                    numberOfClusters = max(remainingClusters.toInt(), maxConsecutiveClusters)
+                    size = (clusterSize * min(remainingClusters.toInt(), maxConsecutiveClusters)).toInt()
+                    numberOfClusters = min(remainingClusters.toInt(), maxConsecutiveClusters)
                     remainingClusters -= numberOfClusters
                 }
                 else -> size = length
