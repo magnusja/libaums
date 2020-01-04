@@ -7,6 +7,7 @@ package com.github.mjdev.libaums.usb
 import android.annotation.TargetApi
 import android.hardware.usb.UsbDeviceConnection
 import android.hardware.usb.UsbEndpoint
+import android.hardware.usb.UsbInterface
 import android.os.Build
 import android.system.ErrnoException
 
@@ -23,7 +24,7 @@ import java.nio.ByteBuffer
  * @author mjahnen
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-internal class JellyBeanMr2Communication(private val deviceConnection: UsbDeviceConnection, private val outEndpoint: UsbEndpoint, private val inEndpoint: UsbEndpoint) : UsbCommunication {
+internal class JellyBeanMr2Communication(private val deviceConnection: UsbDeviceConnection, private val usbInterface: UsbInterface, private val outEndpoint: UsbEndpoint, private val inEndpoint: UsbEndpoint) : AndroidUsbCommunication(deviceConnection, usbInterface, outEndpoint, inEndpoint) {
 
     @Throws(IOException::class)
     override fun bulkOutTransfer(src: ByteBuffer): Int {

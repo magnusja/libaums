@@ -131,7 +131,7 @@ private constructor(private val usbManager: UsbManager,
             throw IOException("could not claim interface!")
         }
 
-        val communication = UsbCommunicationFactory.createUsbCommunication(deviceConnection, outEndpoint, inEndpoint)
+        val communication = UsbCommunicationFactory.createUsbCommunication(deviceConnection, usbInterface, outEndpoint, inEndpoint)
         val maxLun = ByteArray(1)
         deviceConnection.controlTransfer(161, 254, 0, usbInterface.id, maxLun, 1, 5000)
         Log.i(TAG, "MAX LUN " + maxLun[0].toInt())

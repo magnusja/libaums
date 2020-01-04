@@ -2,6 +2,7 @@ package com.github.mjdev.libaums.usb
 
 import android.hardware.usb.UsbDeviceConnection
 import android.hardware.usb.UsbEndpoint
+import android.hardware.usb.UsbInterface
 import android.hardware.usb.UsbRequest
 
 import java.io.IOException
@@ -11,7 +12,7 @@ import java.nio.ByteBuffer
  * Created by magnusja on 21/12/16.
  */
 
-internal class UsbRequestCommunication(private val deviceConnection: UsbDeviceConnection, outEndpoint: UsbEndpoint, inEndpoint: UsbEndpoint) : UsbCommunication {
+internal class UsbRequestCommunication(private val deviceConnection: UsbDeviceConnection, private val usbInterface: UsbInterface, outEndpoint: UsbEndpoint, inEndpoint: UsbEndpoint) : AndroidUsbCommunication(deviceConnection, usbInterface, outEndpoint, inEndpoint) {
     private val outRequest = UsbRequest().apply { initialize(deviceConnection, outEndpoint) }
     private val inRequest = UsbRequest().apply { initialize(deviceConnection, inEndpoint) }
     private val workaroundBuffer = ByteBuffer.allocate(1024 * 32 * 4)

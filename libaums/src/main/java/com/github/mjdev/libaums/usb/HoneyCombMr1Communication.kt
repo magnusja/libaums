@@ -2,6 +2,7 @@ package com.github.mjdev.libaums.usb
 
 import android.hardware.usb.UsbDeviceConnection
 import android.hardware.usb.UsbEndpoint
+import android.hardware.usb.UsbInterface
 
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -14,7 +15,7 @@ import java.nio.ByteBuffer
  *
  * @author mjahnen
  */
-internal class HoneyCombMr1Communication(private val deviceConnection: UsbDeviceConnection, private val outEndpoint: UsbEndpoint, private val inEndpoint: UsbEndpoint) : UsbCommunication {
+internal class HoneyCombMr1Communication(private val deviceConnection: UsbDeviceConnection, private val usbInterface: UsbInterface, private val outEndpoint: UsbEndpoint, private val inEndpoint: UsbEndpoint) : AndroidUsbCommunication(deviceConnection, usbInterface, outEndpoint, inEndpoint) {
 
     @Throws(IOException::class)
     override fun bulkOutTransfer(src: ByteBuffer): Int {

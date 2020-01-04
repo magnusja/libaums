@@ -17,6 +17,7 @@
 
 package com.github.mjdev.libaums.usb
 
+import android.hardware.usb.UsbEndpoint
 import java.io.IOException
 import java.nio.ByteBuffer
 
@@ -51,6 +52,15 @@ interface UsbCommunication {
      */
     @Throws(IOException::class)
     fun bulkInTransfer(dest: ByteBuffer): Int
+
+    fun controlTransfer(requestType: Int, request: Int, value: Int, index: Int, buffer: ByteArray, length: Int): Int
+
+    @Throws(IOException::class)
+    fun resetRecovery()
+    @Throws(IOException::class)
+    fun bulkOnlyMassStorageReset()
+    @Throws(IOException::class)
+    fun clearFeatureHalt(endpoint: UsbEndpoint)
 
     companion object {
         const val TRANSFER_TIMEOUT = 5000
