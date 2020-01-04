@@ -135,6 +135,24 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
      */
     @Throws(IOException::class)
     private fun transferCommand(command: CommandBlockWrapper, inBuffer: ByteBuffer): Boolean {
+        for(i in 0..3) {
+            try {
+                return transferOneCommand(command, inBuffer)
+            } catch(e: IOException) {
+                if (i == 3) {
+                    throw e
+                }
+
+                Log.e(TAG, "error transferring command, sending bulk only reset")
+                usbCommunication.resetRecovery()
+                Thread.sleep(1500);
+            }
+        }
+    }
+
+
+    @Throws(IOException::class)
+    private fun transferOneCommand(command: CommandBlockWrapper, inBuffer: ByteBuffer): Boolean {
         val outArray = outBuffer.array()
         Arrays.fill(outArray, 0.toByte())
 
