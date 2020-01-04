@@ -148,6 +148,8 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
                 Thread.sleep(1500);
             }
         }
+
+        throw IllegalStateException("This should never happen..")
     }
 
 
