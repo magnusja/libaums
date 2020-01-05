@@ -3,6 +3,7 @@ package com.github.mjdev.libaums.usb
 import android.hardware.usb.UsbDeviceConnection
 import android.hardware.usb.UsbEndpoint
 import android.hardware.usb.UsbInterface
+import android.util.Log
 import com.github.mjdev.libaums.usb.UsbCommunication.Companion.TRANSFER_TIMEOUT
 import java.io.IOException
 
@@ -13,11 +14,16 @@ internal abstract class AndroidUsbCommunication(private val deviceConnection: Us
     }
 
     override fun resetRecovery() {
-        bulkOnlyMassStorageReset();
-        clearFeatureHalt(inEndpoint);
+        bulkOnlyMassStorageReset()
+        Thread.sleep(10000)
+        clearFeatureHalt(inEndpoint)
+        Thread.sleep(10000)
+        clearFeatureHalt(outEndpoint)
+        Thread.sleep(10000)
     }
 
     override fun bulkOnlyMassStorageReset() {
+        Log.w(TAG, "sending bulk only mass storage request")
         val bArr = ByteArray(2)
         // REQUEST_BULK_ONLY_MASS_STORAGE_RESET = 255
         // REQUEST_TYPE_BULK_ONLY_MASS_STORAGE_RESET = 33
@@ -28,6 +34,7 @@ internal abstract class AndroidUsbCommunication(private val deviceConnection: Us
     }
 
     override fun clearFeatureHalt(endpoint: UsbEndpoint) {
+        Log.w(TAG, "sending clear feature halt")
         val bArr = ByteArray(2)
         val address: Int = endpoint.address
         // REQUEST_CLEAR_FEATURE = 1
@@ -36,5 +43,9 @@ internal abstract class AndroidUsbCommunication(private val deviceConnection: Us
         if (transferred == -1) {
             throw IOException("bulk only mass storage reset failed!")
         }
+    }
+
+    companion object {
+        private val TAG = AndroidUsbCommunication::class.java.simpleName
     }
 }

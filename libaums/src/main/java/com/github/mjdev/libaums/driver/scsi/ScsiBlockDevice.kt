@@ -48,6 +48,8 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
     private val readCommand = ScsiRead10(lun=lun)
     private val csw = CommandStatusWrapper()
 
+    private var cbwTagCounter = 0
+
     /**
      * The size of the block device, in blocks of [blockSize] bytes,
      *
@@ -149,7 +151,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
             }
         }
 
-        throw IllegalStateException("This should never happen..")
+        throw IllegalStateException("This should never happen.. ")
     }
 
 
@@ -157,6 +159,9 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
     private fun transferOneCommand(command: CommandBlockWrapper, inBuffer: ByteBuffer): Boolean {
         val outArray = outBuffer.array()
         Arrays.fill(outArray, 0.toByte())
+
+        command.dCbwTag = cbwTagCounter
+        cbwTagCounter++
 
         outBuffer.clear()
         command.serialize(outBuffer)
