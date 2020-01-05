@@ -54,6 +54,7 @@ interface UsbCommunication : Closeable {
     @Throws(IOException::class)
     fun bulkInTransfer(dest: ByteBuffer): Int
 
+    @Throws(IOException::class)
     fun controlTransfer(requestType: Int, request: Int, value: Int, index: Int, buffer: ByteArray, length: Int): Int
 
     @Throws(IOException::class)
