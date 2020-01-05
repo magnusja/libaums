@@ -4,6 +4,7 @@ import android.hardware.usb.UsbDeviceConnection
 import android.hardware.usb.UsbEndpoint
 import android.hardware.usb.UsbInterface
 import android.util.Log
+import com.github.mjdev.libaums.ErrNo
 import com.github.mjdev.libaums.usb.UsbCommunication.Companion.TRANSFER_TIMEOUT
 import java.io.IOException
 
@@ -28,19 +29,19 @@ internal abstract class AndroidUsbCommunication(private val deviceConnection: Us
     }
 
     override fun resetRecovery() {
-        bulkOnlyMassStorageReset()
-        Thread.sleep(10000)
-        clearFeatureHalt(inEndpoint)
-        Thread.sleep(10000)
-        clearFeatureHalt(outEndpoint)
-        Thread.sleep(10000)
-
         if (isNativeInited) {
             Log.w(TAG, "Native reset")
             val result = resetUsbDeviceNative(deviceConnection.fileDescriptor)
-            Log.d(TAG, "ioctl returned $result")
+            Log.w(TAG, "ioctl returned $result; errno ${ErrNo.errno} ${ErrNo.errstr}; ignoring")
+            Thread.sleep(2000)
+        } else {
+            bulkOnlyMassStorageReset()
+            Thread.sleep(2000)
+            clearFeatureHalt(inEndpoint)
+            Thread.sleep(2000)
+            clearFeatureHalt(outEndpoint)
+            Thread.sleep(2000)
         }
-        Thread.sleep(10000)
     }
 
     override fun bulkOnlyMassStorageReset() {
