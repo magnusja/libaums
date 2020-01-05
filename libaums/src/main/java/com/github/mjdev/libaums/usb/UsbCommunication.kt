@@ -18,6 +18,7 @@
 package com.github.mjdev.libaums.usb
 
 import android.hardware.usb.UsbEndpoint
+import java.io.Closeable
 import java.io.IOException
 import java.nio.ByteBuffer
 
@@ -29,7 +30,7 @@ import java.nio.ByteBuffer
  *
  * @author mjahnen
  */
-interface UsbCommunication {
+interface UsbCommunication : Closeable {
 
     /**
      * Performs a bulk out transfer beginning at the offset specified in the

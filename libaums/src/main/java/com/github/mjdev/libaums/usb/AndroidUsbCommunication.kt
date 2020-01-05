@@ -1,19 +1,44 @@
 package com.github.mjdev.libaums.usb
 
-import android.hardware.usb.UsbDeviceConnection
-import android.hardware.usb.UsbEndpoint
-import android.hardware.usb.UsbInterface
+import android.hardware.usb.*
 import android.util.Log
 import com.github.mjdev.libaums.ErrNo
 import com.github.mjdev.libaums.usb.UsbCommunication.Companion.TRANSFER_TIMEOUT
 import java.io.IOException
 
 
-internal abstract class AndroidUsbCommunication(private val deviceConnection: UsbDeviceConnection, private val usbInterface: UsbInterface, private val outEndpoint: UsbEndpoint, private val inEndpoint: UsbEndpoint) : UsbCommunication {
+internal abstract class AndroidUsbCommunication(
+        private val usbManager: UsbManager,
+        private val usbDevice: UsbDevice,
+        private val usbInterface: UsbInterface,
+        private val outEndpoint: UsbEndpoint,
+        private val inEndpoint: UsbEndpoint
+) : UsbCommunication {
 
     private var isNativeInited: Boolean = false
+    var deviceConnection: UsbDeviceConnection? = null
+    private var isClosed = false
 
     init {
+        initNativeLibrary()
+        initUsbConnection()
+    }
+
+    private fun initUsbConnection() {
+        if (isClosed)
+            return
+
+        Log.d(TAG, "setup device")
+        deviceConnection = usbManager.openDevice(usbDevice)
+                ?: throw IOException("deviceConnection is null!")
+
+        val claim = deviceConnection!!.claimInterface(usbInterface, true)
+        if (!claim) {
+            throw IOException("could not claim interface!")
+        }
+    }
+
+    private fun initNativeLibrary() {
         try {
             System.loadLibrary("usb-lib")
             isNativeInited = true
@@ -21,11 +46,10 @@ internal abstract class AndroidUsbCommunication(private val deviceConnection: Us
             isNativeInited = false
             Log.e(TAG, "could not load usb-lib", e)
         }
-
     }
 
     override fun controlTransfer(requestType: Int, request: Int, value: Int, index: Int, buffer: ByteArray, length: Int): Int {
-        return deviceConnection.controlTransfer(requestType, request, value, index, buffer, length, TRANSFER_TIMEOUT)
+        return deviceConnection!!.controlTransfer(requestType, request, value, index, buffer, length, TRANSFER_TIMEOUT)
     }
 
     override fun resetRecovery() {
@@ -68,6 +92,24 @@ internal abstract class AndroidUsbCommunication(private val deviceConnection: Us
     }
 
     private external fun resetUsbDeviceNative(fd: Int): Boolean
+
+    private fun closeUsbConnection() {
+        if (deviceConnection == null)
+            return
+
+        val release = deviceConnection!!.releaseInterface(usbInterface)
+        if (!release) {
+            Log.e(TAG, "could not release interface!")
+        }
+
+        deviceConnection!!.close()
+    }
+
+    override fun close() {
+        Log.d(TAG, "close device")
+        closeUsbConnection()
+        isClosed = true
+    }
 
     companion object {
         private val TAG = AndroidUsbCommunication::class.java.simpleName
