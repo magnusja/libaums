@@ -9,6 +9,20 @@ import java.io.IOException
 
 
 internal abstract class AndroidUsbCommunication(private val deviceConnection: UsbDeviceConnection, private val usbInterface: UsbInterface, private val outEndpoint: UsbEndpoint, private val inEndpoint: UsbEndpoint) : UsbCommunication {
+
+    private var isNativeInited: Boolean = false
+
+    init {
+        try {
+            System.loadLibrary("usb-lib")
+            isNativeInited = true
+        } catch (e: UnsatisfiedLinkError) {
+            isNativeInited = false
+            Log.e(TAG, "could not load usb-lib", e)
+        }
+
+    }
+
     override fun controlTransfer(requestType: Int, request: Int, value: Int, index: Int, buffer: ByteArray, length: Int): Int {
         return deviceConnection.controlTransfer(requestType, request, value, index, buffer, length, TRANSFER_TIMEOUT)
     }
@@ -19,6 +33,14 @@ internal abstract class AndroidUsbCommunication(private val deviceConnection: Us
         clearFeatureHalt(inEndpoint)
         Thread.sleep(10000)
         clearFeatureHalt(outEndpoint)
+        Thread.sleep(10000)
+
+        if (isNativeInited) {
+            Log.w(TAG, "Native reset")
+            if (!resetUsbDeviceNative(deviceConnection.fileDescriptor)) {
+                throw IOException("native reset unsuccessful!")
+            }
+        }
         Thread.sleep(10000)
     }
 
@@ -44,6 +66,8 @@ internal abstract class AndroidUsbCommunication(private val deviceConnection: Us
             throw IOException("bulk only mass storage reset failed!")
         }
     }
+
+    private external fun resetUsbDeviceNative(fd: Int): Boolean
 
     companion object {
         private val TAG = AndroidUsbCommunication::class.java.simpleName
