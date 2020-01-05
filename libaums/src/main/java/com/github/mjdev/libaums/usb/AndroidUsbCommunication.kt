@@ -37,9 +37,8 @@ internal abstract class AndroidUsbCommunication(private val deviceConnection: Us
 
         if (isNativeInited) {
             Log.w(TAG, "Native reset")
-            if (!resetUsbDeviceNative(deviceConnection.fileDescriptor)) {
-                throw IOException("native reset unsuccessful!")
-            }
+            val result = resetUsbDeviceNative(deviceConnection.fileDescriptor)
+            Log.d(TAG, "ioctl returned $result")
         }
         Thread.sleep(10000)
     }
