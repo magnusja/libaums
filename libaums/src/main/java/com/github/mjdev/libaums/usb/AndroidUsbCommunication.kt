@@ -52,20 +52,29 @@ internal abstract class AndroidUsbCommunication(
         return deviceConnection!!.controlTransfer(requestType, request, value, index, buffer, length, TRANSFER_TIMEOUT)
     }
 
-    override fun resetRecovery() {
-        if (isNativeInited) {
-            Log.w(TAG, "Native reset")
-            val result = resetUsbDeviceNative(deviceConnection.fileDescriptor)
-            Log.w(TAG, "ioctl returned $result; errno ${ErrNo.errno} ${ErrNo.errstr}; ignoring")
-            Thread.sleep(2000)
-        } else {
-            bulkOnlyMassStorageReset()
-            Thread.sleep(2000)
-            clearFeatureHalt(inEndpoint)
-            Thread.sleep(2000)
-            clearFeatureHalt(outEndpoint)
-            Thread.sleep(2000)
-        }
+    override fun resetRecovery() = when {
+        isNativeInited -> nativeReset()
+        else           -> softReset()
+    }
+
+    private fun nativeReset() {
+        Log.w(TAG, "Native reset")
+        val result = resetUsbDeviceNative(deviceConnection!!.fileDescriptor)
+        Log.w(TAG, "ioctl returned $result; errno ${ErrNo.errno} ${ErrNo.errstr}; ignoring")
+        Thread.sleep(1000)
+
+        // Reopen UsbConnection
+        closeUsbConnection()
+        initUsbConnection()
+    }
+
+    private fun softReset() {
+        bulkOnlyMassStorageReset()
+        Thread.sleep(2000)
+        clearFeatureHalt(inEndpoint)
+        Thread.sleep(2000)
+        clearFeatureHalt(outEndpoint)
+        Thread.sleep(2000)
     }
 
     override fun bulkOnlyMassStorageReset() {
