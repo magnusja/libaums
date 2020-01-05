@@ -6,12 +6,6 @@ libaums
 
 A library to access USB mass storage devices (pen drives, external HDDs, card readers) using the Android USB Host API. Currently it supports the SCSI command set and the FAT32 file system.
 
-# User survey 2019
-
-I am currently trying to understand who and how people use this library as well as where is most room for future improvement. To do so I created a really short survey (no more than 3 minutes) and I would be really happy if people would take part: https://forms.gle/WBkXWpPVRYxrPhrs9
-
-Thank you!
-
 ## How to use
 
 ### Install
