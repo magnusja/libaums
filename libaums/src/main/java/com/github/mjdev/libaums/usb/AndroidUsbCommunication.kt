@@ -60,7 +60,11 @@ internal abstract class AndroidUsbCommunication(
     private fun nativeReset() {
         Log.d(TAG, "Performing native reset")
         val result = resetUsbDeviceNative(deviceConnection!!.fileDescriptor)
-        Log.d(TAG, "ioctl returned $result; errno ${ErrNo.errno} ${ErrNo.errstr}; ignoring")
+
+        Log.d(TAG, "ioctl okay: $result; errno ${ErrNo.errno} ${ErrNo.errstr}")
+        if (!result)
+            Log.w(TAG, "ioctl failed! USB device will likely require new discovery and permissions")
+
         Thread.sleep(1000)
 
         Log.d(TAG, "Closing and reopening USB device")
