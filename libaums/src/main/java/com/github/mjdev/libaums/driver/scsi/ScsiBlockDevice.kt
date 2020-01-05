@@ -18,6 +18,7 @@
 package com.github.mjdev.libaums.driver.scsi
 
 import android.util.Log
+import com.github.mjdev.libaums.ErrNo
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.driver.scsi.commands.*
 import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper.Direction
@@ -145,13 +146,14 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
                     throw e
                 }
 
-                Log.e(TAG, "error transferring command, sending bulk only reset")
+                Log.e(TAG, "Error transferring command; errno ${ErrNo.errno} ${ErrNo.errstr}")
+                Log.e(TAG, "Performing recovery reset procedure")
                 usbCommunication.resetRecovery()
                 Thread.sleep(1500);
             }
         }
 
-        throw IllegalStateException("This should never happen.. ")
+        throw IllegalStateException("This should never happen.")
     }
 
 
