@@ -138,34 +138,30 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
      */
     @Throws(IOException::class)
     private fun transferCommand(command: CommandBlockWrapper, inBuffer: ByteBuffer): Boolean {
-        for(i in 0..3) {
+        for(i in 0..MAX_RECOVERY_ATTEMPTS) {
             try {
                 return transferOneCommand(command, inBuffer)
             } catch(e: IOException) {
                 Log.e(TAG, "Error transferring command; errno ${ErrNo.errno} ${ErrNo.errstr}")
 
-                when (i) {
-                    0 -> {
+                // Try alternately to clear halt and reset device until something happens
+                when {
+                    i % 2 == 0 -> {
                         Log.d(TAG, "Trying to clear halt on both endpoints")
                         usbCommunication.clearFeatureHalt(usbCommunication.inEndpoint)
                         usbCommunication.clearFeatureHalt(usbCommunication.outEndpoint)
                     }
-                    1 -> {
+                    i % 2 == 1 -> {
                         Log.d(TAG, "Trying to reset the device")
                         usbCommunication.resetRecovery()
                     }
-                    2 -> {
-                        Log.d(TAG, "Trying to clear halt on both endpoints again")
-                        usbCommunication.clearFeatureHalt(usbCommunication.inEndpoint)
-                        usbCommunication.clearFeatureHalt(usbCommunication.outEndpoint)
-                    }
-                    else -> {
+                    i == MAX_RECOVERY_ATTEMPTS -> {
                         Log.d(TAG, "Giving up")
                         throw e
                     }
                 }
 
-                Thread.sleep(1000)
+                Thread.sleep(500)
             }
         }
 
@@ -277,7 +273,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
     }
 
     companion object {
-
+        private const val MAX_RECOVERY_ATTEMPTS = 20
         private val TAG = ScsiBlockDevice::class.java.simpleName
     }
 }
