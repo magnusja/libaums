@@ -59,21 +59,22 @@ internal abstract class AndroidUsbCommunication(
 
     private fun nativeReset() {
         Log.d(TAG, "Performing native reset")
-        val result = resetUsbDeviceNative(deviceConnection!!.fileDescriptor)
 
-        Log.d(TAG, "ioctl okay: $result; errno ${ErrNo.errno} ${ErrNo.errstr}")
-        if (!result)
-            Log.w(TAG, "ioctl failed! USB device will likely require new discovery and permissions")
+        if (!deviceConnection!!.releaseInterface(usbInterface)) {
+            Log.w(TAG, "Failed to release interface, errno: ${ErrNo.errno} ${ErrNo.errstr}")
+        }
 
-        Thread.sleep(1000)
+        if (!resetUsbDeviceNative(deviceConnection!!.fileDescriptor)) {
+            Log.w(TAG, "ioctl failed! errno ${ErrNo.errno} ${ErrNo.errstr}")
+            Log.w(TAG, "USB device will likely require new discovery and permissions")
+        }
 
-        Log.d(TAG, "Closing and reopening USB device")
-        closeUsbConnection()
-        initUsbConnection()
+        if (!deviceConnection!!.claimInterface(usbInterface, true)) {
+            throw IOException("Could not claim interface, errno: ${ErrNo.errno} ${ErrNo.errstr}")
+        }
     }
 
     private fun softReset() {
-        Log.w(TAG, "Native helper library not available, can't perform hard device reset")
         bulkOnlyMassStorageReset()
         Thread.sleep(2000)
         clearFeatureHalt(inEndpoint)
