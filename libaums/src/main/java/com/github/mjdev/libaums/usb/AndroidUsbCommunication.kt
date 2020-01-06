@@ -11,8 +11,8 @@ internal abstract class AndroidUsbCommunication(
         private val usbManager: UsbManager,
         private val usbDevice: UsbDevice,
         private val usbInterface: UsbInterface,
-        val outEndpoint: UsbEndpoint,
-        val inEndpoint: UsbEndpoint
+        override val outEndpoint: UsbEndpoint,
+        override val inEndpoint: UsbEndpoint
 ) : UsbCommunication {
 
     private var isNativeInited: Boolean = false
