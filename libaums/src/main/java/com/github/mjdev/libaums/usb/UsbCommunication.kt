@@ -31,6 +31,8 @@ import java.nio.ByteBuffer
  * @author mjahnen
  */
 interface UsbCommunication : Closeable {
+    val inEndpoint: UsbEndpoint
+    val outEndpoint: UsbEndpoint
 
     /**
      * Performs a bulk out transfer beginning at the offset specified in the

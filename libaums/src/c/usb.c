@@ -7,3 +7,9 @@ Java_com_github_mjdev_libaums_usb_AndroidUsbCommunication_resetUsbDeviceNative(J
     int ret = ioctl(fd, USBDEVFS_RESET);
     return (ret == 0) ? JNI_TRUE : JNI_FALSE;
 }
+
+JNIEXPORT jboolean JNICALL
+Java_com_github_mjdev_libaums_usb_AndroidUsbCommunication_clearHaltNative(JNIEnv *env, jobject thiz, jint fd, jint endpoint) {
+    int ret = ioctl(fd, USBDEVFS_CLEAR_HALT, &endpoint);
+    return (ret == 0) ? JNI_TRUE : JNI_FALSE;
+}

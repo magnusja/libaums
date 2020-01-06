@@ -11,8 +11,8 @@ internal abstract class AndroidUsbCommunication(
         private val usbManager: UsbManager,
         private val usbDevice: UsbDevice,
         private val usbInterface: UsbInterface,
-        private val outEndpoint: UsbEndpoint,
-        private val inEndpoint: UsbEndpoint
+        val outEndpoint: UsbEndpoint,
+        val inEndpoint: UsbEndpoint
 ) : UsbCommunication {
 
     private var isNativeInited: Boolean = false
@@ -73,7 +73,7 @@ internal abstract class AndroidUsbCommunication(
     }
 
     private fun softReset() {
-        Log.w(TAG, "Native helper library not available, can't perform proper device reset")
+        Log.w(TAG, "Native helper library not available, can't perform hard device reset")
         bulkOnlyMassStorageReset()
         Thread.sleep(2000)
         clearFeatureHalt(inEndpoint)
@@ -94,18 +94,12 @@ internal abstract class AndroidUsbCommunication(
     }
 
     override fun clearFeatureHalt(endpoint: UsbEndpoint) {
-        Log.w(TAG, "sending clear feature halt")
-        val bArr = ByteArray(2)
-        val address: Int = endpoint.address
-        // REQUEST_CLEAR_FEATURE = 1
-        // REQUEST_TYPE_CLEAR_FEATURE = 2
-        val transferred: Int = controlTransfer(2, 1, 0, address, bArr, 0)
-        if (transferred == -1) {
-            throw IOException("bulk only mass storage reset failed!")
+        Log.w(TAG, "Clearing halt on endpoint $endpoint (direction ${endpoint.direction})")
+        val result = clearHaltNative(deviceConnection!!.fileDescriptor, endpoint.address)
+        if (!result) {
+            Log.e(TAG, "Clear halt failed: errno ${ErrNo.errno} ${ErrNo.errstr}")
         }
     }
-
-    private external fun resetUsbDeviceNative(fd: Int): Boolean
 
     private fun closeUsbConnection() {
         if (deviceConnection == null)
@@ -128,4 +122,8 @@ internal abstract class AndroidUsbCommunication(
     companion object {
         private val TAG = AndroidUsbCommunication::class.java.simpleName
     }
+
+    private external fun resetUsbDeviceNative(fd: Int): Boolean
+    private external fun clearHaltNative(fd: Int, endpoint: Int): Boolean
+
 }

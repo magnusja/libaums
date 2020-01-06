@@ -23,8 +23,8 @@ internal class JellyBeanMr2Communication(
         usbManager: UsbManager,
         usbDevice: UsbDevice,
         usbInterface: UsbInterface,
-        private val outEndpoint: UsbEndpoint,
-        private val inEndpoint: UsbEndpoint
+        outEndpoint: UsbEndpoint,
+        inEndpoint: UsbEndpoint
 ) : AndroidUsbCommunication(usbManager, usbDevice, usbInterface, outEndpoint, inEndpoint) {
 
     @Throws(IOException::class)

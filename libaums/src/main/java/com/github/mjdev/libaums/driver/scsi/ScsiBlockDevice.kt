@@ -142,14 +142,30 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
             try {
                 return transferOneCommand(command, inBuffer)
             } catch(e: IOException) {
-                if (i == 3) {
-                    throw e
+                Log.e(TAG, "Error transferring command; errno ${ErrNo.errno} ${ErrNo.errstr}")
+
+                when (i) {
+                    0 -> {
+                        Log.d(TAG, "Trying to clear halt on both endpoints")
+                        usbCommunication.clearFeatureHalt(usbCommunication.inEndpoint)
+                        usbCommunication.clearFeatureHalt(usbCommunication.outEndpoint)
+                    }
+                    1 -> {
+                        Log.d(TAG, "Trying to reset the device")
+                        usbCommunication.resetRecovery()
+                    }
+                    2 -> {
+                        Log.d(TAG, "Trying to clear halt on both endpoints again")
+                        usbCommunication.clearFeatureHalt(usbCommunication.inEndpoint)
+                        usbCommunication.clearFeatureHalt(usbCommunication.outEndpoint)
+                    }
+                    else -> {
+                        Log.d(TAG, "Giving up")
+                        throw e
+                    }
                 }
 
-                Log.e(TAG, "Error transferring command; errno ${ErrNo.errno} ${ErrNo.errstr}")
-                Log.e(TAG, "Performing recovery reset procedure")
-                usbCommunication.resetRecovery()
-                Thread.sleep(1500);
+                Thread.sleep(1000)
             }
         }
 
