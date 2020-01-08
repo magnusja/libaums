@@ -17,6 +17,8 @@
 
 package com.github.mjdev.libaums.usb
 
+import android.hardware.usb.UsbEndpoint
+import java.io.Closeable
 import java.io.IOException
 import java.nio.ByteBuffer
 
@@ -28,7 +30,9 @@ import java.nio.ByteBuffer
  *
  * @author mjahnen
  */
-interface UsbCommunication {
+interface UsbCommunication : Closeable {
+    val inEndpoint: UsbEndpoint
+    val outEndpoint: UsbEndpoint
 
     /**
      * Performs a bulk out transfer beginning at the offset specified in the
@@ -51,6 +55,39 @@ interface UsbCommunication {
      */
     @Throws(IOException::class)
     fun bulkInTransfer(dest: ByteBuffer): Int
+
+    /**
+     * Performs a control transaction on endpoint zero for this device.
+     *
+     * @param requestType request type for this transaction
+     * @param request request ID for this transaction
+     * @param value value field for this transaction
+     * @param index index field for this transaction
+     * @param buffer buffer for data portion of transaction, or null if no data needs to be sent or received
+     * @param length the length of the data to send or receive
+     */
+    @Throws(IOException::class)
+    fun controlTransfer(requestType: Int, request: Int, value: Int, index: Int, buffer: ByteArray, length: Int): Int
+
+    /**
+     * Performs the recovery reset procedure in case the communication is stalled
+     */
+    @Throws(IOException::class)
+    fun resetRecovery()
+
+    /**
+     * Attempts a bulk-only mass storage reset control transfer operation
+     */
+    @Throws(IOException::class)
+    fun bulkOnlyMassStorageReset()
+
+    /**
+     * Attempts to clear the HALT feature from the specified USB endpoint
+     *
+     * @param endpoint the USB endpoint to clear the HALT feature from
+     */
+    @Throws(IOException::class)
+    fun clearFeatureHalt(endpoint: UsbEndpoint)
 
     companion object {
         const val TRANSFER_TIMEOUT = 5000

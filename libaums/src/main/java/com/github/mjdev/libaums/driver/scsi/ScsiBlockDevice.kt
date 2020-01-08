@@ -18,6 +18,7 @@
 package com.github.mjdev.libaums.driver.scsi
 
 import android.util.Log
+import com.github.mjdev.libaums.ErrNo
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.driver.scsi.commands.*
 import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper.Direction
@@ -47,6 +48,8 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
     private val writeCommand = ScsiWrite10(lun=lun)
     private val readCommand = ScsiRead10(lun=lun)
     private val csw = CommandStatusWrapper()
+
+    private var cbwTagCounter = 0
 
     /**
      * The size of the block device, in blocks of [blockSize] bytes,
@@ -135,8 +138,46 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
      */
     @Throws(IOException::class)
     private fun transferCommand(command: CommandBlockWrapper, inBuffer: ByteBuffer): Boolean {
+        for(i in 0..MAX_RECOVERY_ATTEMPTS) {
+            try {
+                return transferOneCommand(command, inBuffer)
+            } catch(e: IOException) {
+                Log.e(TAG, "Error transferring command; errno ${ErrNo.errno} ${ErrNo.errstr}")
+
+                // Try alternately to clear halt and reset device until something happens
+                when {
+                    i % 2 == 0 -> {
+                        Log.d(TAG, "Reset bulk-only mass storage")
+                        usbCommunication.bulkOnlyMassStorageReset()
+                        Log.d(TAG, "Trying to clear halt on both endpoints")
+                        usbCommunication.clearFeatureHalt(usbCommunication.inEndpoint)
+                        usbCommunication.clearFeatureHalt(usbCommunication.outEndpoint)
+                    }
+                    i % 2 == 1 -> {
+                        Log.d(TAG, "Trying to reset the device")
+                        usbCommunication.resetRecovery()
+                    }
+                    i == MAX_RECOVERY_ATTEMPTS -> {
+                        Log.d(TAG, "Giving up")
+                        throw e
+                    }
+                }
+
+                Thread.sleep(500)
+            }
+        }
+
+        throw IllegalStateException("This should never happen.")
+    }
+
+
+    @Throws(IOException::class)
+    private fun transferOneCommand(command: CommandBlockWrapper, inBuffer: ByteBuffer): Boolean {
         val outArray = outBuffer.array()
         Arrays.fill(outArray, 0.toByte())
+
+        command.dCbwTag = cbwTagCounter
+        cbwTagCounter++
 
         outBuffer.clear()
         command.serialize(outBuffer)
@@ -234,7 +275,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
     }
 
     companion object {
-
+        private const val MAX_RECOVERY_ATTEMPTS = 20
         private val TAG = ScsiBlockDevice::class.java.simpleName
     }
 }
