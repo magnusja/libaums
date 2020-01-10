@@ -1,13 +1,12 @@
 package me.jahnen.libaums.libusbcommunication
 
-import android.hardware.usb.UsbDevice
-import android.hardware.usb.UsbEndpoint
-import android.hardware.usb.UsbInterface
-import android.hardware.usb.UsbManager
+import android.hardware.usb.*
 import com.github.mjdev.libaums.usb.UsbCommunication
+import com.github.mjdev.libaums.usb.UsbCommunication.Companion.TRANSFER_TIMEOUT
 import com.github.mjdev.libaums.usb.UsbCommunicationCreator
 import java.io.IOException
 import java.nio.ByteBuffer
+import kotlin.math.absoluteValue
 
 class LibusbCommunication(
         private val usbManager: UsbManager,
@@ -17,29 +16,52 @@ class LibusbCommunication(
         override val inEndpoint: UsbEndpoint
 ) : UsbCommunication {
 
+    // used to save heap address of libusb device handle
+    private var libUsbHandleArray = longArrayOf(0)
+    private val libUsbHandle: Long
+        get() = libUsbHandleArray[0]
+    private var deviceConnection: UsbDeviceConnection?
+
     init {
         System.loadLibrary("libusbcom")
-        if(!nativeInit()) {
+
+        deviceConnection = usbManager.openDevice(usbDevice)
+                ?: throw IOException("deviceConnection is null!")
+
+        if(!nativeInit(deviceConnection!!.fileDescriptor, libUsbHandleArray)) {
             throw IOException("libusb init failed")
-        }
-        if(!nativeOpen()) {
-            throw IOException("libusb open failed")
         }
     }
 
-    private external fun nativeInit(): Boolean
-    private external fun nativeOpen(): Boolean
+    private external fun nativeInit(fd: Int, handle: LongArray): Boolean
+    private external fun nativeClose(handle: Long)
+    private external fun nativeBulkTransfer(handle: Long, endpointAddress: Int, data: ByteArray, offset: Int, length: Int, timeout: Int): Int
+    private external fun nativeControlTransfer(handle: Long, requestType: Int, request: Int, value: Int, index: Int, buffer: ByteArray, length: Int, timeout: Int): Int
 
     override fun bulkOutTransfer(src: ByteBuffer): Int {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val transferred = nativeBulkTransfer(libUsbHandle, outEndpoint.address, src.array(), src.position(), src.remaining(), TRANSFER_TIMEOUT)
+        if (transferred < 0) {
+            throw IOException("libusb returned $transferred in bulk out transfer")
+        }
+        src.position(src.position() + transferred)
+        return transferred
     }
 
     override fun bulkInTransfer(dest: ByteBuffer): Int {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val transferred = nativeBulkTransfer(libUsbHandle, inEndpoint.address, dest.array(), dest.position(), dest.remaining(), TRANSFER_TIMEOUT)
+        if (transferred < 0) {
+            throw IOException("libusb returned $transferred in bulk in transfer")
+        }
+        dest.position(dest.position() + transferred)
+        return transferred
     }
 
     override fun controlTransfer(requestType: Int, request: Int, value: Int, index: Int, buffer: ByteArray, length: Int): Int {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val ret = nativeControlTransfer(libUsbHandle, requestType, request, value, index, buffer, length, TRANSFER_TIMEOUT)
+        if (ret < 0) {
+            throw IOException("libusb returned $ret in control transfer")
+        }
+        return ret
     }
 
     override fun resetRecovery() {
@@ -55,7 +77,8 @@ class LibusbCommunication(
     }
 
     override fun close() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        nativeClose(libUsbHandle)
+        deviceConnection!!.close()
     }
 
 }

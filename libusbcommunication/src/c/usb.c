@@ -6,56 +6,71 @@
 
 #define TAG "native_libusbcom"
 
-static void print_devs(libusb_device **devs)
-{
-    libusb_device *dev;
-    int i = 0, j = 0;
-    uint8_t path[8];
-
-    while ((dev = devs[i++]) != NULL) {
-        struct libusb_device_descriptor desc;
-        int r = libusb_get_device_descriptor(dev, &desc);
-        if (r < 0) {
-            printf("failed to get device descriptor");
-            return;
-        }
-
-        printf("%04x:%04x (bus %d, device %d)",
-              desc.idVendor, desc.idProduct,
-              libusb_get_bus_number(dev), libusb_get_device_address(dev));
-
-        r = libusb_get_port_numbers(dev, path, sizeof(path));
-        if (r > 0) {
-            printf(" path: %d", path[0]);
-            for (j = 1; j < r; j++)
-                printf(".%d", path[j]);
-        }
-        printf("\n");
-    }
-}
-
 JNIEXPORT jboolean JNICALL
-Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeInit(JNIEnv *env, jobject thiz) {
+Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeInit(JNIEnv *env, jobject thiz, jint fd, jlongArray handle) {
     int ret = libusb_init(NULL);
-
-    if (ret == 0)
-        return JNI_TRUE;
-    else {
+    if (ret != 0) {
         LOG_E(TAG, "libusb_init returned %d", ret);
         return JNI_FALSE;
     }
+
+    libusb_device_handle *devh = NULL;
+    ret = libusb_wrap_sys_device(NULL, fd, &devh);
+    if (ret != 0) {
+        LOG_E(TAG, "libusb_wrap_sys_device returned %d", ret);
+        return JNI_FALSE;
+    }
+    if (devh == NULL) {
+        LOG_E(TAG, "libusb_wrap_sys_device device handle NULL");
+        return JNI_FALSE;
+    }
+
+    jlong *body = (*env)->GetLongArrayElements(env, handle, NULL);
+    // cache heap address in java class object
+    body[0] = (jlong)devh;
+    (*env)->ReleaseLongArrayElements(env, handle, body, NULL);
+
+    return JNI_TRUE;
 }
 
 JNIEXPORT jboolean JNICALL
-Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeOpen(JNIEnv *env, jobject thiz) {
-    LOG_D(TAG, "libusb open");
-    libusb_device **devs;
-    int count = libusb_get_device_list(NULL, &devs);
-    if (count < 0){
-        LOG_E(TAG, "libusb_get_device_list returned %d", count);
-        return JNI_FALSE;
-    }
-    print_devs(devs);
+Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeClose(JNIEnv *env, jobject thiz, jlong handle) {
+    libusb_close((libusb_device_handle*)(intptr_t)handle);
+    libusb_exit(NULL);
+}
 
-    return JNI_TRUE;
+JNIEXPORT jint JNICALL
+Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeBulkTransfer(JNIEnv *env, jobject thiz, jlong handle,
+        jint endpointAddress, jbyteArray data, jint offset, jint length, jint timeout) {
+    jbyte *c_data = (*env)->GetByteArrayElements(env, data, NULL);
+    int transferred;
+    int ret = libusb_bulk_transfer((libusb_device_handle*)(intptr_t)handle, (unsigned char)endpointAddress,
+                                   (unsigned char *) &c_data[offset], length, &transferred, (unsigned int)timeout);
+
+    (*env)->ReleaseByteArrayElements(env, data, c_data, NULL);
+
+    if (ret == 0) {
+        return transferred;
+    } else {
+        LOG_E(TAG, "libusb_bulk_transfer returned %d", ret);
+        return ret;
+    }
+}
+
+JNIEXPORT jint JNICALL
+Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeControlTransfer(JNIEnv *env, jobject thiz, jlong handle,
+        jint requestType, jint request, jint value, int index, jbyteArray buffer, jint length, jint timeout) {
+    jbyte *c_data = (*env)->GetByteArrayElements(env, buffer, NULL);
+    int transferred;
+    int ret = libusb_control_transfer((libusb_device_handle*)(intptr_t)handle, (uint8_t)requestType,
+            (uint8_t)request, (uint8_t)value, (uint8_t)index, (unsigned char *)c_data,
+            (uint16_t)length, (unsigned int)timeout);
+    (*env)->ReleaseByteArrayElements(env, buffer, c_data, NULL);
+
+    if (ret == 0) {
+        return transferred;
+    } else {
+        LOG_E(TAG, "libusb_control_transfer returned %d", ret);
+        return ret;
+    }
 }
