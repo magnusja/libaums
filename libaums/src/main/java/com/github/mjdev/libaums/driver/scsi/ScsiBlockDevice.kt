@@ -146,7 +146,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
 
                 // Try alternately to clear halt and reset device until something happens
                 when {
-                    i == MAX_RECOVERY_ATTEMPTS -> {
+                    i == MAX_RECOVERY_ATTEMPTS - 1 -> {
                         Log.d(TAG, "Giving up")
                         throw e
                     }
