@@ -146,6 +146,10 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
 
                 // Try alternately to clear halt and reset device until something happens
                 when {
+                    i == MAX_RECOVERY_ATTEMPTS -> {
+                        Log.d(TAG, "Giving up")
+                        throw e
+                    }
                     i % 2 == 0 -> {
                         Log.d(TAG, "Reset bulk-only mass storage")
                         usbCommunication.bulkOnlyMassStorageReset()
@@ -156,10 +160,6 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
                     i % 2 == 1 -> {
                         Log.d(TAG, "Trying to reset the device")
                         usbCommunication.resetRecovery()
-                    }
-                    i == MAX_RECOVERY_ATTEMPTS -> {
-                        Log.d(TAG, "Giving up")
-                        throw e
                     }
                 }
 
