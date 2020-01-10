@@ -1,6 +1,9 @@
 package me.jahnen.libaums.libusbcommunication
 
+import android.content.ContentValues.TAG
 import android.hardware.usb.*
+import android.util.Log
+import com.github.mjdev.libaums.ErrNo
 import com.github.mjdev.libaums.usb.UsbCommunication
 import com.github.mjdev.libaums.usb.UsbCommunication.Companion.TRANSFER_TIMEOUT
 import com.github.mjdev.libaums.usb.UsbCommunicationCreator
@@ -45,6 +48,8 @@ class LibusbCommunication(
     private external fun nativeInit(fd: Int, handle: LongArray): Boolean
     private external fun nativeClaimInterface(handle: Long, interfaceNumber: Int): Int
     private external fun nativeClose(handle: Long, interfaceNumber: Int)
+    private external fun nativeReset(handle: Long)
+    private external fun nativeClearHalt(handle: Long, interfaceNumber: Int)
     private external fun nativeBulkTransfer(handle: Long, endpointAddress: Int, data: ByteArray, offset: Int, length: Int, timeout: Int): Int
     private external fun nativeControlTransfer(handle: Long, requestType: Int, request: Int, value: Int, index: Int, buffer: ByteArray, length: Int, timeout: Int): Int
 
@@ -75,11 +80,22 @@ class LibusbCommunication(
     }
 
     override fun resetDevice() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        if (!deviceConnection!!.releaseInterface(usbInterface)) {
+            Log.w(TAG, "Failed to release interface, errno: ${ErrNo.errno} ${ErrNo.errstr}")
+        }
+
+        val ret = nativeReset(libUsbHandle)
+        // if LIBUSB_ERROR_NOT_FOUND might need reenumeration
+        Log.d(TAG, "libusb reset returned $ret")
+
+        if (!deviceConnection!!.claimInterface(usbInterface, true)) {
+            throw IOException("Could not claim interface, errno: ${ErrNo.errno} ${ErrNo.errstr}")
+        }
     }
 
     override fun clearFeatureHalt(endpoint: UsbEndpoint) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val ret = nativeClearHalt(libUsbHandle, usbInterface.id)
+        Log.d(TAG, "libusb clearFeatureHalt returned $ret")
     }
 
     override fun close() {

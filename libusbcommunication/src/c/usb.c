@@ -8,6 +8,7 @@
 
 JNIEXPORT jboolean JNICALL
 Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeInit(JNIEnv *env, jobject thiz, jint fd, jlongArray handle) {
+    LOG_D(TAG, "init native libusb");
     int ret = libusb_init(NULL);
     if (ret != 0) {
         LOG_E(TAG, "libusb_init returned %d", ret);
@@ -35,6 +36,7 @@ Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeInit(JNIEnv
 
 JNIEXPORT void JNICALL
 Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeClose(JNIEnv *env, jobject thiz, jlong handle, jint interfaceNumber) {
+    LOG_D(TAG, "close native libusb");
     //libusb_release_interface((libusb_device_handle*)(intptr_t)handle, interfaceNumber);
     libusb_close((libusb_device_handle*)(intptr_t)handle);
     libusb_exit(NULL);
@@ -83,4 +85,16 @@ Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeControlTran
     (*env)->ReleaseByteArrayElements(env, buffer, c_data, NULL);
 
     return ret;
+}
+
+JNIEXPORT jint JNICALL
+Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeReset(JNIEnv *env, jobject thiz, jlong handle) {
+    LOG_W(TAG, "libusb reset");
+    return libusb_reset_device((libusb_device_handle*)(intptr_t)handle);
+}
+
+JNIEXPORT jint JNICALL
+Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeClearHalt(JNIEnv *env, jobject thiz, jlong handle, jint endpointAddress) {
+    LOG_W(TAG, "libusb reset");
+    return libusb_clear_halt((libusb_device_handle*)(intptr_t)handle, endpointAddress);
 }
