@@ -31,10 +31,20 @@ class LibusbCommunication(
         if(!nativeInit(deviceConnection!!.fileDescriptor, libUsbHandleArray)) {
             throw IOException("libusb init failed")
         }
+
+//        val ret = nativeClaimInterface(libUsbHandle, usbInterface.id)
+//        if (ret < 0) {
+//            throw IOException("libusb returned $ret in claim interface")
+//        }
+        val claim = deviceConnection!!.claimInterface(usbInterface, true)
+        if (!claim) {
+            throw IOException("could not claim interface!")
+        }
     }
 
     private external fun nativeInit(fd: Int, handle: LongArray): Boolean
-    private external fun nativeClose(handle: Long)
+    private external fun nativeClaimInterface(handle: Long, interfaceNumber: Int): Int
+    private external fun nativeClose(handle: Long, interfaceNumber: Int)
     private external fun nativeBulkTransfer(handle: Long, endpointAddress: Int, data: ByteArray, offset: Int, length: Int, timeout: Int): Int
     private external fun nativeControlTransfer(handle: Long, requestType: Int, request: Int, value: Int, index: Int, buffer: ByteArray, length: Int, timeout: Int): Int
 
@@ -77,7 +87,8 @@ class LibusbCommunication(
     }
 
     override fun close() {
-        nativeClose(libUsbHandle)
+        deviceConnection!!.releaseInterface(usbInterface)
+        nativeClose(libUsbHandle, usbInterface.id)
         deviceConnection!!.close()
     }
 
