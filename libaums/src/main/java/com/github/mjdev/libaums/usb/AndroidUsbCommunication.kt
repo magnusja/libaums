@@ -10,7 +10,7 @@ import java.io.IOException
 internal abstract class AndroidUsbCommunication(
         private val usbManager: UsbManager,
         private val usbDevice: UsbDevice,
-        private val usbInterface: UsbInterface,
+        override val usbInterface: UsbInterface,
         override val outEndpoint: UsbEndpoint,
         override val inEndpoint: UsbEndpoint
 ) : UsbCommunication {
@@ -52,12 +52,7 @@ internal abstract class AndroidUsbCommunication(
         return deviceConnection!!.controlTransfer(requestType, request, value, index, buffer, length, TRANSFER_TIMEOUT)
     }
 
-    override fun resetRecovery() = when {
-        isNativeInited -> nativeReset()
-        else           -> softReset()
-    }
-
-    private fun nativeReset() {
+    override fun resetDevice() {
         Log.d(TAG, "Performing native reset")
 
         if (!deviceConnection!!.releaseInterface(usbInterface)) {
@@ -71,26 +66,6 @@ internal abstract class AndroidUsbCommunication(
 
         if (!deviceConnection!!.claimInterface(usbInterface, true)) {
             throw IOException("Could not claim interface, errno: ${ErrNo.errno} ${ErrNo.errstr}")
-        }
-    }
-
-    private fun softReset() {
-        bulkOnlyMassStorageReset()
-        Thread.sleep(2000)
-        clearFeatureHalt(inEndpoint)
-        Thread.sleep(2000)
-        clearFeatureHalt(outEndpoint)
-        Thread.sleep(2000)
-    }
-
-    override fun bulkOnlyMassStorageReset() {
-        Log.w(TAG, "sending bulk only mass storage request")
-        val bArr = ByteArray(2)
-        // REQUEST_BULK_ONLY_MASS_STORAGE_RESET = 255
-        // REQUEST_TYPE_BULK_ONLY_MASS_STORAGE_RESET = 33
-        val transferred: Int = controlTransfer(33, 255, 0, usbInterface.id, bArr, 0)
-        if (transferred == -1) {
-            throw IOException("bulk only mass storage reset failed!")
         }
     }
 

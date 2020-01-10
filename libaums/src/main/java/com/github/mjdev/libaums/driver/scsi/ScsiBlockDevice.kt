@@ -22,6 +22,7 @@ import com.github.mjdev.libaums.ErrNo
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.driver.scsi.commands.*
 import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper.Direction
+import com.github.mjdev.libaums.usb.AndroidUsbCommunication
 import com.github.mjdev.libaums.usb.UsbCommunication
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -152,14 +153,14 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
                     }
                     i % 2 == 0 -> {
                         Log.d(TAG, "Reset bulk-only mass storage")
-                        usbCommunication.bulkOnlyMassStorageReset()
+                        bulkOnlyMassStorageReset()
                         Log.d(TAG, "Trying to clear halt on both endpoints")
                         usbCommunication.clearFeatureHalt(usbCommunication.inEndpoint)
                         usbCommunication.clearFeatureHalt(usbCommunication.outEndpoint)
                     }
                     i % 2 == 1 -> {
                         Log.d(TAG, "Trying to reset the device")
-                        usbCommunication.resetRecovery()
+                        usbCommunication.resetDevice()
                     }
                 }
 
@@ -170,6 +171,16 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
         throw IllegalStateException("This should never happen.")
     }
 
+    private fun bulkOnlyMassStorageReset() {
+        Log.w(TAG, "sending bulk only mass storage request")
+        val bArr = ByteArray(2)
+        // REQUEST_BULK_ONLY_MASS_STORAGE_RESET = 255
+        // REQUEST_TYPE_BULK_ONLY_MASS_STORAGE_RESET = 33
+        val transferred: Int = usbCommunication.controlTransfer(33, 255, 0, usbCommunication.usbInterface.id, bArr, 0)
+        if (transferred == -1) {
+            throw IOException("bulk only mass storage reset failed!")
+        }
+    }
 
     @Throws(IOException::class)
     private fun transferOneCommand(command: CommandBlockWrapper, inBuffer: ByteBuffer): Boolean {

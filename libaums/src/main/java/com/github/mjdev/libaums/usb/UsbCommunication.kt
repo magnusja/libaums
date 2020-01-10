@@ -18,6 +18,7 @@
 package com.github.mjdev.libaums.usb
 
 import android.hardware.usb.UsbEndpoint
+import android.hardware.usb.UsbInterface
 import java.io.Closeable
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -33,6 +34,7 @@ import java.nio.ByteBuffer
 interface UsbCommunication : Closeable {
     val inEndpoint: UsbEndpoint
     val outEndpoint: UsbEndpoint
+    val usbInterface: UsbInterface
 
     /**
      * Performs a bulk out transfer beginning at the offset specified in the
@@ -73,13 +75,7 @@ interface UsbCommunication : Closeable {
      * Performs the recovery reset procedure in case the communication is stalled
      */
     @Throws(IOException::class)
-    fun resetRecovery()
-
-    /**
-     * Attempts a bulk-only mass storage reset control transfer operation
-     */
-    @Throws(IOException::class)
-    fun bulkOnlyMassStorageReset()
+    fun resetDevice()
 
     /**
      * Attempts to clear the HALT feature from the specified USB endpoint

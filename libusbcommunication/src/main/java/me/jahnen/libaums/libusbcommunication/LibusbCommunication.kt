@@ -11,7 +11,7 @@ import kotlin.math.absoluteValue
 class LibusbCommunication(
         private val usbManager: UsbManager,
         private val usbDevice: UsbDevice,
-        private val usbInterface: UsbInterface,
+        override val usbInterface: UsbInterface,
         override val outEndpoint: UsbEndpoint,
         override val inEndpoint: UsbEndpoint
 ) : UsbCommunication {
@@ -74,11 +74,7 @@ class LibusbCommunication(
         return ret
     }
 
-    override fun resetRecovery() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun bulkOnlyMassStorageReset() {
+    override fun resetDevice() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
