@@ -26,4 +26,4 @@ include_directories(${LIBUSB_INCLUDE})
 add_library( libusbcom
              SHARED
              src/c/usb.c )
-target_link_libraries(libusbcom libusb)
+target_link_libraries(libusbcom libusb log)
