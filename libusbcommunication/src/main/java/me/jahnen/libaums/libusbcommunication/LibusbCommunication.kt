@@ -35,13 +35,13 @@ class LibusbCommunication(
             throw IOException("libusb init failed")
         }
 
-//        val ret = nativeClaimInterface(libUsbHandle, usbInterface.id)
-//        if (ret < 0) {
-//            throw IOException("libusb returned $ret in claim interface")
-//        }
         val claim = deviceConnection!!.claimInterface(usbInterface, true)
         if (!claim) {
             throw IOException("could not claim interface!")
+        }
+        val ret = nativeClaimInterface(libUsbHandle, usbInterface.id)
+        if (ret < 0) {
+            throw IOException("libusb returned $ret in claim interface")
         }
     }
 
