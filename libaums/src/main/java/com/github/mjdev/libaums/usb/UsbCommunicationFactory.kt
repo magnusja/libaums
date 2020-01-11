@@ -45,16 +45,16 @@ object UsbCommunicationFactory {
             inEndpoint: UsbEndpoint
     ): UsbCommunication {
         when(underlyingUsbCommunication) {
-//            UnderlyingUsbCommunication.DEVICE_CONNECTION_SYNC ->
-//                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-//                    JellyBeanMr2Communication(usbManager, usbDevice, usbInterface, outEndpoint, inEndpoint)
-//                } else {
-//                    Log.i(TAG, "using workaround usb communication")
-//                    HoneyCombMr1Communication(usbManager, usbDevice, usbInterface, outEndpoint, inEndpoint)
-//                }
-//
-//            UnderlyingUsbCommunication.USB_REQUEST_ASYNC ->
-//                return UsbRequestCommunication(usbManager, usbDevice, usbInterface, outEndpoint, inEndpoint)
+            UnderlyingUsbCommunication.DEVICE_CONNECTION_SYNC ->
+                return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    JellyBeanMr2Communication(usbManager, usbDevice, usbInterface, outEndpoint, inEndpoint)
+                } else {
+                    Log.i(TAG, "using workaround usb communication")
+                    HoneyCombMr1Communication(usbManager, usbDevice, usbInterface, outEndpoint, inEndpoint)
+                }
+
+            UnderlyingUsbCommunication.USB_REQUEST_ASYNC ->
+                return UsbRequestCommunication(usbManager, usbDevice, usbInterface, outEndpoint, inEndpoint)
 
             UnderlyingUsbCommunication.OTHER ->
                 for(creator in communications) {
