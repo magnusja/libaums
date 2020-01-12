@@ -155,6 +155,20 @@ InputStream is = UsbFileStreamFactory.createBufferedInputStream(file, currentFs)
 device.close();
 ```
 
+#### Troubleshooting
+
+If you get the following error fairly often (mostly under Android 9.0 Pie):
+
+```
+java.io.IOException: Could not write to device, result == -1 errno 0 null
+```
+
+or something similar, you might want to try the [libusb module](https://github.com/magnusja/libaums/tree/develop/libusbcommunication). This uses, instead of the Android USB host API, the [libusb](https://github.com/libusb/libusb) library for low level communication with the USB mass storage device. 
+
+see discussions: https://github.com/magnusja/libaums/issues/209 https://github.com/magnusja/libaums/issues/237 https://github.com/magnusja/libaums/pull/242
+
+__Note__, that libusb is licensed under LGPL, which is different from the license this project is licensed under! This might come with some drawbacks or extra work for closed source applications, see here: https://xebia.com/blog/the-lgpl-on-android/
+
 #### Provide access to external apps
 
 Usually third party apps do not have access to the files on a mass storage device if the Android system does mount (this is usually supported on newer devices, back in 2014 there was no support for that) the device or this app integrates this library itself. To solve this issue there are two additional modules to provide access to other app. One uses the Storage Access Framework feature of Android (API level >= 19) and the other one spins up an HTTP server to allow downloading or streaming of videos or images for instance.
