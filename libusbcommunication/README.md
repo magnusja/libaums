@@ -25,7 +25,7 @@ do each of the following:
        the user to replace that copy]
   e) [provide clear instructions how to rebuild or re-link your application in light
      of the previous point]
-´´´
+
 
 where d(1) is not possible on Android, and d(0) only possible with serious overhead if you do not want to give people your source code. What is possible __in my opinion__ is that you offer people to provide you with a compiled binary of libusb and you include that back into your application which you sent back to the user. This is because of code signing issues. Another option would be to give poeple instructions on how to do code signing on their own and then offer an unsigned apk which contains everything except libusb.
 
