@@ -35,9 +35,6 @@ artifacts {
 
 // Bintray
 File file = project.rootProject.file('local.properties')
-if(!file.exists()) {
-    return
-}
 Properties properties = new Properties()
 properties.load(file.newDataInputStream())
 

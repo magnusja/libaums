@@ -70,6 +70,7 @@ object FileSystemFactory {
      * instance.
      */
     @Synchronized
+    @JvmStatic
     fun registerFileSystem(creator: FileSystemCreator) {
         fileSystems.add(creator)
     }

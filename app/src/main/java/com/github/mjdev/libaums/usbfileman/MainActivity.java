@@ -88,6 +88,9 @@ import com.github.mjdev.libaums.fs.UsbFileInputStream;
 import com.github.mjdev.libaums.fs.UsbFileStreamFactory;
 import com.github.mjdev.libaums.server.http.UsbFileHttpServerService;
 import com.github.mjdev.libaums.server.http.server.AsyncHttpServer;
+import com.github.mjdev.libaums.usb.UsbCommunicationFactory;
+
+import me.jahnen.libaums.libusbcommunication.LibusbCommunicationCreator;
 
 /**
  * MainActivity of the demo application which shows the contents of the first
@@ -99,7 +102,9 @@ import com.github.mjdev.libaums.server.http.server.AsyncHttpServer;
 public class MainActivity extends AppCompatActivity implements OnItemClickListener {
 
 	static {
-		FileSystemFactory.INSTANCE.registerFileSystem(new JavaFsFileSystemCreator());
+		FileSystemFactory.registerFileSystem(new JavaFsFileSystemCreator());
+        UsbCommunicationFactory.registerCommunication(new LibusbCommunicationCreator());
+        UsbCommunicationFactory.setUnderlyingUsbCommunication(UsbCommunicationFactory.UnderlyingUsbCommunication.OTHER);
 	}
 
 	/**
