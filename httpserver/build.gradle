@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.dokka'
 
 project.archivesBaseName = 'libaums-httpserver'
 
@@ -35,6 +36,11 @@ android {
     }
 }
 
+dokka {
+    outputFormat = 'html'
+    outputDirectory = "$buildDir/docs/javadoc"
+}
+
 dependencies {
     api 'org.nanohttpd:nanohttpd:2.+'
     javadocDeps 'org.nanohttpd:nanohttpd:2.+'
@@ -43,9 +49,9 @@ dependencies {
 
     api fileTree(include: ['*.jar'], dir: 'libs')
     api 'androidx.annotation:annotation:1.1.0'
-    api 'androidx.core:core:1.1.0-beta01'
+    api 'androidx.core:core:1.2.0-rc01'
     api project(':libaums')
-    api "androidx.core:core-ktx:1.0.2"
+    api "androidx.core:core-ktx:1.1.0"
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 

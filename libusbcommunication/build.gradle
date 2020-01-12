@@ -1,11 +1,17 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'org.jetbrains.dokka-android'
 
 Properties props = new Properties()
 props.load(new FileInputStream(project.rootProject.file('local.properties')))
 String libusbDir = props['libusb.dir']
 
+ext {
+    artifact = 'libaums-libusbcommunication'
+    bintrayName = 'libaums-libusbcommunication'
+    libraryVersion = '0.1'
+}
 
 android {
     compileSdkVersion 29
@@ -42,6 +48,11 @@ android {
 
 }
 
+dokka {
+    outputFormat = 'html'
+    outputDirectory = "$buildDir/docs/javadoc"
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -51,4 +62,9 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     api project(':libaums')
+}
+
+task bintray {
+    apply from: '../install.gradle'
+    apply from: '../bintray.gradle'
 }
