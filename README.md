@@ -1,7 +1,7 @@
 libaums
 =======
-[![Javadocs](https://www.javadoc.io/badge/com.github.mjdev/libaums.svg)](https://www.javadoc.io/doc/com.github.mjdev/libaums)
-[ ![Build Status](https://travis-ci.org/magnusja/libaums.svg?branch=develop)](https://travis-ci.org/magnusja/libaums)[ ![codecov](https://codecov.io/gh/magnusja/libaums/branch/develop/graph/badge.svg)](https://codecov.io/gh/magnusja/libaums)[ ![Codacy Badge](https://api.codacy.com/project/badge/Grade/31124a2747de41b49c040b9f7979c2a6)](https://www.codacy.com/manual/magnusja/libaums?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=magnusja/libaums&amp;utm_campaign=Badge_Grade)[ ![Download](https://api.bintray.com/packages/mjdev/maven/libaums/images/download.svg) ](https://bintray.com/mjdev/maven/libaums/_latestVersion)
+[![Javadocs](https://www.javadoc.io/badge/me.jahnen/libaums.svg)](https://www.javadoc.io/doc/me.jahnen/libaums)
+[ ![Build Status](https://travis-ci.org/magnusja/libaums.svg?branch=develop)](https://travis-ci.org/magnusja/libaums)[ ![codecov](https://codecov.io/gh/magnusja/libaums/branch/develop/graph/badge.svg)](https://codecov.io/gh/magnusja/libaums)[ ![Codacy Badge](https://api.codacy.com/project/badge/Grade/31124a2747de41b49c040b9f7979c2a6)](https://www.codacy.com/manual/magnusja/libaums?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=magnusja/libaums&amp;utm_campaign=Badge_Grade)[ ![Download](https://api.bintray.com/packages/magnusja/maven/libaums/images/download.svg) ](https://bintray.com/magnusja/maven/libaums/_latestVersion)
 [ ![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/libaums)
 
 A library to access USB mass storage devices (pen drives, external HDDs, card readers) using the Android USB Host API. Currently it supports the SCSI command set and the FAT32 file system.
@@ -13,14 +13,14 @@ A library to access USB mass storage devices (pen drives, external HDDs, card re
 The library can be included into your project like this:
 
 ```ruby
-compile 'com.github.mjdev:libaums:0.7.4'
+compile 'me.jahnen:libaums:0.7.5'
 ```
 
 If you need the HTTP or the storage provider module:
 
 ```ruby
-compile 'com.github.mjdev:libaums-httpserver:0.5.3'
-compile 'com.github.mjdev:libaums-storageprovider:0.5.1'
+compile 'me.jahnen:libaums-httpserver:0.5.3'
+compile 'me.jahnen:libaums-storageprovider:0.5.1'
 ```
 
 ### Basics
