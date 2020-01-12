@@ -11,6 +11,7 @@ buildscript {
             url 'https://maven.google.com/'
             name 'Google'
         }
+        maven { url "https://plugins.gradle.org/m2/" }
         google()
     }
     dependencies {
@@ -18,10 +19,12 @@ buildscript {
 
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
-        classpath 'com.dicedmelon.gradle:jacoco-android:0.1.4'
+        classpath 'com.hiya:jacoco-android:0.2'
 
         classpath 'org.codehaus.groovy:groovy-all:2.4.15'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+
+        classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:0.9.18"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -31,7 +34,7 @@ buildscript {
 ext {
     bintrayRepo = 'maven'
 
-    publishedGroupId = 'com.github.mjdev'
+    publishedGroupId = 'me.jahnen'
     libraryName = 'libaums'
 
     // artifact comes from module as well as libraryVersion
@@ -39,12 +42,12 @@ ext {
 
     libraryDescription = 'Android USB mass storage library with FAT32 support.'
 
-    siteUrl = 'https://github.com/mjdev/libaums'
-    gitUrl = 'https://github.com/mjdev/libaums.git'
+    siteUrl = 'https://github.com/magnusja/libaums'
+    gitUrl = 'https://github.com/magnusja/libaums.git'
 
 
-    developerId = 'mjdev'
-    developerName = 'mjahnen'
+    developerId = 'magnusja'
+    developerName = 'Magnus Jahnen'
     developerEmail = 'github@mgns.tech'
 
     licenseName = 'The Apache Software License, Version 2.0'
