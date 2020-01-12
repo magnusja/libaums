@@ -169,7 +169,7 @@ see discussions: https://github.com/magnusja/libaums/issues/209 https://github.c
 
 __Note__, that libusb is licensed under LGPL, which is different from the license this project is licensed under! This might come with some drawbacks or extra work for closed source applications, see here: https://xebia.com/blog/the-lgpl-on-android/
 
-#### Provide access to external apps
+## Provide access to external apps
 
 Usually third party apps do not have access to the files on a mass storage device if the Android system does mount (this is usually supported on newer devices, back in 2014 there was no support for that) the device or this app integrates this library itself. To solve this issue there are two additional modules to provide access to other app. One uses the Storage Access Framework feature of Android (API level >= 19) and the other one spins up an HTTP server to allow downloading or streaming of videos or images for instance.
 
