@@ -38,7 +38,7 @@ Refer to the following blog where someone claims that LPGL cannot be used in clo
 #### Inclusion in your build.gradle
 
 ```ruby
-compile 'me.jahnen:libaums-libusbcommunication:0.1'
+implementation 'me.jahnen:libaums-libusbcommunication:0.1'
 ```
 
 ### Activate libusb communication
