@@ -86,6 +86,6 @@ interface UsbCommunication : Closeable {
     fun clearFeatureHalt(endpoint: UsbEndpoint)
 
     companion object {
-        const val TRANSFER_TIMEOUT = 5000
+        const val TRANSFER_TIMEOUT = 50000
     }
 }

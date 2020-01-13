@@ -47,9 +47,9 @@ class LibusbCommunication(
 
     private external fun nativeInit(fd: Int, handle: LongArray): Boolean
     private external fun nativeClaimInterface(handle: Long, interfaceNumber: Int): Int
-    private external fun nativeClose(handle: Long, interfaceNumber: Int): Int
+    private external fun nativeClose(handle: Long, interfaceNumber: Int)
     private external fun nativeReset(handle: Long): Int
-    private external fun nativeClearHalt(handle: Long, interfaceNumber: Int)
+    private external fun nativeClearHalt(handle: Long, interfaceNumber: Int): Int
     private external fun nativeBulkTransfer(handle: Long, endpointAddress: Int, data: ByteArray, offset: Int, length: Int, timeout: Int): Int
     private external fun nativeControlTransfer(handle: Long, requestType: Int, request: Int, value: Int, index: Int, buffer: ByteArray, length: Int, timeout: Int): Int
 
