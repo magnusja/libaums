@@ -1,6 +1,5 @@
 package me.jahnen.libaums.libusbcommunication
 
-import android.content.ContentValues.TAG
 import android.hardware.usb.*
 import android.util.Log
 import com.github.mjdev.libaums.ErrNo
@@ -9,7 +8,7 @@ import com.github.mjdev.libaums.usb.UsbCommunication.Companion.TRANSFER_TIMEOUT
 import com.github.mjdev.libaums.usb.UsbCommunicationCreator
 import java.io.IOException
 import java.nio.ByteBuffer
-import kotlin.math.absoluteValue
+
 
 class LibusbCommunication(
         private val usbManager: UsbManager,
@@ -104,6 +103,9 @@ class LibusbCommunication(
         deviceConnection!!.close()
     }
 
+    companion object {
+        private val TAG = LibusbCommunication::class.java.simpleName
+    }
 }
 
 class LibusbCommunicationCreator : UsbCommunicationCreator {
