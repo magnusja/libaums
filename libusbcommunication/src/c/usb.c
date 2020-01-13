@@ -95,6 +95,6 @@ Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeReset(JNIEn
 
 JNIEXPORT jint JNICALL
 Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeClearHalt(JNIEnv *env, jobject thiz, jlong handle, jint endpointAddress) {
-    LOG_W(TAG, "libusb reset");
+    LOG_W(TAG, "libusb clear halt");
     return libusb_clear_halt((libusb_device_handle*)(intptr_t)handle, endpointAddress);
 }
