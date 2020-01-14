@@ -13,14 +13,14 @@ A library to access USB mass storage devices (pen drives, external HDDs, card re
 The library can be included into your project like this:
 
 ```ruby
-compile 'me.jahnen:libaums:0.7.5'
+implementation 'me.jahnen:libaums:0.7.5'
 ```
 
 If you need the HTTP or the storage provider module:
 
 ```ruby
-compile 'me.jahnen:libaums-httpserver:0.5.3'
-compile 'me.jahnen:libaums-storageprovider:0.5.1'
+implementation 'me.jahnen:libaums-httpserver:0.5.3'
+implementation 'me.jahnen:libaums-storageprovider:0.5.1'
 ```
 
 ### Basics
@@ -326,17 +326,15 @@ After that apps using the Storage Access Framework will be able to access the fi
 
 ##### Thesis
 
+The library was developed by Mr. Jahnen as part of his bachelor's thesis in 2014. It's a sub-topic of the research topic "Secure Copy Protection for Mobile Apps" by Mr. Kannengießer. The full thesis document can be downloaded [here](https://www.os.in.tum.de/fileadmin/w00bdp/www/Lehre/Abschlussarbeiten/Jahnen-thesis.pdf).
+
+
 Libaums - Library to access USB Mass Storage Devices  
 License: Apache 2.0 (see license.txt for details)
-Author: Magnus Jahnen, jahnen at in.tum.de  
+Author: Magnus Jahnen, github@mgns.tech 
 Advisor: Nils Kannengießer, nils.kannengiesser at tum.de  
 Supervisor: Prof. Uwe Baumgarten, baumgaru at in.tum.de  
-
 
 Technische Universität München (TUM)  
 Lehrstuhl/Fachgebiet für Betriebssysteme  
 www.os.in.tum.de  
-
-The library was developed by Mr. Jahnen as part of his bachelor's thesis in 2014. It's a sub-topic of the research topic "Secure Copy Protection for Mobile Apps" by Mr. Kannengießer. The full thesis document can be downloaded [here](https://www.os.in.tum.de/fileadmin/w00bdp/www/Lehre/Abschlussarbeiten/Jahnen-thesis.pdf).
-
-We would appreciate an information email, when you plan to use the library in your projects.
