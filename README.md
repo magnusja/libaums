@@ -330,7 +330,7 @@ The library was developed by Mr. Jahnen as part of his bachelor's thesis in 2014
 
 
 Libaums - Library to access USB Mass Storage Devices  
-License: Apache 2.0 (see license.txt for details)
+License: Apache 2.0 (see license.txt for details)   
 Author: Magnus Jahnen, github@mgns.tech 
 Advisor: Nils Kannengießer, nils.kannengiesser at tum.de  
 Supervisor: Prof. Uwe Baumgarten, baumgaru at in.tum.de  
