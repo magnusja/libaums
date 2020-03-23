@@ -53,3 +53,11 @@ UsbCommunicationFactory.setUnderlyingUsbCommunication(UsbCommunicationFactory.Un
 You want to do that in a static block in your first activity or the constructor before doing anything else. See also https://github.com/magnusja/libaums/blob/develop/app/src/main/java/com/github/mjdev/libaums/usbfileman/MainActivity.java#L104-L108
 
 You need at least libaums v0.7.5 to be able to use the libusb module.
+
+### Compile yourself
+
+Download libusb and add the following line to your `local.properties`
+
+```
+libusb.dir=/Users/magnus/Documents/code/libusb-1.0.23
+```
