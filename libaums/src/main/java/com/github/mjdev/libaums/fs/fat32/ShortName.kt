@@ -19,7 +19,7 @@ package com.github.mjdev.libaums.fs.fat32
 
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
-import java.util.Arrays
+import java.util.*
 import kotlin.experimental.and
 
 /**

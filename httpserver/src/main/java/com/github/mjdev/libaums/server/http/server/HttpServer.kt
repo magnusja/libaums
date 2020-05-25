@@ -1,8 +1,6 @@
 package com.github.mjdev.libaums.server.http.server
 
-import com.github.mjdev.libaums.server.http.UsbFileHttpServer
 import com.github.mjdev.libaums.server.http.UsbFileProvider
-
 import java.io.IOException
 
 /**

@@ -17,7 +17,7 @@
 
 package com.github.mjdev.libaums.fs.fat32
 
-import java.util.Locale
+import java.util.*
 
 /**
  * This class is responsible for generating valid 8.3 short names for any given

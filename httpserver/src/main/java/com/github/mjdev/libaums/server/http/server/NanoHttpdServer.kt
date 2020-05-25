@@ -1,19 +1,16 @@
 package com.github.mjdev.libaums.server.http.server
 
 import android.util.Log
-
 import com.github.mjdev.libaums.fs.UsbFile
 import com.github.mjdev.libaums.fs.UsbFileInputStream
 import com.github.mjdev.libaums.server.http.UsbFileProvider
 import com.github.mjdev.libaums.server.http.exception.NotAFileException
-
+import fi.iki.elonen.NanoHTTPD
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
-
-import fi.iki.elonen.NanoHTTPD
 
 /**
  * Created by magnusja on 16/12/16.

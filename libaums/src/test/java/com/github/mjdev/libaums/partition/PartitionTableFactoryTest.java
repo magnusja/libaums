@@ -1,16 +1,14 @@
 package com.github.mjdev.libaums.partition;
 
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
-import com.github.mjdev.libaums.driver.ByteBlockDevice;
 import com.github.mjdev.libaums.driver.file.FileBlockDeviceDriver;
-import com.github.mjdev.libaums.partition.fs.FileSystemPartitionTable;
 import com.github.mjdev.libaums.partition.mbr.MasterBootRecord;
 
 import org.junit.Test;
 
 import java.net.URL;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by magnusja on 12/08/17.

@@ -8,7 +8,6 @@ import com.github.mjdev.libaums.driver.file.FileBlockDeviceDriver;
 import com.github.mjdev.libaums.util.Pair;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xenei.junit.contract.Contract;
 import org.xenei.junit.contract.ContractImpl;

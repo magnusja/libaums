@@ -22,7 +22,6 @@ import com.github.mjdev.libaums.ErrNo
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.driver.scsi.commands.*
 import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper.Direction
-import com.github.mjdev.libaums.usb.AndroidUsbCommunication
 import com.github.mjdev.libaums.usb.UsbCommunication
 import java.io.IOException
 import java.nio.ByteBuffer

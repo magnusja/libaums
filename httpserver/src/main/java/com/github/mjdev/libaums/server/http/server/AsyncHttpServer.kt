@@ -1,8 +1,6 @@
 package com.github.mjdev.libaums.server.http.server
 
 import android.util.Log
-
-import com.github.mjdev.libaums.fs.UsbFile
 import com.github.mjdev.libaums.fs.UsbFileInputStream
 import com.github.mjdev.libaums.server.http.UsbFileProvider
 import com.github.mjdev.libaums.server.http.exception.NotAFileException
@@ -10,7 +8,6 @@ import com.koushikdutta.async.AsyncServer
 import com.koushikdutta.async.http.server.AsyncHttpServerRequest
 import com.koushikdutta.async.http.server.AsyncHttpServerResponse
 import com.koushikdutta.async.http.server.HttpServerRequestCallback
-
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.UnsupportedEncodingException

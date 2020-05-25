@@ -27,14 +27,11 @@ import android.graphics.Color
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-
-import android.util.Log
-
 import com.github.mjdev.libaums.fs.UsbFile
 import com.github.mjdev.libaums.server.http.server.HttpServer
-
 import java.io.IOException
 
 /**

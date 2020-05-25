@@ -1,7 +1,5 @@
 package com.github.magnusja.libaums.javafs.wrapper.device;
 
-import android.util.Log;
-
 import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 
 import org.jnode.driver.block.FSBlockDeviceAPI;
