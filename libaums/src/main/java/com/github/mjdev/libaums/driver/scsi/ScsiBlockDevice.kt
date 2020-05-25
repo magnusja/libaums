@@ -154,9 +154,9 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
                     i % 2 == 0 -> {
                         Log.d(TAG, "Reset bulk-only mass storage")
                         bulkOnlyMassStorageReset()
-                        Log.d(TAG, "Trying to clear stall both endpoints")
-                        clearEndpointStall(usbCommunication.inEndpoint)
-                        clearEndpointStall(usbCommunication.outEndpoint)
+//                        Log.d(TAG, "Trying to clear stall both endpoints")
+//                        clearEndpointStall(usbCommunication.inEndpoint)
+//                        clearEndpointStall(usbCommunication.outEndpoint)
                         Log.d(TAG, "Trying to clear halt on both endpoints")
                         usbCommunication.clearFeatureHalt(usbCommunication.inEndpoint)
                         usbCommunication.clearFeatureHalt(usbCommunication.outEndpoint)
