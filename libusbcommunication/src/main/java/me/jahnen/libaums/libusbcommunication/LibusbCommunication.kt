@@ -38,10 +38,10 @@ class LibusbCommunication(
         if (!claim) {
             throw IOException("could not claim interface!")
         }
-        val ret = nativeClaimInterface(libUsbHandle, usbInterface.id)
-        if (ret < 0) {
-            throw IOException("libusb returned $ret in claim interface")
-        }
+//        val ret = nativeClaimInterface(libUsbHandle, usbInterface.id)
+//        if (ret < 0) {
+//            throw IOException("libusb returned $ret in claim interface")
+//        }
     }
 
     private external fun nativeInit(fd: Int, handle: LongArray): Boolean
@@ -98,7 +98,7 @@ class LibusbCommunication(
     }
 
     override fun clearFeatureHalt(endpoint: UsbEndpoint) {
-        val ret = nativeClearHalt(libUsbHandle, usbInterface.id)
+        val ret = nativeClearHalt(libUsbHandle, endpoint.address)
         Log.d(TAG, "libusb clearFeatureHalt returned $ret")
     }
 
