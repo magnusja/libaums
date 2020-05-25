@@ -1,6 +1,5 @@
 package com.github.mjdev.libaums.fs;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -12,8 +11,11 @@ import org.mockito.junit.MockitoRule;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by magnusja on 12/08/17.

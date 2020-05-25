@@ -1,7 +1,9 @@
 package com.github.mjdev.libaums.usb
 
-import android.hardware.usb.*
-
+import android.hardware.usb.UsbDevice
+import android.hardware.usb.UsbEndpoint
+import android.hardware.usb.UsbInterface
+import android.hardware.usb.UsbManager
 import java.io.IOException
 import java.nio.ByteBuffer
 

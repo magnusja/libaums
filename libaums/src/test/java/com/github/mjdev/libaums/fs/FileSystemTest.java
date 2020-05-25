@@ -5,7 +5,6 @@ import com.github.mjdev.libaums.util.Pair;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 import org.xenei.junit.contract.Contract;
 import org.xenei.junit.contract.ContractTest;
 import org.xenei.junit.contract.IProducer;

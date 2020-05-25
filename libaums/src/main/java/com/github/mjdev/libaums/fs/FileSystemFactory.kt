@@ -17,13 +17,11 @@
 
 package com.github.mjdev.libaums.fs
 
-import java.io.IOException
-import java.util.ArrayList
-import java.util.TimeZone
-
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.fs.fat32.Fat32FileSystemCreator
 import com.github.mjdev.libaums.partition.PartitionTableEntry
+import java.io.IOException
+import java.util.*
 
 /**
  * This is a helper class to create different supported file systems. The file

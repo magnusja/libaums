@@ -17,10 +17,9 @@
 
 package com.github.mjdev.libaums.driver.scsi.commands
 
+import android.util.Log
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-
-import android.util.Log
 
 /**
  * This class represents the command status wrapper (CSW) in the SCSI

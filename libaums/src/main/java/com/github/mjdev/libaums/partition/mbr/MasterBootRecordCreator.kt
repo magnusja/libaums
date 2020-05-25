@@ -3,10 +3,8 @@ package com.github.mjdev.libaums.partition.mbr
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.partition.PartitionTable
 import com.github.mjdev.libaums.partition.PartitionTableFactory
-
 import java.io.IOException
 import java.nio.ByteBuffer
-import java.lang.Math
 
 /**
  * Created by magnusja on 30/07/17.

@@ -6,10 +6,8 @@ import android.hardware.usb.UsbInterface
 import android.hardware.usb.UsbManager
 import android.os.Build
 import android.util.Log
-import com.github.mjdev.libaums.fs.FileSystemCreator
-import com.github.mjdev.libaums.fs.FileSystemFactory
 import java.io.IOException
-import java.util.ArrayList
+import java.util.*
 
 /**
  * Created by magnusja on 21/12/16.
