@@ -17,12 +17,12 @@
 
 package com.github.mjdev.libaums.driver.scsi
 
+import android.hardware.usb.UsbEndpoint
 import android.util.Log
 import com.github.mjdev.libaums.ErrNo
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.driver.scsi.commands.*
 import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper.Direction
-import com.github.mjdev.libaums.usb.AndroidUsbCommunication
 import com.github.mjdev.libaums.usb.UsbCommunication
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -154,17 +154,21 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
                     i % 2 == 0 -> {
                         Log.d(TAG, "Reset bulk-only mass storage")
                         bulkOnlyMassStorageReset()
+                        Log.d(TAG, "Trying to clear stall both endpoints")
+                        clearEndpointStall(usbCommunication.inEndpoint)
+                        clearEndpointStall(usbCommunication.outEndpoint)
                         Log.d(TAG, "Trying to clear halt on both endpoints")
                         usbCommunication.clearFeatureHalt(usbCommunication.inEndpoint)
                         usbCommunication.clearFeatureHalt(usbCommunication.outEndpoint)
                     }
                     i % 2 == 1 -> {
+                        Thread.sleep(500 * MAX_RECOVERY_ATTEMPTS.toLong())
                         Log.d(TAG, "Trying to reset the device")
                         usbCommunication.resetDevice()
                     }
                 }
 
-                Thread.sleep(500)
+                Thread.sleep(500 * MAX_RECOVERY_ATTEMPTS.toLong())
             }
         }
 
@@ -180,6 +184,15 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
         if (transferred == -1) {
             throw IOException("bulk only mass storage reset failed!")
         }
+    }
+
+    private fun clearEndpointStall(usbEndpoint: UsbEndpoint): Int {
+        val bArr = ByteArray(2)
+        val transferred = usbCommunication.controlTransfer(0x2, 0x1, 0x0, usbEndpoint.address, bArr, 0)
+        if (transferred == -1) {
+            throw IOException("clearEndpointStall failed!")
+        }
+        return transferred
     }
 
     @Throws(IOException::class)

@@ -87,8 +87,13 @@ class LibusbCommunication(
         // if LIBUSB_ERROR_NOT_FOUND might need reenumeration
         Log.d(TAG, "libusb reset returned $ret")
 
-        if (!deviceConnection!!.claimInterface(usbInterface, true)) {
-            throw IOException("Could not claim interface, errno: ${ErrNo.errno} ${ErrNo.errstr}")
+        var counter = 3
+        while(!deviceConnection!!.claimInterface(usbInterface, true) && counter >= 0) {
+            if (counter == 0) {
+                throw IOException("Could not claim interface, errno: ${ErrNo.errno} ${ErrNo.errstr}")
+            }
+            Thread.sleep(800)
+            counter--
         }
     }
 
