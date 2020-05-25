@@ -151,14 +151,14 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
                         Log.d(TAG, "Giving up")
                         throw e
                     }
-                    i % 2 == 0 -> {
+                    i % 2 == 1 -> {
                         Log.d(TAG, "Reset bulk-only mass storage")
                         bulkOnlyMassStorageReset()
                         Log.d(TAG, "Trying to clear halt on both endpoints")
                         usbCommunication.clearFeatureHalt(usbCommunication.inEndpoint)
                         usbCommunication.clearFeatureHalt(usbCommunication.outEndpoint)
                     }
-                    i % 2 == 1 -> {
+                    i % 2 == 0 -> {
                         Thread.sleep(300 * i.toLong())
                         Log.d(TAG, "Trying to reset the device")
                         usbCommunication.resetDevice()
