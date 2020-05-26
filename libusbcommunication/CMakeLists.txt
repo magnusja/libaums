@@ -11,6 +11,7 @@ include_directories(${LIBUSB_SRC})
 add_library( libusb
              SHARED
              ${LIBUSB_SRC}/core.c
+             ${LIBUSB_SRC}/strerror.c
              ${LIBUSB_SRC}/descriptor.c
              ${LIBUSB_SRC}/hotplug.c
              ${LIBUSB_SRC}/io.c
