@@ -49,7 +49,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
     private val readCommand = ScsiRead10(lun=lun)
     private val csw = CommandStatusWrapper()
 
-    private var cbwTagCounter = 0
+    private var cbwTagCounter = 1
 
     /**
      * The size of the block device, in blocks of [blockSize] bytes,
