@@ -199,6 +199,10 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
         }
 
         val transferLength = command.dCbwDataTransferLength
+        inBuffer.apply {
+            limit(position() + transferLength)
+        }
+
         var read = 0
         if (transferLength > 0) {
 
