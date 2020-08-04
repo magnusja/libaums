@@ -7,8 +7,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.usb.UsbManager
 import android.util.Log
+import androidx.test.InstrumentationRegistry
 import androidx.test.filters.LargeTest
-import androidx.test.platform.app.InstrumentationRegistry
 import com.github.magnusja.libaums.javafs.JavaFsFileSystemCreator
 import com.github.mjdev.libaums.UsbMassStorageDevice
 import com.github.mjdev.libaums.UsbMassStorageDevice.Companion.getMassStorageDevices
