@@ -1,4 +1,4 @@
-package me.jahnen.libaums
+package me.jahnen.libaums.androidtests
 
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
