@@ -17,6 +17,7 @@ import com.github.mjdev.libaums.fs.FileSystemFactory
 import com.github.mjdev.libaums.fs.UsbFile
 import com.github.mjdev.libaums.usb.UsbCommunicationFactory
 import junit.framework.Assert
+import junit.framework.TestCase
 import me.jahnen.libaums.libusbcommunication.LibusbCommunicationCreator
 import org.junit.Before
 import org.junit.Rule
@@ -32,7 +33,21 @@ private const val USB_PERMISSION_TIMEOUT = 30 * 1000
 
 @RunWith(Parameterized::class)
 @LargeTest
-open class LibAumsTest(val underlyingUsbCommunication: UsbCommunicationFactory.UnderlyingUsbCommunication) {
+open class LibAumsTest
+private constructor(
+        val underlyingUsbCommunication: UsbCommunicationFactory.UnderlyingUsbCommunication,
+        private val usbCommName: String
+) : TestCase("LibAumsTest $usbCommName") {
+
+    @Suppress("unused")
+    public constructor(underlyingUsbCommunication: UsbCommunicationFactory.UnderlyingUsbCommunication) :
+            this(
+                    underlyingUsbCommunication, when (underlyingUsbCommunication) {
+                        UsbCommunicationFactory.UnderlyingUsbCommunication.OTHER -> "LIBUSB"
+                        else -> underlyingUsbCommunication.name
+                    }
+            )
+
     private val TAG: String = LibAumsTest::class.java.simpleName
 
     /**
@@ -63,11 +78,6 @@ open class LibAumsTest(val underlyingUsbCommunication: UsbCommunicationFactory.U
 
     @Before
     public fun before() {
-        val usbCommName = when (underlyingUsbCommunication) {
-            UsbCommunicationFactory.UnderlyingUsbCommunication.OTHER -> "LIBUSB"
-            else -> underlyingUsbCommunication.name
-        }
-
         println("Running test with communication: $usbCommName")
     }
 
