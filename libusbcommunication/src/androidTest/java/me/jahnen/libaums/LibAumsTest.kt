@@ -1,4 +1,4 @@
-package com.github.mjdev.libaums
+package me.jahnen.libaums
 
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -9,17 +9,30 @@ import android.hardware.usb.UsbManager
 import android.util.Log
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
+import com.github.magnusja.libaums.javafs.JavaFsFileSystemCreator
+import com.github.mjdev.libaums.UsbMassStorageDevice
 import com.github.mjdev.libaums.UsbMassStorageDevice.Companion.getMassStorageDevices
 import com.github.mjdev.libaums.fs.FileSystem
+import com.github.mjdev.libaums.fs.FileSystemFactory
 import com.github.mjdev.libaums.fs.UsbFile
+import com.github.mjdev.libaums.usb.UsbCommunicationFactory
 import junit.framework.Assert
+import me.jahnen.libaums.libusbcommunication.LibusbCommunicationCreator
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ExternalResource
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 import java.io.IOException
+import java.util.concurrent.TimeoutException
 
+private const val USB_DISCOVER_TIMEOUT = 30 * 1000
+private const val USB_PERMISSION_TIMEOUT = 30 * 1000
 
+@RunWith(Parameterized::class)
 @LargeTest
-class LibAumsTest {
+open class LibAumsTest(val underlyingUsbCommunication: UsbCommunicationFactory.UnderlyingUsbCommunication) {
     private val TAG: String = LibAumsTest::class.java.simpleName
 
     /**
@@ -31,17 +44,54 @@ class LibAumsTest {
     private lateinit var fs: FileSystem
     private val context = InstrumentationRegistry.getInstrumentation().context
 
-    @Before
-    fun setUp() {
-        val filter = IntentFilter().apply {
-            addAction(ACTION_USB_PERMISSION)
-            addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
-            addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
+    companion object {
+        init {
+            FileSystemFactory.registerFileSystem(JavaFsFileSystemCreator())
+            UsbCommunicationFactory.registerCommunication(LibusbCommunicationCreator())
         }
-        context.registerReceiver(noopBroadcastReceiver, filter)
 
-        discoverDevice()
-        setupDevice()
+        @JvmStatic
+        @Parameterized.Parameters
+        fun data(): List<UsbCommunicationFactory.UnderlyingUsbCommunication> {
+            return listOf(
+                    UsbCommunicationFactory.UnderlyingUsbCommunication.USB_REQUEST_ASYNC,
+                    UsbCommunicationFactory.UnderlyingUsbCommunication.DEVICE_CONNECTION_SYNC,
+                    UsbCommunicationFactory.UnderlyingUsbCommunication.OTHER
+            )
+        }
+    }
+
+    @Before
+    public fun before() {
+        val usbCommName = when (underlyingUsbCommunication) {
+            UsbCommunicationFactory.UnderlyingUsbCommunication.OTHER -> "LIBUSB"
+            else -> underlyingUsbCommunication.name
+        }
+
+        println("Running test with communication: $usbCommName")
+    }
+
+    // Workaround for global before/after
+    @Rule
+    @JvmField
+    public var resource: ExternalResource = object : ExternalResource() {
+        override fun before() {
+            UsbCommunicationFactory.underlyingUsbCommunication = underlyingUsbCommunication
+
+            val filter = IntentFilter().apply {
+                addAction(ACTION_USB_PERMISSION)
+                addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
+                addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
+            }
+            context.registerReceiver(noopBroadcastReceiver, filter)
+
+            discoverDevice()
+            setupDevice()
+        }
+
+        override fun after() {
+            device.close()
+        }
     }
 
     @Test
@@ -159,11 +209,28 @@ class LibAumsTest {
      */
     private fun discoverDevice() {
         val usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
-        val devices = getMassStorageDevices(context)
+        lateinit var devices: Array<UsbMassStorageDevice>
+
+        val startDiscoverTime = System.currentTimeMillis()
+        Log.d(TAG, "Waiting for a USB mass storage device")
+        do {
+            devices = getMassStorageDevices(context)
+            if (devices.isEmpty()) {
+                Thread.sleep(1)
+            }
+        } while (devices.isEmpty() && System.currentTimeMillis() < startDiscoverTime + USB_DISCOVER_TIMEOUT)
+
+        if (devices.isEmpty()) {
+            throw TimeoutException("Timed out waiting for device")
+        }
 
         // we only use the first device
         device = devices[0]
         val usbDevice = device.usbDevice
+
+        Log.d(TAG, "Running tests with device ${usbDevice.deviceName}:  " +
+                "${usbDevice.manufacturerName} ${usbDevice.productName} " +
+                "(${usbDevice.vendorId.toString(16)}:${usbDevice.productId.toString(16)}")
 
         // The logged uppercase strings should always be present, so we grep for them in the QEMU
         // tests and we can auto-press the "Grant" button
@@ -176,9 +243,13 @@ class LibAumsTest {
             Log.d(TAG, "USB permission already granted - USB-GRANTED")
         }
 
-        while (!usbManager.hasPermission(usbDevice)) {
+        val startWaitPermissionTime = System.currentTimeMillis()
+        while (!usbManager.hasPermission(usbDevice) && System.currentTimeMillis() < startWaitPermissionTime + USB_PERMISSION_TIMEOUT) {
             // Actively wait for permission since we don't have the luxury of waiting asynchronously
             Thread.sleep(500)
+        }
+        if (!usbManager.hasPermission(usbDevice)) {
+            throw TimeoutException("Timed out waiting for permission to use USB device")
         }
     }
 
