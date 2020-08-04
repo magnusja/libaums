@@ -33,20 +33,10 @@ private const val USB_PERMISSION_TIMEOUT = 30 * 1000
 
 @RunWith(Parameterized::class)
 @LargeTest
-open class LibAumsTest
-private constructor(
+open class LibAumsTest(
         val underlyingUsbCommunication: UsbCommunicationFactory.UnderlyingUsbCommunication,
         private val usbCommName: String
 ) : TestCase("LibAumsTest $usbCommName") {
-
-    @Suppress("unused")
-    public constructor(underlyingUsbCommunication: UsbCommunicationFactory.UnderlyingUsbCommunication) :
-            this(
-                    underlyingUsbCommunication, when (underlyingUsbCommunication) {
-                        UsbCommunicationFactory.UnderlyingUsbCommunication.OTHER -> "LIBUSB"
-                        else -> underlyingUsbCommunication.name
-                    }
-            )
 
     private val TAG: String = LibAumsTest::class.java.simpleName
 
@@ -66,12 +56,12 @@ private constructor(
         }
 
         @JvmStatic
-        @Parameterized.Parameters
-        fun data(): List<UsbCommunicationFactory.UnderlyingUsbCommunication> {
+        @Parameterized.Parameters(name = "{1}")
+        fun data(): List<Array<Any>> {
             return listOf(
-                    UsbCommunicationFactory.UnderlyingUsbCommunication.USB_REQUEST_ASYNC,
-                    UsbCommunicationFactory.UnderlyingUsbCommunication.DEVICE_CONNECTION_SYNC,
-                    UsbCommunicationFactory.UnderlyingUsbCommunication.OTHER
+                    arrayOf(UsbCommunicationFactory.UnderlyingUsbCommunication.USB_REQUEST_ASYNC, "USB_REQUEST_ASYNC"),
+                    arrayOf(UsbCommunicationFactory.UnderlyingUsbCommunication.DEVICE_CONNECTION_SYNC, "DEVICE_CONNECTION_SYNC"),
+                    arrayOf(UsbCommunicationFactory.UnderlyingUsbCommunication.OTHER, "LIBUSB_COMM")
             )
         }
     }
