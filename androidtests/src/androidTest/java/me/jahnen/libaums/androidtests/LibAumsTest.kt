@@ -238,9 +238,9 @@ open class LibAumsTest(
             val permissionIntent = PendingIntent.getBroadcast(context, 0, Intent(
                     ACTION_USB_PERMISSION), 0)
             usbManager.requestPermission(device.usbDevice, permissionIntent)
-            Log.d(TAG, "Requested USB permission - USB-REQUESTED")
+            Log.d(TAG, "Requested USB permission - USB-PERMISSION-REQUESTED")
         } else {
-            Log.d(TAG, "USB permission already granted - USB-GRANTED")
+            Log.d(TAG, "USB permission already granted - USB-PERMISSION-GRANTED")
         }
 
         val startWaitPermissionTime = System.currentTimeMillis()
