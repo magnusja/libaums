@@ -1,32 +1,93 @@
-language: android
-jdk: oraclejdk8
-dist: trusty
-sudo: required
+language: bash
+os: linux
+dist: focal
 group: edge
-
-android:
-  components:
-    - tools
-    - android-26
-
-install:
-  - sudo apt-get install build-essential
-  - yes | sdkmanager 'ndk-bundle'
-  - yes | sdkmanager 'cmake;3.6.4111459'
 
 env:
   global:
-   # install timeout in minutes (2 minutes by default)
+    # Android/Java stuff
     - ADB_INSTALL_TIMEOUT=8
+    - ANDROID_HOME=${HOME}/android-sdk
+    - ANDROID_TOOLS_URL="https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip"
+    - TOOLS=${ANDROID_HOME}/tools
+    - PATH=${ANDROID_HOME}:${ANDROID_HOME}/emulator:${TOOLS}:${TOOLS}/bin:${ANDROID_HOME}/platform-tools:/usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/bin:/usr/lib/jvm/adoptopenjdk-8-hotspot-jre-amd64/bin:${PATH}
+    - TERM=dumb
+    # QEMU orchestrator
+    - QEMU_DEBUG=1
+    - PYTHONUNBUFFERED=1
+    - JOB_COMMAND="./gradlew androidtests:connectedAndroidTest"
+    - VNC_RECORDER=1
+    - VNC_RECORDER_BIN=/usr/local/bin/vnc-recorder
+    - VNC_RECORDER_OUTPUT="$TRAVIS_BUILD_DIR/screenrec.mkv"
+    - LOGCAT_OUTPUT="$TRAVIS_BUILD_DIR/logcat.txt"
+    - DMESG_OUTPUT="$TRAVIS_BUILD_DIR/dmesg.txt"
+    - BUGREPORT_OUTPUT="$TRAVIS_BUILD_DIR/bugreport.zip"
+  matrix:
+    # Note to readers: do not "fill the gaps": Android-x86 RPM images are not available for all versions.
+    # Make sure new ones are added first to the download script and test them.
+    - API=23 VIRTWIFI_HACK=0 API_NAME=marshmallow
+    - API=25 VIRTWIFI_HACK=1 API_NAME=nougat
+    - API=27 VIRTWIFI_HACK=1 API_NAME=oreo
+    - API=28 VIRTWIFI_HACK=1 API_NAME=pie
+
+before_install:
+  - free -h
+  # AdoptOpenJDK
+  - travis_retry sudo apt-get update
+  - sudo apt-get install -y software-properties-common
+  - travis_retry wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | sudo apt-key add -
+  - travis_retry sudo add-apt-repository --yes https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/
+  - travis_retry sudo apt-get update
+  - travis_retry sudo apt-get install -y java-common adoptopenjdk-8-hotspot adoptopenjdk-8-hotspot-jre
+  # Android SDK
+  - travis_retry wget -q "${ANDROID_TOOLS_URL}" -O android-sdk-tools.zip
+  - unzip -q android-sdk-tools.zip -d ${ANDROID_HOME}
+  - rm android-sdk-tools.zip
+  - mkdir ~/.android  # avoid harmless sdkmanager warning
+  - echo 'count=0' > ~/.android/repositories.cfg  # avoid harmless sdkmanager warning
+  - yes | travis_retry sdkmanager --licenses >/dev/null  # accept all sdkmanager warnings
+  - yes | travis_retry sdkmanager --no_https "platform-tools" >/dev/null
+  - yes | travis_retry sdkmanager --no_https "tools" >/dev/null  # A second time per Travis docs, gets latest versions
+  - yes | travis_retry sdkmanager --no_https "build-tools;28.0.3" >/dev/null  # Implicit gradle dependency - gradle drives changes
+  - yes | travis_retry sdkmanager --no_https "platforms;android-29" >/dev/null  # We need the API of the current compileSdkVersion from gradle.properties
+  - yes | travis_retry sdkmanager 'ndk-bundle' >/dev/null
+  - yes | travis_retry sdkmanager 'cmake;3.6.4111459' >/dev/null
+
+install:
+  # qemu
+  - travis_retry sudo apt-get install --no-install-suggests --no-install-recommends -y build-essential qemu-system qemu-utils libvirt-clients fdisk python3 python3-pip python3-setuptools dosfstools rpm2cpio libarchive-tools adb ffmpeg git libpulse0 libvirt0 libvirt-daemon qemu-kvm virtinst
+  # Debug KVM availability
+  - cat /proc/cpuinfo
+  - lscpu
+  - sudo virt-host-validate || echo "virt-host-validate exited with $? non-zero status code"
+  # orchestrator
+  - travis_retry sudo pip3 install https://github.com/EtchDroid/qemu_test_orchestrator/archive/master.zip
+  # vnc-recorder
+  - travis_retry sudo wget "https://github.com/Depau/vnc-recorder/releases/download/v0.2/vnc-recorder-linux-x86_64.bin" -O /usr/local/bin/vnc-recorder
+  - sudo chmod +x /usr/local/bin/vnc-recorder
+  # minio client
+  - travis_retry sudo wget "https://dl.min.io/client/mc/release/linux-amd64/mc" -O /usr/local/bin/mc
+  - sudo chmod +x /usr/local/bin/mc
+  # Try loading kvm module
+  - sudo modprobe kvm || echo "Unable to load KVM module"
 
 before_script:
+  # libusb
   - ls
-  - wget https://github.com/libusb/libusb/archive/v1.0.23.zip
-  - unzip v1.0.23.zip
+  - wget -q https://github.com/libusb/libusb/archive/v1.0.23.zip
+  - unzip -q v1.0.23.zip
   - echo "libusb.dir=$TRAVIS_BUILD_DIR/libusb-1.0.23" > $TRAVIS_BUILD_DIR/local.properties
 
 script:
-  - ./gradlew build -x bintray jacocoTestReport --stacktrace
+  # Run VM and tests
+  - sudo -E ./.ci_helpers/instrumented_tests_qemu.sh "$API"
 
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
+after_script:
+  # Upload screen recording
+  - sudo chown "$USER" "$VNC_RECORDER_OUTPUT"
+  - mc config host add minio "$MINIO_SERVER" "$MINIO_USER" "$MINIO_TOKEN"
+  - travis_retry mc cp "$VNC_RECORDER_OUTPUT" "minio/libaums-screenrecs/travis/$TRAVIS_BUILD_NUMBER/sdk$API-$API_NAME/screen_rec.mkv"
+  - travis_retry mc cp "$LOGCAT_OUTPUT" "minio/libaums-screenrecs/travis/$TRAVIS_BUILD_NUMBER/sdk$API-$API_NAME/logcat.txt"
+  - travis_retry mc cp "$DMESG_OUTPUT" "minio/libaums-screenrecs/travis/$TRAVIS_BUILD_NUMBER/sdk$API-$API_NAME/dmesg.txt"
+  - travis_retry mc cp "$BUGREPORT_OUTPUT" "minio/libaums-screenrecs/travis/$TRAVIS_BUILD_NUMBER/sdk$API-$API_NAME/bugreport.zip"
+  - 'echo "Build logs and screen recording at $MINIO_SERVER/minio/libaums-screenrecs/travis/$TRAVIS_BUILD_NUMBER/sdk$API-$API_NAME/"'
