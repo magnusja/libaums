@@ -1,0 +1,68 @@
+name: Instrumented QEMU tests
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    branches:
+      - master
+      - develop
+
+strategy:
+  matrix:
+    android_api:
+      - 23  # Marshmallow
+      - 25  # Nougat
+      - 27  # Oreo
+      - 28  # Pie
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Prepare caches
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.android/build-cache
+            !~/.gradle/caches/modules-2/modules-2.lock
+            !~/.gradle/caches/*/plugin-resolution/
+            /opt/android
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Set up Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+          
+      - name: Install libusb
+        run: |
+          wget https://github.com/libusb/libusb/archive/v1.0.23.zip && unzip v1.0.23.zip
+          echo "libusb.dir=$GITHUB_WORKSPACE/libusb-1.0.23" > $GITHUB_WORKSPACE/local.properties
+
+      - name: Install QEMU test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu qemu-kvm qemu-system qemu-system-x86 qemu-utils fdisk python3 python3-pip dosfstools rpm2cpio libarchive-tools
+          sudo pip3 install https://github.com/EtchDroid/qemu_test_orchestrator/archive/master.zip
+      
+      - name: Run QEMU tests
+        run: |
+          ./.ci_helpers/instrumented_tests_qemu.sh "$android_api"
+
+
+
+
+
