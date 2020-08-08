@@ -10,6 +10,10 @@ export JOB_WORKDIR="$(pwd)"
 if [ "$api" == "23" ]; then
   # API 23 Android-x86 image connects to the network automatically
   export VIRTWIFI_HACK=0
+else
+  echo "Downloading VirtWifi connector..."
+  wget -O virtwificonnector.apk "$(curl -s https://api.github.com/repos/EtchDroid/VirtWifiConnector/releases/latest | grep 'virtwificonnector-debug.apk' | grep download | cut -d '"' -f 4)"
+  export VIRTWIFICONNECTOR_APK="$(pwd)/virtwificonnector.apk"
 fi
 
 echo "Downloading Android-x86 SDK$api image..."
