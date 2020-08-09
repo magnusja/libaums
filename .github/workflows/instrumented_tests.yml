@@ -58,7 +58,7 @@ jobs:
         run: |
           export DEBIAN_FRONTEND=noninteractive
           sudo apt-get update
-          sudo apt-get install -y qemu qemu-kvm qemu-system qemu-system-x86 qemu-utils fdisk python3 python3-pip python3-setuptools dosfstools rpm2cpio libarchive-tools
+          sudo apt-get install -y qemu qemu-kvm qemu-system qemu-system-x86 qemu-utils fdisk python3 python3-pip python3-setuptools dosfstools rpm2cpio libarchive-tools adb
           sudo pip3 install https://github.com/EtchDroid/qemu_test_orchestrator/archive/master.zip
       
       - name: Run QEMU tests
