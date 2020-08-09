@@ -12,16 +12,16 @@ on:
       - develop
       - ci-instrumented-tests
 
-strategy:
-  matrix:
-    android_api:
-      - 23  # Marshmallow
-      - 25  # Nougat
-      - 27  # Oreo
-      - 28  # Pie
-
 jobs:
   build:
+    strategy:
+      matrix:
+        android_api:
+          - 23  # Marshmallow
+          - 25  # Nougat
+          - 27  # Oreo
+          - 28  # Pie
+
     runs-on: ubuntu-latest
 
     steps:
