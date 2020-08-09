@@ -58,12 +58,26 @@ jobs:
         run: |
           export DEBIAN_FRONTEND=noninteractive
           sudo apt-get update
-          sudo apt-get install -y qemu qemu-kvm qemu-system qemu-system-x86 qemu-utils fdisk python3 python3-pip python3-setuptools dosfstools rpm2cpio libarchive-tools adb
+          sudo apt-get install -y qemu qemu-kvm qemu-system qemu-system-x86 qemu-utils fdisk python3 python3-pip python3-setuptools dosfstools rpm2cpio libarchive-tools adb ffmpeg git
           sudo pip3 install https://github.com/EtchDroid/qemu_test_orchestrator/archive/master.zip
+          pushd /tmp
+          git clone https://github.com/Depau/vnc-recorder.git --depth 1
+          cd vnc-recorder
+          go build
+          popd
       
       - name: Run QEMU tests
         run: |
           export PYTHONUNBUFFERED=1
           export QEMU_DEBUG=1
+          export VNC_RECORDER=1
+          export VNC_RECORDER_BIN=/tmp/vnc-recorder/vnc-recorder
+          export VNC_RECORDER_OUTPUT="${{ github.workspace }}/screenrec.mp4"
           ./.ci_helpers/instrumented_tests_qemu.sh "${{ matrix.android_api }}"
 
+      - name: Upload screen recording
+        if: ${{ always() }}
+        uses: 'actions/upload-artifact@v2'
+        with:
+          name: "screenrec_api${{ matrix.android_api }}.mp4"
+          path: "${{ github.workspace }}/screenrec.mp4"
