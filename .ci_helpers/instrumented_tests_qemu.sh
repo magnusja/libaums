@@ -12,7 +12,7 @@ if [ "$api" == "23" ]; then
   export VIRTWIFI_HACK=0
 else
   echo "Downloading VirtWifi connector..."
-  wget -O virtwificonnector.apk "$(curl -s https://api.github.com/repos/EtchDroid/VirtWifiConnector/releases/latest | grep 'virtwificonnector-debug.apk' | grep download | cut -d '"' -f 4)"
+  wget -qO virtwificonnector.apk "$(curl -s https://api.github.com/repos/EtchDroid/VirtWifiConnector/releases/latest | grep 'virtwificonnector-debug.apk' | grep download | cut -d '"' -f 4)"
   export VIRTWIFICONNECTOR_APK="$(pwd)/virtwificonnector.apk"
 fi
 

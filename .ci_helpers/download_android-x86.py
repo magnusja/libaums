@@ -118,7 +118,7 @@ def main():
 
     for link in api_links[api][img_type]:
         try:
-            subprocess.run(['wget', link, '-O', filename])
+            subprocess.run(['wget', link, '-qO', filename])
             break
         except Exception:
             traceback.print_exc()
