@@ -63,5 +63,6 @@ jobs:
       
       - name: Run QEMU tests
         run: |
+          export PYTHONUNBUFFERED=1
           ./.ci_helpers/instrumented_tests_qemu.sh "${{ matrix.android_api }}"
 
