@@ -29,10 +29,9 @@ qemu-img create -f raw usb.img 4G
 
 sfdisk usb.img << EOF
 label: dos
-label-id: 0x5139bfd1
+label-id: 0x3ffe7587
 device: usb.img
 unit: sectors
-sector-size: 512
 
 usb.img1 : start=        2048, size=     8386560, type=83
 EOF
