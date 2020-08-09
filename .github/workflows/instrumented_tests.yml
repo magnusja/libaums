@@ -5,10 +5,12 @@ on:
     branches:
       - master
       - develop
+      - ci-instrumented-tests
   pull_request:
     branches:
       - master
       - develop
+      - ci-instrumented-tests
 
 strategy:
   matrix:
