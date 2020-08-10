@@ -824,9 +824,6 @@ public class MainActivity extends AppCompatActivity implements OnItemClickListen
                 serverService.stopServer();
             }
             return true;
-		case R.id.run_tests:
-			startActivity(new Intent(this, LibAumsTest.class));
-			return true;
 		case R.id.open_storage_provider:
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
 				if(currentDevice != -1) {

@@ -1,1 +1,1 @@
-include ':app', ':libaums', ':httpserver', ':storageprovider', ':javafs', ':libusbcommunication'
+include ':app', ':libaums', ':httpserver', ':storageprovider', ':javafs', ':libusbcommunication', ':androidtests'
