@@ -17,6 +17,7 @@
 
 package com.github.mjdev.libaums.driver.scsi
 
+import android.hardware.usb.UsbEndpoint
 import android.util.Log
 import com.github.mjdev.libaums.ErrNo
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
@@ -158,12 +159,13 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
                         usbCommunication.clearFeatureHalt(usbCommunication.outEndpoint)
                     }
                     i % 2 == 1 -> {
+                        Thread.sleep(300 * i.toLong())
                         Log.d(TAG, "Trying to reset the device")
                         usbCommunication.resetDevice()
                     }
                 }
 
-                Thread.sleep(500)
+                Thread.sleep(300 * i.toLong())
             }
         }
 

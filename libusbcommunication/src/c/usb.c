@@ -11,18 +11,18 @@ Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeInit(JNIEnv
     LOG_D(TAG, "init native libusb");
     int ret = libusb_init(NULL);
     if (ret != 0) {
-        LOG_E(TAG, "libusb_init returned %d", ret);
+        LOG_E(TAG, "libusb_init returned %d, %s", ret, libusb_strerror(ret));
         return (jboolean) JNI_FALSE;
     }
 
     libusb_device_handle *devh = NULL;
     ret = libusb_wrap_sys_device(NULL, fd, &devh);
     if (ret != 0) {
-        LOG_E(TAG, "libusb_wrap_sys_device returned %d", ret);
+        LOG_E(TAG, "libusb_wrap_sys_device returned %d, %s", ret, libusb_strerror(ret));
         return (jboolean) JNI_FALSE;
     }
     if (devh == NULL) {
-        LOG_E(TAG, "libusb_wrap_sys_device device handle NULL");
+        LOG_E(TAG, "libusb_wrap_sys_device device handle, %s NULL", libusb_strerror(ret));
         return (jboolean) JNI_FALSE;
     }
 
@@ -52,7 +52,7 @@ Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeClaimInterf
 
     ret = libusb_claim_interface((libusb_device_handle*)(intptr_t)handle, interfaceNumber);
     if (ret != 0) {
-        LOG_E(TAG, "libusb_claim_interface returned %d", ret);
+        LOG_E(TAG, "libusb_claim_interface returned %d, %s", ret, libusb_strerror(ret));
     }
     return ret;
 }
@@ -70,7 +70,7 @@ Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeBulkTransfe
     if (ret == 0) {
         return transferred;
     } else {
-        LOG_E(TAG, "libusb_bulk_transfer returned %d", ret);
+        LOG_E(TAG, "libusb_bulk_transfer returned %d, %s", ret, libusb_strerror(ret));
         return ret;
     }
 }
