@@ -38,7 +38,7 @@ class ScsiReadCapacity(lun: Byte) : CommandBlockWrapper(RESPONSE_LENGTH, Directi
     companion object {
 
         private const val RESPONSE_LENGTH = 0x8
-        private const val LENGTH: Byte = 0x10
+        private const val LENGTH: Byte = 10
         private const val OPCODE: Byte = 0x25
     }
 

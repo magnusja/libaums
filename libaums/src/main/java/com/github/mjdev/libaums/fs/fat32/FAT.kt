@@ -17,14 +17,12 @@
 
 package com.github.mjdev.libaums.fs.fat32
 
+import android.util.Log
+import com.github.mjdev.libaums.driver.BlockDeviceDriver
+import com.github.mjdev.libaums.util.LRUCache
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-
-import android.util.Log
-
-import com.github.mjdev.libaums.driver.BlockDeviceDriver
-import com.github.mjdev.libaums.util.LRUCache
 import java.util.*
 
 /**

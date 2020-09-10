@@ -19,7 +19,6 @@ package com.github.mjdev.libaums.fs.fat32
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import kotlin.experimental.and
 
 /**
  * This class represents the FAT32 boot sector which is always located at the

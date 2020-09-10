@@ -19,6 +19,12 @@ env:
    # install timeout in minutes (2 minutes by default)
     - ADB_INSTALL_TIMEOUT=8
 
+before_script:
+  - ls
+  - wget https://github.com/libusb/libusb/archive/v1.0.23.zip
+  - unzip v1.0.23.zip
+  - echo "libusb.dir=$TRAVIS_BUILD_DIR/libusb-1.0.23" > $TRAVIS_BUILD_DIR/local.properties
+
 script:
   - ./gradlew build -x bintray jacocoTestReport --stacktrace
 

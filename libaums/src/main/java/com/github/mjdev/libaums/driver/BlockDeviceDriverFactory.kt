@@ -17,8 +17,8 @@
 
 package com.github.mjdev.libaums.driver
 
-import com.github.mjdev.libaums.usb.UsbCommunication
 import com.github.mjdev.libaums.driver.scsi.ScsiBlockDevice
+import com.github.mjdev.libaums.usb.UsbCommunication
 
 /**
  * A helper class to create different

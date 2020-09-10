@@ -1,8 +1,9 @@
 package com.github.mjdev.libaums.usb
 
-import android.hardware.usb.UsbDeviceConnection
+import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbEndpoint
-
+import android.hardware.usb.UsbInterface
+import android.hardware.usb.UsbManager
 import java.io.IOException
 import java.nio.ByteBuffer
 
@@ -14,14 +15,20 @@ import java.nio.ByteBuffer
  *
  * @author mjahnen
  */
-internal class HoneyCombMr1Communication(private val deviceConnection: UsbDeviceConnection, private val outEndpoint: UsbEndpoint, private val inEndpoint: UsbEndpoint) : UsbCommunication {
+internal class HoneyCombMr1Communication(
+        usbManager: UsbManager,
+        usbDevice: UsbDevice,
+        usbInterface: UsbInterface,
+        outEndpoint: UsbEndpoint,
+        inEndpoint: UsbEndpoint
+) : AndroidUsbCommunication(usbManager, usbDevice, usbInterface, outEndpoint, inEndpoint) {
 
     @Throws(IOException::class)
     override fun bulkOutTransfer(src: ByteBuffer): Int {
         val offset = src.position()
 
         if (offset == 0) {
-            val result = deviceConnection.bulkTransfer(outEndpoint,
+            val result = deviceConnection!!.bulkTransfer(outEndpoint,
                     src.array(), src.remaining(), UsbCommunication.TRANSFER_TIMEOUT)
 
             if (result == -1) {
@@ -34,7 +41,7 @@ internal class HoneyCombMr1Communication(private val deviceConnection: UsbDevice
 
         val tmpBuffer = ByteArray(src.remaining())
         System.arraycopy(src.array(), offset, tmpBuffer, 0, src.remaining())
-        val result = deviceConnection.bulkTransfer(outEndpoint,
+        val result = deviceConnection!!.bulkTransfer(outEndpoint,
                 tmpBuffer, src.remaining(), UsbCommunication.TRANSFER_TIMEOUT)
 
         if (result == -1) {
@@ -50,7 +57,7 @@ internal class HoneyCombMr1Communication(private val deviceConnection: UsbDevice
         val offset = dest.position()
 
         if (offset == 0) {
-            val result = deviceConnection.bulkTransfer(inEndpoint,
+            val result = deviceConnection!!.bulkTransfer(inEndpoint,
                     dest.array(), dest.remaining(), UsbCommunication.TRANSFER_TIMEOUT)
 
             if (result == -1) {
@@ -63,7 +70,7 @@ internal class HoneyCombMr1Communication(private val deviceConnection: UsbDevice
         }
 
         val tmpBuffer = ByteArray(dest.remaining())
-        val result = deviceConnection.bulkTransfer(inEndpoint, tmpBuffer, dest.remaining(), UsbCommunication.TRANSFER_TIMEOUT)
+        val result = deviceConnection!!.bulkTransfer(inEndpoint, tmpBuffer, dest.remaining(), UsbCommunication.TRANSFER_TIMEOUT)
 
         if (result == -1) {
             throw IOException("Could not read from device, result == -1")

@@ -17,13 +17,10 @@
 
 package com.github.mjdev.libaums.fs.fat32
 
+import android.util.Log
+import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import java.io.IOException
 import java.nio.ByteBuffer
-
-import android.util.Log
-
-import com.github.mjdev.libaums.driver.BlockDeviceDriver
-import kotlin.math.max
 import kotlin.math.min
 
 /**

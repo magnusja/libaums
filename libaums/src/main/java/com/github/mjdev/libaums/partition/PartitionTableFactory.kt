@@ -17,12 +17,11 @@
 
 package com.github.mjdev.libaums.partition
 
-import java.io.IOException
-import java.util.ArrayList
-
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.partition.fs.FileSystemPartitionTableCreator
 import com.github.mjdev.libaums.partition.mbr.MasterBootRecordCreator
+import java.io.IOException
+import java.util.*
 
 /**
  * Helper class to create different supported [PartitionTable]s.

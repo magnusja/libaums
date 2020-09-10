@@ -4,17 +4,14 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver;
 import com.github.mjdev.libaums.driver.ByteBlockDevice;
 import com.github.mjdev.libaums.driver.file.FileBlockDeviceDriver;
 import com.github.mjdev.libaums.fs.fat32.Fat32FileSystem;
-import com.github.mjdev.libaums.partition.PartitionTable;
 import com.github.mjdev.libaums.partition.PartitionTableEntry;
-import com.github.mjdev.libaums.partition.PartitionTableFactory;
 import com.github.mjdev.libaums.partition.PartitionTypes;
-import com.github.mjdev.libaums.partition.mbr.MasterBootRecord;
 
 import org.junit.Test;
 
 import java.net.URL;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by magnusja on 12/08/17.

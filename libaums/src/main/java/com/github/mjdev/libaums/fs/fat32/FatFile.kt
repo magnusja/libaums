@@ -17,12 +17,11 @@
 
 package com.github.mjdev.libaums.fs.fat32
 
-import java.io.IOException
-import java.nio.ByteBuffer
-
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.fs.AbstractUsbFile
 import com.github.mjdev.libaums.fs.UsbFile
+import java.io.IOException
+import java.nio.ByteBuffer
 
 class FatFile
 /**

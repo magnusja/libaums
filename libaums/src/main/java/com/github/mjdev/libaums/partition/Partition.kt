@@ -17,15 +17,12 @@
 
 package com.github.mjdev.libaums.partition
 
-import java.io.IOException
-import java.nio.ByteBuffer
-
 import android.util.Log
-
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.driver.ByteBlockDevice
 import com.github.mjdev.libaums.fs.FileSystem
 import com.github.mjdev.libaums.fs.FileSystemFactory
+import java.io.IOException
 
 /**
  * This class represents a partition on an mass storage device. A partition has

@@ -5,13 +5,9 @@ package com.github.mjdev.libaums.usb
  */
 
 import android.annotation.TargetApi
-import android.hardware.usb.UsbDeviceConnection
-import android.hardware.usb.UsbEndpoint
+import android.hardware.usb.*
 import android.os.Build
-import android.system.ErrnoException
-
 import com.github.mjdev.libaums.ErrNo
-
 import java.io.IOException
 import java.nio.ByteBuffer
 
@@ -23,11 +19,17 @@ import java.nio.ByteBuffer
  * @author mjahnen
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-internal class JellyBeanMr2Communication(private val deviceConnection: UsbDeviceConnection, private val outEndpoint: UsbEndpoint, private val inEndpoint: UsbEndpoint) : UsbCommunication {
+internal class JellyBeanMr2Communication(
+        usbManager: UsbManager,
+        usbDevice: UsbDevice,
+        usbInterface: UsbInterface,
+        outEndpoint: UsbEndpoint,
+        inEndpoint: UsbEndpoint
+) : AndroidUsbCommunication(usbManager, usbDevice, usbInterface, outEndpoint, inEndpoint) {
 
     @Throws(IOException::class)
     override fun bulkOutTransfer(src: ByteBuffer): Int {
-        val result = deviceConnection.bulkTransfer(outEndpoint,
+        val result = deviceConnection!!.bulkTransfer(outEndpoint,
                 src.array(), src.position(), src.remaining(), UsbCommunication.TRANSFER_TIMEOUT)
 
         if (result == -1) {
@@ -40,7 +42,7 @@ internal class JellyBeanMr2Communication(private val deviceConnection: UsbDevice
 
     @Throws(IOException::class)
     override fun bulkInTransfer(dest: ByteBuffer): Int {
-        val result = deviceConnection.bulkTransfer(inEndpoint,
+        val result = deviceConnection!!.bulkTransfer(inEndpoint,
                 dest.array(), dest.position(), dest.remaining(), UsbCommunication.TRANSFER_TIMEOUT)
 
         if (result == -1) {

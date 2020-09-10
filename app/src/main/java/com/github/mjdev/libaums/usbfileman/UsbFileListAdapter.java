@@ -17,13 +17,6 @@
 
 package com.github.mjdev.libaums.usbfileman;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +25,13 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.github.mjdev.libaums.fs.UsbFile;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * List adapter to represent the contents of an {@link UsbFile} directory.

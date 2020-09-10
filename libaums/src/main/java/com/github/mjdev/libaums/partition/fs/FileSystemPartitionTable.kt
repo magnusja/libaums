@@ -1,13 +1,11 @@
 package com.github.mjdev.libaums.partition.fs
 
 import android.util.Log
-
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.fs.FileSystem
 import com.github.mjdev.libaums.partition.PartitionTable
 import com.github.mjdev.libaums.partition.PartitionTableEntry
-
-import java.util.ArrayList
+import java.util.*
 
 /**
  * Represents a dummy partition table. Sometimes devices do not have an MBR or GPT to save memory.
