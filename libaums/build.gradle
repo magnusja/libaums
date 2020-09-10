@@ -7,7 +7,7 @@ apply plugin: 'com.hiya.jacoco-android'
 ext {
     artifact = 'libaums'
     bintrayName = 'libaums'
-    libraryVersion = '0.7.5'
+    libraryVersion = '0.7.6'
 }
 
 configurations {
@@ -22,7 +22,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 29
         versionCode 75
-        versionName "0.7.5"
+        versionName "0.7.6"
 
         externalNativeBuild {
             cmake {

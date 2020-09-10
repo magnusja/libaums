@@ -13,7 +13,7 @@ A library to access USB mass storage devices (pen drives, external HDDs, card re
 The library can be included into your project like this:
 
 ```ruby
-implementation 'me.jahnen:libaums:0.7.5'
+implementation 'me.jahnen:libaums:0.7.6'
 ```
 
 If you need the HTTP or the storage provider module:
