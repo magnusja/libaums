@@ -28,8 +28,8 @@ import org.junit.runners.Parameterized
 import java.io.IOException
 import java.util.concurrent.TimeoutException
 
-private const val USB_DISCOVER_TIMEOUT = 30 * 1000
-private const val USB_PERMISSION_TIMEOUT = 30 * 1000
+private const val USB_DISCOVER_TIMEOUT = 120 * 1000
+private const val USB_PERMISSION_TIMEOUT = 120 * 1000
 
 @RunWith(Parameterized::class)
 @LargeTest
