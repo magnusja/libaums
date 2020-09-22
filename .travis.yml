@@ -26,7 +26,7 @@ env:
     # Note to readers: do not "fill the gaps": Android-x86 RPM images are not available for all versions.
     # Make sure new ones are added first to the download script and test them.
     - API=23 VIRTWIFI_HACK=0 API_NAME=marshmallow
-    - API=25 VIRTWIFI_HACK=1 API_NAME=nougat
+    #- API=25 VIRTWIFI_HACK=1 API_NAME=nougat   # Gets stuck
     - API=27 VIRTWIFI_HACK=1 API_NAME=oreo
     - API=28 VIRTWIFI_HACK=1 API_NAME=pie
 
