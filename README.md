@@ -326,7 +326,7 @@ After that apps using the Storage Access Framework will be able to access the fi
 
 ##### Thesis
 
-The library was developed by Mr. Jahnen as part of his bachelor's thesis in 2014. It's a sub-topic of the research topic "Secure Copy Protection for Mobile Apps" by Mr. Kannengießer. The full thesis document can be downloaded [here](https://www.os.in.tum.de/fileadmin/w00bdp/www/Lehre/Abschlussarbeiten/Jahnen-thesis.pdf).
+The library was developed by Mr. Jahnen as part of his bachelor's thesis in 2014. It's a sub-topic of the research topic "Secure Copy Protection for Mobile Apps" by Mr. Kannengießer. The full thesis document can be downloaded [here](https://www.in.tum.de/fileadmin/w00bws/os/Lehre/Abschlussarbeiten/Jahnen-thesis.pdf).
 
 
 Libaums - Library to access USB Mass Storage Devices  
