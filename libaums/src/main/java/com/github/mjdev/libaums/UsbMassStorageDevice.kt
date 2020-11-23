@@ -22,7 +22,7 @@ import android.hardware.usb.*
 import android.util.Log
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.driver.BlockDeviceDriverFactory
-import com.github.mjdev.libaums.driver.scsi.UnitNotReady
+import com.github.mjdev.libaums.driver.scsi.MediaNotInserted
 import com.github.mjdev.libaums.partition.Partition
 import com.github.mjdev.libaums.partition.PartitionTable
 import com.github.mjdev.libaums.partition.PartitionTableFactory
@@ -136,13 +136,8 @@ private constructor(private val usbManager: UsbManager,
                 .mapNotNull { blockDevice ->
                     try {
                         blockDevice.init()
-                    } catch (e: UnitNotReady) {
-                        if (maxLun[0] == 0.toByte()) {
-                            throw e
-                        }
-                        // else:  seems to support multiple logical units (e.g. card reader)
-                        // so some LUNs may not be inserted. Silently fail in this case and
-                        // continue with next LUN
+                    } catch (e: MediaNotInserted) {
+                        // This LUN does not have media inserted. Ignore it.
                         return@mapNotNull null
                     }
 

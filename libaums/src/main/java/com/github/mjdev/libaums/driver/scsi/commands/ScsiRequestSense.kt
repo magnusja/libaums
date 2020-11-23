@@ -17,16 +17,21 @@
 
 package com.github.mjdev.libaums.driver.scsi.commands
 
+import com.github.mjdev.libaums.BuildConfig
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 /**
  * This class is used to issue a SCSI request sense when a command has failed.
  *
- * @author mjahnen
+ * allocationLength MUST be 18
+ *
+ * @author mjahnen, Derpalus
  * @see com.github.mjdev.libaums.driver.scsi.commands.CommandStatusWrapper
  * .getbCswStatus
  */
-class ScsiRequestSense(private val allocationLength: Byte, lun: Byte) : CommandBlockWrapper(0, Direction.NONE, lun, LENGTH) {
+class ScsiRequestSense(private val allocationLength: Byte, lun: Byte) :
+        CommandBlockWrapper(allocationLength.toInt(), Direction.IN, lun, LENGTH, true) {
 
     override fun serialize(buffer: ByteBuffer) {
         super.serialize(buffer)
@@ -37,11 +42,21 @@ class ScsiRequestSense(private val allocationLength: Byte, lun: Byte) : CommandB
             put(0.toByte())
             put(allocationLength)
         }
+
+        if (BuildConfig.DEBUG && allocationLength != 18.toByte()) {
+            error("Assertion failed")
+        }
+    }
+
+    override fun getCurrentLength(buffer: ByteBuffer): Int {
+        buffer.order(ByteOrder.BIG_ENDIAN)
+        return buffer.get(SENSE_BYTE_ADDR).toInt() + SENSE_BYTE_ADDR + 1
     }
 
     companion object {
         private const val OPCODE: Byte = 0x3
         private const val LENGTH: Byte = 0x6
+        private const val SENSE_BYTE_ADDR: Int = 0x7
     }
 
 }

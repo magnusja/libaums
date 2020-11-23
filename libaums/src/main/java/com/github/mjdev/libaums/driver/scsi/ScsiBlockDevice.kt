@@ -17,9 +17,7 @@
 
 package com.github.mjdev.libaums.driver.scsi
 
-import android.hardware.usb.UsbEndpoint
 import android.util.Log
-import com.github.mjdev.libaums.ErrNo
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.driver.scsi.commands.*
 import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper.Direction
@@ -28,14 +26,12 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.util.*
 
-class UnitNotReady: IOException("Device is not ready (Unsuccessful ScsiTestUnitReady Csw status)")
-
 /**
  * This class is responsible for handling mass storage devices which follow the
  * SCSI standard. This class communicates with the mass storage device via the
  * different SCSI commands.
  *
- * @author mjahnen
+ * @author mjahnen, Derpalus
  * @see com.github.mjdev.libaums.driver.scsi.commands
  */
 class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private val lun: Byte) : BlockDeviceDriver {
@@ -79,6 +75,23 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
      */
     @Throws(IOException::class)
     override fun init() {
+        for(i in 0..MAX_RECOVERY_ATTEMPTS) {
+            try {
+                initAttempt()
+                return
+            } catch(e: InitRequired) {
+                Log.i(TAG, e.message ?: "Reinitializing device")
+            } catch (e: NotReadyTryAgain) {
+                Log.i(TAG, e.message ?: "Reinitializing device")
+            }
+            Thread.sleep(100)
+        }
+
+        throw Unrecoverable(null)
+    }
+
+    @Throws(IOException::class)
+    private fun initAttempt() {
         val inBuffer = ByteBuffer.allocate(36)
         val inquiry = ScsiInquiry(inBuffer.array().size.toByte(), lun=lun)
         transferCommand(inquiry, inBuffer)
@@ -91,18 +104,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
         }
 
         val testUnit = ScsiTestUnitReady(lun=lun)
-        try {
-            if (!transferCommand(testUnit, ByteBuffer.allocate(0))) {
-                Log.e(TAG, "unit not ready!")
-                throw UnitNotReady()
-            }
-        } catch (e: IOException) {
-            if (e.message.equals("Unsuccessful Csw status: 1")) {
-                throw UnitNotReady()
-            } else {
-                throw e
-            }
-        }
+        transferCommand(testUnit)
 
         val readCapacity = ScsiReadCapacity(lun=lun)
         inBuffer.clear()
@@ -133,45 +135,74 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
      * The command which should be transferred.
      * @param inBuffer
      * The buffer used for reading or writing.
+     * @param writeCommand
+     * If this flag is true the caller doesn't expect any result in inBuffer
      * @return True if the transaction was successful.
      * @throws IOException
      * If something fails.
      */
     @Throws(IOException::class)
-    private fun transferCommand(command: CommandBlockWrapper, inBuffer: ByteBuffer): Boolean {
+    private fun transferCommand(command: CommandBlockWrapper, inBuffer: ByteBuffer,
+                                writeCommand: Boolean = false) {
         for(i in 0..MAX_RECOVERY_ATTEMPTS) {
             try {
-                return transferOneCommand(command, inBuffer)
-            } catch(e: IOException) {
-                Log.e(TAG, "Error transferring command; errno ${ErrNo.errno} ${ErrNo.errstr}")
+                val result = transferOneCommand(command, inBuffer)
+                handleCommandResult(result)
+                return
+            } catch(e: Recovered) {
 
-                // Try alternately to clear halt and reset device until something happens
-                when {
-                    i == MAX_RECOVERY_ATTEMPTS -> {
-                        Log.d(TAG, "Giving up")
-                        throw e
-                    }
-                    i % 2 == 0 -> {
-                        Log.d(TAG, "Reset bulk-only mass storage")
-                        bulkOnlyMassStorageReset()
-                        Log.d(TAG, "Trying to clear halt on both endpoints")
-                        usbCommunication.clearFeatureHalt(usbCommunication.inEndpoint)
-                        usbCommunication.clearFeatureHalt(usbCommunication.outEndpoint)
-                    }
-                    i % 2 == 1 -> {
-                        Thread.sleep(300 * i.toLong())
-                        Log.d(TAG, "Trying to reset the device")
-                        usbCommunication.resetDevice()
-                    }
-                }
+                Log.i(TAG, e.message ?: "Recovered exception caught")
 
-                Thread.sleep(300 * i.toLong())
+                // If it was a write command the Recovered exception indicates that it
+                // has completed successfully, but if it was a read command we would have to
+                // run it again to receive the correct data.
+                if (writeCommand)
+                    return
+
+            } catch (e: SenseException) {
+                throw e
+            } catch (e: IOException) {
+                // Retry
+                Log.w(TAG, (e.message ?: "IOException") + ", retrying...")
             }
+            Thread.sleep(100)
         }
 
-        throw IllegalStateException("This should never happen.")
+        throw Unrecoverable(null)
     }
 
+    @Throws(IOException::class)
+    private fun transferCommand(command: CommandBlockWrapper) {
+        transferCommand(command, ByteBuffer.allocate(0), true)
+    }
+
+    @Throws(IOException::class)
+    private fun handleCommandResult(status: Int) {
+        when (status) {
+            CommandStatusWrapper.COMMAND_PASSED -> return
+            CommandStatusWrapper.COMMAND_FAILED -> requestSense()
+            CommandStatusWrapper.PHASE_ERROR -> {
+                bulkOnlyMassStorageReset()
+                throw InitRequired(null)
+            }
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun requestSense() {
+        val inBuffer = ByteBuffer.allocate(18)
+        val sense = ScsiRequestSense(inBuffer.array().size.toByte(), lun=lun)
+        when (transferOneCommand(sense, inBuffer)) {
+            CommandStatusWrapper.COMMAND_PASSED -> SenseParser.parse(inBuffer)
+            CommandStatusWrapper.COMMAND_FAILED -> throw Unrecoverable(null)
+            CommandStatusWrapper.PHASE_ERROR -> {
+                bulkOnlyMassStorageReset()
+                throw InitRequired(null)
+            }
+        }
+    }
+
+    @Throws(IOException::class)
     private fun bulkOnlyMassStorageReset() {
         Log.w(TAG, "sending bulk only mass storage request")
         val bArr = ByteArray(2)
@@ -181,10 +212,13 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
         if (transferred == -1) {
             throw IOException("bulk only mass storage reset failed!")
         }
+        Log.d(TAG, "Trying to clear halt on both endpoints")
+        usbCommunication.clearFeatureHalt(usbCommunication.inEndpoint)
+        usbCommunication.clearFeatureHalt(usbCommunication.outEndpoint)
     }
 
     @Throws(IOException::class)
-    private fun transferOneCommand(command: CommandBlockWrapper, inBuffer: ByteBuffer): Boolean {
+    private fun transferOneCommand(command: CommandBlockWrapper, inBuffer: ByteBuffer): Int {
         val outArray = outBuffer.array()
         Arrays.fill(outArray, 0.toByte())
 
@@ -200,10 +234,9 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
             throw IOException("Writing all bytes on command $command failed!")
         }
 
-        val transferLength = command.dCbwDataTransferLength
-        inBuffer.apply {
-            limit(position() + transferLength)
-        }
+        var transferLength = command.dCbwDataTransferLength
+        inBuffer.clear()
+        inBuffer.limit(transferLength)
 
         var read = 0
         if (transferLength > 0) {
@@ -211,6 +244,10 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
             if (command.direction == Direction.IN) {
                 do {
                     read += usbCommunication.bulkInTransfer(inBuffer)
+                    if (command.bCbwDynamicSize) {
+                        transferLength = command.getCurrentLength(inBuffer)
+                        inBuffer.limit(transferLength)
+                    }
                 } while (read < transferLength)
 
                 if (read != transferLength) {
@@ -239,15 +276,11 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
         cswBuffer.clear()
 
         csw.read(cswBuffer)
-        if (csw.bCswStatus.toInt() != CommandStatusWrapper.COMMAND_PASSED) {
-            throw IOException("Unsuccessful Csw status: " + csw.bCswStatus)
-        }
-
         if (csw.dCswTag != command.dCbwTag) {
             throw IOException("wrong csw tag!")
         }
 
-        return csw.bCswStatus.toInt() == CommandStatusWrapper.COMMAND_PASSED
+        return csw.bCswStatus.toInt()
     }
 
     /**
@@ -257,15 +290,15 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
      */
     @Synchronized
     @Throws(IOException::class)
-    override fun read(devOffset: Long, dest: ByteBuffer) {
+    override fun read(deviceOffset: Long, buffer: ByteBuffer) {
         //long time = System.currentTimeMillis();
-        require(dest.remaining() % blockSize == 0) { "dest.remaining() must be multiple of blockSize!" }
+        require(buffer.remaining() % blockSize == 0) { "buffer.remaining() must be multiple of blockSize!" }
 
-        readCommand.init(devOffset.toInt(), dest.remaining(), blockSize)
+        readCommand.init(deviceOffset.toInt(), buffer.remaining(), blockSize)
         //Log.d(TAG, "reading: " + read);
 
-        transferCommand(readCommand, dest)
-        dest.position(dest.limit())
+        transferCommand(readCommand, buffer)
+        buffer.position(buffer.limit())
 
         //Log.d(TAG, "read time: " + (System.currentTimeMillis() - time));
     }
@@ -277,15 +310,15 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
      */
     @Synchronized
     @Throws(IOException::class)
-    override fun write(devOffset: Long, src: ByteBuffer) {
+    override fun write(deviceOffset: Long, buffer: ByteBuffer) {
         //long time = System.currentTimeMillis();
-        require(src.remaining() % blockSize == 0) { "src.remaining() must be multiple of blockSize!" }
+        require(buffer.remaining() % blockSize == 0) { "buffer.remaining() must be multiple of blockSize!" }
 
-        writeCommand.init(devOffset.toInt(), src.remaining(), blockSize)
+        writeCommand.init(deviceOffset.toInt(), buffer.remaining(), blockSize)
         //Log.d(TAG, "writing: " + write);
 
-        transferCommand(writeCommand, src)
-        src.position(src.limit())
+        transferCommand(writeCommand, buffer)
+        buffer.position(buffer.limit())
 
         //Log.d(TAG, "write time: " + (System.currentTimeMillis() - time));
     }
