@@ -139,7 +139,6 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
      * The buffer used for reading or writing.
      * @param writeCommand
      * If this flag is true the caller doesn't expect any result in inBuffer
-     * @return True if the transaction was successful.
      * @throws IOException
      * If something fails.
      */
