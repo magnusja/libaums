@@ -106,7 +106,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
         }
 
         val testUnit = ScsiTestUnitReady(lun=lun)
-        transferCommand(testUnit)
+        transferCommandWithoutDataPhase(testUnit)
 
         val readCapacity = ScsiReadCapacity(lun=lun)
         inBuffer.clear()
@@ -137,30 +137,38 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
      * The command which should be transferred.
      * @param inBuffer
      * The buffer used for reading or writing.
-     * @param writeCommand
-     * If this flag is true the caller doesn't expect any result in inBuffer
      * @throws IOException
      * If something fails.
      */
     @Throws(IOException::class)
-    private fun transferCommand(command: CommandBlockWrapper, inBuffer: ByteBuffer,
-                                writeCommand: Boolean = false) {
+    private fun transferCommand(command: CommandBlockWrapper, inBuffer: ByteBuffer) {
         for(i in 0..MAX_RECOVERY_ATTEMPTS) {
             try {
                 val result = transferOneCommand(command, inBuffer)
-                if(!handleCommandResult(result))
-                    // successful request sense, continue and try command again
-                    // TODO read vs write?
-                    continue
-                else
-                    // successful
+                val senseWasNotIssued = handleCommandResult(result)
+                if (senseWasNotIssued || command.direction == Direction.NONE) {
+                    // successful w/o need of sending sense command
+                    // OR
+                    // command has no data phase ie. no need to sent again
+                    // and read response into buffer
                     return
+                }
+
+                // sense command was sent because of error, sense was successful
+                // ie. NO_SENSE, RECOVERED_ERROR, COMPLETED, see
+                // sense response impl
+                // try again and hope that data phase ie. filling inBuffer
+                // works now
+                continue
+
             } catch (e: SenseException) {
+                // necessary because SenseException inherits IOException
                 throw e
             } catch (e: IOException) {
                 // Retry
                 Log.w(TAG, (e.message ?: "IOException") + ", retrying...")
             }
+
             Thread.sleep(100)
         }
 
@@ -168,8 +176,9 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
     }
 
     @Throws(IOException::class)
-    private fun transferCommand(command: CommandBlockWrapper) {
-        transferCommand(command, ByteBuffer.allocate(0), true)
+    private fun transferCommandWithoutDataPhase(command: CommandBlockWrapper) {
+        require(command.direction == Direction.NONE) { "Command has a data phase" }
+        transferCommand(command, ByteBuffer.allocate(0))
     }
 
     @Throws(IOException::class)
