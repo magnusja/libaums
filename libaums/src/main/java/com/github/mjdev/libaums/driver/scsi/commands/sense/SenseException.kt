@@ -52,15 +52,6 @@ class RestartRequired(response: ScsiRequestSenseResponse?):
 class Unrecoverable(response: ScsiRequestSenseResponse?):
         SenseException(response, "Can't communicate with device")
 
-/**
- * Either there was no error, or if there was it was automatically recovered.
- * Any write type command would have been successfully completed,
- * but read type commands probably have to be re-issued to get the result.
- *
- * Recommended action: ignore if write command, re-issue if read command.
- */
-class Recovered(response: ScsiRequestSenseResponse?):
-        SenseException(response, "Success; recovered.")
 
 /**
  * Device is not ready.

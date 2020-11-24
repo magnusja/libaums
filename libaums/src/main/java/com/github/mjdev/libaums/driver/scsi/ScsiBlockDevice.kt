@@ -24,6 +24,7 @@ import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper.Directi
 import com.github.mjdev.libaums.driver.scsi.commands.sense.*
 import com.github.mjdev.libaums.usb.UsbCommunication
 import java.io.IOException
+import java.lang.IllegalStateException
 import java.nio.ByteBuffer
 import java.util.*
 
@@ -148,18 +149,13 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
         for(i in 0..MAX_RECOVERY_ATTEMPTS) {
             try {
                 val result = transferOneCommand(command, inBuffer)
-                handleCommandResult(result)
-                return
-            } catch(e: Recovered) {
-
-                Log.i(TAG, e.message ?: "Recovered exception caught")
-
-                // If it was a write command the Recovered exception indicates that it
-                // has completed successfully, but if it was a read command we would have to
-                // run it again to receive the correct data.
-                if (writeCommand)
+                if(!handleCommandResult(result))
+                    // successful request sense, continue and try command again
+                    // TODO read vs write?
+                    continue
+                else
+                    // successful
                     return
-
             } catch (e: SenseException) {
                 throw e
             } catch (e: IOException) {
@@ -178,14 +174,18 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
     }
 
     @Throws(IOException::class)
-    private fun handleCommandResult(status: Int) {
-        when (status) {
-            CommandStatusWrapper.COMMAND_PASSED -> return
-            CommandStatusWrapper.COMMAND_FAILED -> requestSense()
+    private fun handleCommandResult(status: Int): Boolean {
+        return when (status) {
+            CommandStatusWrapper.COMMAND_PASSED -> true
+            CommandStatusWrapper.COMMAND_FAILED -> {
+                requestSense()
+                false
+            }
             CommandStatusWrapper.PHASE_ERROR -> {
                 bulkOnlyMassStorageReset()
                 throw InitRequired(null)
             }
+            else -> throw IllegalStateException("CommandStatus wrapper illegal status $status")
         }
     }
 
@@ -193,7 +193,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
     private fun requestSense() {
         val inBuffer = ByteBuffer.allocate(18)
         val sense = ScsiRequestSense(inBuffer.array().size.toByte(), lun = lun)
-        when (transferOneCommand(sense, inBuffer)) {
+        when (val status = transferOneCommand(sense, inBuffer)) {
             CommandStatusWrapper.COMMAND_PASSED -> {
                 inBuffer.clear()
                 val response = ScsiRequestSenseResponse.read(inBuffer)
@@ -204,6 +204,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
                 bulkOnlyMassStorageReset()
                 throw InitRequired(null)
             }
+            else -> throw IllegalStateException("CommandStatus wrapper illegal status $status")
         }
     }
 
