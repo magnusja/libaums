@@ -48,10 +48,6 @@ android {
 
 }
 
-dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/docs/javadoc"
-}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])

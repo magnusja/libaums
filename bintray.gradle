@@ -1,5 +1,7 @@
 // https://inthecheesefactory.com/blog/how-to-upload-library-to-jcenter-maven-central-as-dependency/en
 
+
+
 apply plugin: 'com.jfrog.bintray'
 
 version = libraryVersion
@@ -11,8 +13,7 @@ if (project.hasProperty("kotlin")) { // Kotlin libraries
         from android.sourceSets.main.java.srcDirs
     }
 
-    task javadoc(type: Javadoc, dependsOn: dokka) {
-
+    task javadoc(type: Javadoc, dependsOn: dokkaJavadoc) {
     }
 } else if (project.hasProperty("android")) { // Android libraries
     task sourcesJar(type: Jar) {
@@ -35,7 +36,7 @@ if (project.hasProperty("kotlin")) { // Kotlin libraries
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
-    from javadoc.destinationDir
+    from "$buildDir/dokka/javadoc"
 }
 
 artifacts {

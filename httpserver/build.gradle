@@ -36,10 +36,6 @@ android {
     }
 }
 
-dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/docs/javadoc"
-}
 
 dependencies {
     api 'org.nanohttpd:nanohttpd:2.+'
