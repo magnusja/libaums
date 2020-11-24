@@ -89,7 +89,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
             Thread.sleep(100)
         }
 
-        throw Unrecoverable(null)
+        throw IOException("MAX_RECOVERY_ATTEMPTS Exceeded while trying to init communication with USB device, please reattach device and try again")
     }
 
     @Throws(IOException::class)
@@ -165,7 +165,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
             Thread.sleep(100)
         }
 
-        throw Unrecoverable(null)
+        throw IOException("MAX_RECOVERY_ATTEMPTS Exceeded while trying to transfer command to device, please reattach device and try again")
     }
 
     @Throws(IOException::class)
@@ -183,7 +183,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
             }
             CommandStatusWrapper.PHASE_ERROR -> {
                 bulkOnlyMassStorageReset()
-                throw InitRequired(null)
+                throw IOException("phase error, please reattach device and try again")
             }
             else -> throw IllegalStateException("CommandStatus wrapper illegal status $status")
         }
@@ -199,10 +199,10 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
                 val response = ScsiRequestSenseResponse.read(inBuffer)
                 response.checkResponseForError()
             }
-            CommandStatusWrapper.COMMAND_FAILED -> throw Unrecoverable(null)
+            CommandStatusWrapper.COMMAND_FAILED -> throw IOException("requesting sense failed")
             CommandStatusWrapper.PHASE_ERROR -> {
                 bulkOnlyMassStorageReset()
-                throw InitRequired(null)
+                throw IOException("phase error, please reattach device and try again")
             }
             else -> throw IllegalStateException("CommandStatus wrapper illegal status $status")
         }
