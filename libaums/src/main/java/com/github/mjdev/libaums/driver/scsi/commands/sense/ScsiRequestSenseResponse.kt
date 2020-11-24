@@ -1,9 +1,8 @@
-package com.github.mjdev.libaums.driver.scsi.commands
+package com.github.mjdev.libaums.driver.scsi.commands.sense
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.experimental.and
-import kotlin.experimental.or
 
 /**
  * Represents the response of a sense request.
@@ -127,6 +126,62 @@ class ScsiRequestSenseResponse private constructor() {
      */
     var additionalSenseCodeQualifier: Byte = 0
         private set
+
+    /**
+     * Checks the result from a request sense command.
+     * Will always throw some type of SenseException, although
+     * some variants are easily recoverable.
+     *
+     * @throws SenseException (multiple variants)
+     * Always throws. Exception indicates if something is wrong or needs handling.
+     */
+    fun checkResponseForError() {
+        when (senseKey.toInt()) {
+            NO_SENSE -> throw Recovered(this)
+            COMPLETED -> throw Recovered(this)
+            RECOVERED_ERROR -> throw Recovered(this)
+            NOT_READY -> handleNotReady()
+            MEDIUM_ERROR -> handleMediumError()
+            HARDWARE_ERROR -> throw HardwareError(this)
+            ILLEGAL_REQUEST -> throw IllegalCommand(this)
+            UNIT_ATTENTION -> throw UnitAttention(this)
+            DATA_PROTECT -> throw DataProtect(this)
+            BLANK_CHECK -> throw BlankCheck(this)
+            COPY_ABORTED -> throw CopyAborted(this)
+            ABORTED -> throw Aborted(this)
+            VOLUME_OVERFLOW -> throw VolumeOverflow(this)
+            MISCOMPARE -> throw Miscompare(this)
+        }
+
+        throw SenseException(this, "Sense exception: " + this.senseKey)
+    }
+
+    private fun handleNotReady() {
+        if (additionalSenseCode.toInt() == 0x04) {
+            // Logical unit issues
+            when (additionalSenseCodeQualifier.toInt()) {
+                0x01 -> throw NotReadyTryAgain(this)
+                0x03 -> throw ManualIntervention(this)
+                0x04 -> throw NotReadyTryAgain(this)
+                0x07 -> throw NotReadyTryAgain(this)
+                0x09 -> throw NotReadyTryAgain(this)
+                0x22 -> throw RestartRequired(this)
+                0x12 -> throw NotReady(this, "Not ready; logical unit offline")
+            }
+        } else if (additionalSenseCode.toInt() == 0x3A) {
+            throw MediaNotInserted(this)
+        }
+        throw NotReady(this)
+    }
+
+    private fun handleMediumError() {
+        when (additionalSenseCode.toInt()) {
+            0x0C -> throw MediumError(this, "Write error")
+            0x11 -> throw MediumError(this, "Read error")
+            0x31 -> throw MediumError(this, "Storage medium corrupted")
+        }
+        throw MediumError(this)
+    }
 
     companion object {
 

@@ -1,6 +1,5 @@
-package com.github.mjdev.libaums.driver.scsi
+package com.github.mjdev.libaums.driver.scsi.commands.sense
 
-import com.github.mjdev.libaums.driver.scsi.commands.ScsiRequestSenseResponse
 import java.io.IOException
 
 open class SenseException(response: ScsiRequestSenseResponse?, msg: String) :

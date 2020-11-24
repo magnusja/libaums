@@ -138,7 +138,7 @@ protected constructor(var dCbwDataTransferLength: Int,
      *
      * @return New total data transfer length
      */
-    open fun getCurrentLength(buffer: ByteBuffer) : Int { return dCbwDataTransferLength }
+    open fun dynamicSizeFromPartialResponse(buffer: ByteBuffer) : Int { throw NotImplementedError("If dynamic length possible override in subclass") }
 
     companion object {
 

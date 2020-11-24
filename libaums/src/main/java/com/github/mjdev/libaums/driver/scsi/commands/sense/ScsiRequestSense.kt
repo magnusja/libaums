@@ -15,9 +15,10 @@
  * 
  */
 
-package com.github.mjdev.libaums.driver.scsi.commands
+package com.github.mjdev.libaums.driver.scsi.commands.sense
 
 import com.github.mjdev.libaums.BuildConfig
+import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -44,11 +45,11 @@ class ScsiRequestSense(private val allocationLength: Byte, lun: Byte) :
         }
 
         if (BuildConfig.DEBUG && allocationLength != 18.toByte()) {
-            error("Assertion failed")
+            error("Allocation size MUST BE 18")
         }
     }
 
-    override fun getCurrentLength(buffer: ByteBuffer): Int {
+    override fun dynamicSizeFromPartialResponse(buffer: ByteBuffer): Int {
         buffer.order(ByteOrder.BIG_ENDIAN)
         return buffer.get(SENSE_BYTE_ADDR).toInt() + SENSE_BYTE_ADDR + 1
     }

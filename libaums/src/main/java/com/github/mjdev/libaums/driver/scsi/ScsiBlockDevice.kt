@@ -21,6 +21,7 @@ import android.util.Log
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.driver.scsi.commands.*
 import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper.Direction
+import com.github.mjdev.libaums.driver.scsi.commands.sense.*
 import com.github.mjdev.libaums.usb.UsbCommunication
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -191,9 +192,13 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
     @Throws(IOException::class)
     private fun requestSense() {
         val inBuffer = ByteBuffer.allocate(18)
-        val sense = ScsiRequestSense(inBuffer.array().size.toByte(), lun=lun)
+        val sense = ScsiRequestSense(inBuffer.array().size.toByte(), lun = lun)
         when (transferOneCommand(sense, inBuffer)) {
-            CommandStatusWrapper.COMMAND_PASSED -> SenseParser.parse(inBuffer)
+            CommandStatusWrapper.COMMAND_PASSED -> {
+                inBuffer.clear()
+                val response = ScsiRequestSenseResponse.read(inBuffer)
+                response.checkResponseForError()
+            }
             CommandStatusWrapper.COMMAND_FAILED -> throw Unrecoverable(null)
             CommandStatusWrapper.PHASE_ERROR -> {
                 bulkOnlyMassStorageReset()
@@ -245,7 +250,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
                 do {
                     read += usbCommunication.bulkInTransfer(inBuffer)
                     if (command.bCbwDynamicSize) {
-                        transferLength = command.getCurrentLength(inBuffer)
+                        transferLength = command.dynamicSizeFromPartialResponse(inBuffer)
                         inBuffer.limit(transferLength)
                     }
                 } while (read < transferLength)

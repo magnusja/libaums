@@ -22,7 +22,7 @@ import android.hardware.usb.*
 import android.util.Log
 import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.driver.BlockDeviceDriverFactory
-import com.github.mjdev.libaums.driver.scsi.MediaNotInserted
+import com.github.mjdev.libaums.driver.scsi.commands.sense.MediaNotInserted
 import com.github.mjdev.libaums.partition.Partition
 import com.github.mjdev.libaums.partition.PartitionTable
 import com.github.mjdev.libaums.partition.PartitionTableFactory
