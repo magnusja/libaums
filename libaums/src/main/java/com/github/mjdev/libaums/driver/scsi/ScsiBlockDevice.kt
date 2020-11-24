@@ -157,9 +157,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
                 // sense command was sent because of error, sense was successful
                 // ie. NO_SENSE, RECOVERED_ERROR, COMPLETED, see
                 // sense response impl
-                // try again and hope that data phase ie. filling inBuffer
-                // works now
-                continue
+                // try again and hope that data phase ie. filling inBuffer works now
 
             } catch (e: SenseException) {
                 // necessary because SenseException inherits IOException
