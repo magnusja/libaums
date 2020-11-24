@@ -129,11 +129,12 @@ class ScsiRequestSenseResponse private constructor() {
 
     /**
      * Checks the result from a request sense command.
-     * Will always throw some type of SenseException, although
-     * some variants are easily recoverable.
+     * Will throw some type of SenseException, or do nothing
+     * if sense response indicates {@see ScsiRequestSenseResponse.NO_SENSE},
+     * {@see ScsiRequestSenseResponse.COMPLETED},
+     * {@see ScsiRequestSenseResponse.RECOVERED_ERROR}.
      *
      * @throws SenseException (multiple variants)
-     * Always throws. Exception indicates if something is wrong or needs handling.
      */
     fun checkResponseForError() {
         when (senseKey.toInt()) {
