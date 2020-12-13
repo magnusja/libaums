@@ -22,6 +22,7 @@ import com.github.mjdev.libaums.driver.BlockDeviceDriver
 import com.github.mjdev.libaums.driver.scsi.commands.*
 import com.github.mjdev.libaums.driver.scsi.commands.CommandBlockWrapper.Direction
 import com.github.mjdev.libaums.driver.scsi.commands.sense.*
+import com.github.mjdev.libaums.usb.PipeException
 import com.github.mjdev.libaums.usb.UsbCommunication
 import java.io.IOException
 import java.lang.IllegalStateException
@@ -160,8 +161,15 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
                 // try again and hope that data phase ie. filling inBuffer works now
 
             } catch (e: SenseException) {
-                // necessary because SenseException inherits IOException
-                throw e
+                Log.w(TAG, (e.message ?: "SenseException"))
+                when(e) {
+                    is InitRequired -> init()
+                    is NotReadyTryAgain -> {} // try again
+                    else -> throw e
+                }
+            } catch(e: PipeException) {
+                Log.w(TAG, (e.message ?: "PipeException") + ", try bulk storage reset and retry")
+                bulkOnlyMassStorageReset()
             } catch (e: IOException) {
                 // Retry
                 Log.w(TAG, (e.message ?: "IOException") + ", retrying...")
