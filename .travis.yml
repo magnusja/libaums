@@ -7,7 +7,7 @@ group: edge
 android:
   components:
     - tools
-    - android-26
+    - android-30
 
 install:
   - sudo apt-get install build-essential
