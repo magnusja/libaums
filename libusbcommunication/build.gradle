@@ -14,11 +14,11 @@ ext {
 }
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 1
         versionName "0.1"
 
@@ -45,6 +45,7 @@ android {
             path "CMakeLists.txt"
         }
     }
+    ndkVersion '21.0.6113669'
 
 }
 

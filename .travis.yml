@@ -26,7 +26,7 @@ before_script:
   - echo "libusb.dir=$TRAVIS_BUILD_DIR/libusb-1.0.23" > $TRAVIS_BUILD_DIR/local.properties
 
 script:
-  - ./gradlew build -x bintray jacocoTestReport --stacktrace
+  - ./gradlew build -x bintray jacocoTestReportRelease --stacktrace
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
