@@ -3,6 +3,7 @@ package me.jahnen.libaums.libusbcommunication
 import android.hardware.usb.*
 import android.util.Log
 import com.github.mjdev.libaums.ErrNo
+import com.github.mjdev.libaums.usb.PipeException
 import com.github.mjdev.libaums.usb.UsbCommunication
 import com.github.mjdev.libaums.usb.UsbCommunication.Companion.TRANSFER_TIMEOUT
 import com.github.mjdev.libaums.usb.UsbCommunicationCreator
@@ -11,8 +12,8 @@ import java.nio.ByteBuffer
 
 
 class LibusbCommunication(
-        private val usbManager: UsbManager,
-        private val usbDevice: UsbDevice,
+        usbManager: UsbManager,
+        usbDevice: UsbDevice,
         override val usbInterface: UsbInterface,
         override val outEndpoint: UsbEndpoint,
         override val inEndpoint: UsbEndpoint
@@ -54,8 +55,9 @@ class LibusbCommunication(
 
     override fun bulkOutTransfer(src: ByteBuffer): Int {
         val transferred = nativeBulkTransfer(libUsbHandle, outEndpoint.address, src.array(), src.position(), src.remaining(), TRANSFER_TIMEOUT)
-        if (transferred < 0) {
-            throw IOException("libusb returned $transferred in bulk out transfer")
+        when {
+            transferred == LIBUSB_EPIPE -> throw PipeException()
+            transferred < 0 -> throw IOException("libusb returned $transferred in control transfer")
         }
         src.position(src.position() + transferred)
         return transferred
@@ -63,8 +65,9 @@ class LibusbCommunication(
 
     override fun bulkInTransfer(dest: ByteBuffer): Int {
         val transferred = nativeBulkTransfer(libUsbHandle, inEndpoint.address, dest.array(), dest.position(), dest.remaining(), TRANSFER_TIMEOUT)
-        if (transferred < 0) {
-            throw IOException("libusb returned $transferred in bulk in transfer")
+        when {
+            transferred == LIBUSB_EPIPE -> throw PipeException()
+            transferred < 0 -> throw IOException("libusb returned $transferred in control transfer")
         }
         dest.position(dest.position() + transferred)
         return transferred
@@ -110,6 +113,7 @@ class LibusbCommunication(
 
     companion object {
         private val TAG = LibusbCommunication::class.java.simpleName
+        private val LIBUSB_EPIPE = -9
     }
 }
 

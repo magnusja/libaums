@@ -778,8 +778,11 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 }
                 val param = CopyTaskParam()
                 param.from = entry
-                val f = File(
-                        Environment.getExternalStorageDirectory().absolutePath + "/usbfileman/cache")
+                val f = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    File(getExternalFilesDir(null)!!.absolutePath + "/usbfileman/cache")
+                } else {
+                    File(Environment.getExternalStorageDirectory().absolutePath + "/usbfileman/cache")
+                }
                 f.mkdirs()
                 val index = if (entry.name.lastIndexOf(".") > 0) entry.name.lastIndexOf(".") else entry.name.length
                 var prefix = entry.name.substring(0, index)

@@ -30,7 +30,7 @@ import java.nio.ByteOrder
  * information. When transmitting the command, the
  * [.serialize] method has to be called!
  *
- * @author mjahnen
+ * @author mjahnen, Derpalus
  */
 abstract class CommandBlockWrapper
 /**
@@ -48,6 +48,8 @@ abstract class CommandBlockWrapper
  * The logical unit number the command is directed to.
  * @param cbwcbLength
  * The length in bytes of the scsi command.
+ * @param bCbwDynamicSize
+ * If the data length can change during read due to dynamic message length
  */
 protected constructor(var dCbwDataTransferLength: Int,
                       /**
@@ -63,7 +65,8 @@ protected constructor(var dCbwDataTransferLength: Int,
                        * The amount of bytes which should be transmitted in the data
                        * phase.
                        */
-                      val bCbwcbLength: Byte) {
+                      val bCbwcbLength: Byte,
+                      val bCbwDynamicSize: Boolean = false) {
 
 
     /**
@@ -121,6 +124,21 @@ protected constructor(var dCbwDataTransferLength: Int,
             put(bCbwcbLength)
         }
     }
+
+    /**
+     * Returns the data transfer length for (dynamic) messages
+     *
+     *
+     * This method should be overridden in subclasses whose data length
+     * changes as data is received (dynamic length messages).
+     * The function returns the new total data transfer length.
+     *
+     * @param buffer
+     * The buffer containing the received data so far.
+     *
+     * @return New total data transfer length
+     */
+    open fun dynamicSizeFromPartialResponse(buffer: ByteBuffer) : Int { throw NotImplementedError("If dynamic length possible override in subclass") }
 
     companion object {
 
