@@ -21,3 +21,5 @@ jobs:
       run: mkdir ~/.gradle/ && echo "org.gradle.jvmargs=-Xmx4096M" > ~/.gradle/gradle.properties
     - name: Build & test with Gradle
       run: ./gradlew build -x bintray jacocoTestReportDebug --stacktrace
+    - name: codecov
+      run: bash <(curl -s https://codecov.io/bash)
