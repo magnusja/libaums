@@ -17,5 +17,5 @@ jobs:
       run: wget https://github.com/libusb/libusb/archive/v1.0.23.zip && unzip v1.0.23.zip
     - name: write local properties
       run: echo "libusb.dir=$GITHUB_WORKSPACE/libusb-1.0.23" > $GITHUB_WORKSPACE/local.properties
-    - name: Build with Gradle
-      run: ./gradlew build
+    - name: Build & test with Gradle
+      run: ./gradlew build -x bintray jacocoTestReportDebug --stacktrace
