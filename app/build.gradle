@@ -1,17 +1,18 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply from: "../constants.gradle"
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion '30.0.3'
+    compileSdkVersion project.ext.compileSdkVersion
+    buildToolsVersion project.ext.buildToolsVersion
 
     defaultConfig {
-        applicationId "com.github.mjdev.usbfileman"
-        minSdkVersion 16
-        targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
+        applicationId project.ext.applicationId
+        minSdkVersion project.ext.minSdkVersion
+        targetSdkVersion project.ext.targetSdkVersion
+        versionCode project.ext.versionCode
+        versionName project.ext.versionName
     }
     buildTypes {
         release {
@@ -26,13 +27,11 @@ android {
 }
 
 dependencies {
-    api fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'junit:junit:4.12'
-    api 'androidx.appcompat:appcompat:1.0.0-beta01'
-    api 'com.google.android.material:material:1.0.0-beta01'
-    api project(':libaums')
-    api project(':httpserver')
-    api project(':storageprovider')
-    api project(':javafs')
-    api project(':libusbcommunication')
+    api "androidx.appcompat:appcompat:$appcompatVersion"
+    api "com.google.android.material:material:$materialVersion"
+    api project(":libaums")
+    api project(":httpserver")
+    api project(":storageprovider")
+    api project(":javafs")
+    api project(":libusbcommunication")
 }
