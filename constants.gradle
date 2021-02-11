@@ -12,8 +12,8 @@ project.ext {
     versionCode = 2
     versionName = "0.2"
 
-    versionCodeProduction = 2
-    versionNameProduction = "0.2"
+    versionCodeProduction = 80
+    versionNameProduction = "0.8.0"
 
     /////////////////////////////////////
     // SDK section
