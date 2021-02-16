@@ -93,10 +93,10 @@ internal class FatLfnDirectoryEntry
             var name = sname
             var ext = ""
 
-            val split = sname.split(".".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            val split = sname.split("\\.".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
             if (split.size == 2) {
                 name = split[0]
-                ext = split[0]
+                ext = split[1]
             }
 
             if (actualEntry.isShortNameLowerCase)
