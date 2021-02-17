@@ -348,7 +348,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 }
                 val inputStream = contentResolver.openInputStream(param!!.from!!)
                 val outputStream: OutputStream = createBufferedOutputStream(file, currentFs)
-                val bytes = ByteArray(1337)
+                val bytes = ByteArray(currentFs.chunkSize)
                 var count: Int
                 var total: Long = 0
                 while (inputStream!!.read(bytes).also { count = it } != -1) {
@@ -431,7 +431,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 usbFile.length = file.length()
                 val inputStream = contentResolver.openInputStream(file.uri)
                 val outputStream: OutputStream = createBufferedOutputStream(usbFile, currentFs!!)
-                val bytes = ByteArray(1337)
+                val bytes = ByteArray(currentFs.chunkSize)
                 var count: Int
                 var total: Long = 0
                 while (inputStream!!.read(bytes).also { count = it } != -1) {
