@@ -1,22 +1,20 @@
-apply plugin: 'com.android.library'
+apply plugin: "com.android.library"
+apply from: "../constants.gradle"
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion '30.0.3'
+    compileSdkVersion project.ext.compileSdkVersion
+    buildToolsVersion project.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 15
-        targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
+        minSdkVersion project.ext.minSdkVersion
+        targetSdkVersion project.ext.targetSdkVersion
+        versionCode project.ext.versionCode
+        versionName project.ext.versionName
     }
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
     lintOptions {
@@ -25,15 +23,9 @@ android {
 }
 
 dependencies {
-    api project(':libaums')
+    api project(":libaums")
 
-    api('log4j:log4j:1.2.17')
-    api('de.mindpipe.android:android-logging-log4j:1.0.3')
-    api 'com.github.magnusja:java-fs:0.1.5'
-
-    api fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0-alpha4', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    testImplementation 'junit:junit:4.12'
+    api "log4j:log4j:$log4jVersion"
+    api "de.mindpipe.android:android-logging-log4j:$loggingLog4jVersion"
+    api "com.github.magnusja:java-fs:$javaFsVersion"
 }

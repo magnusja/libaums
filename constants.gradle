@@ -1,0 +1,92 @@
+/**
+ * Project dependencies constants.
+ */
+project.ext {
+
+    /////////////////////////////////////
+    // Version section
+    /////////////////////////////////////
+
+    applicationId = "com.github.mjdev.usbfileman"
+
+    versionCode = 2
+    versionName = "0.2"
+
+    versionCodeProduction = 80
+    versionNameProduction = "0.8.0"
+
+    /////////////////////////////////////
+    // SDK section
+    /////////////////////////////////////
+
+    compileSdkVersion = 30
+    minSdkVersion = 16
+    targetSdkVersion = 30
+    ndkVersion = "22.0.7026061"
+
+    /////////////////////////////////////
+    // Build section
+    /////////////////////////////////////
+
+    buildToolsVersion = "30.0.3"
+    buildGradleVersion = "4.1.2"
+    gradleBintrayPluginVersion = "1.8.4"
+    androidMavenGradlePluginVersion = "2.1"
+    groovyAllVersion = "2.4.15"
+    dokkaGradlePluginVersion = "1.4.20"
+    jacocoPluginVersion = "0.16.0"
+    appcompatVersion = "1.2.0"
+    materialVersion = "1.3.0"
+
+    nanohttpdVersion = "2.3.1"
+    koushikduttaAsyncVersion = "2.+"
+    annotationVersion = "1.1.0"
+
+    log4jVersion = "1.2.17"
+    loggingLog4jVersion = "1.0.3"
+    javaFsVersion = "0.1.5"
+
+    /////////////////////////////////////
+    // Kotlin section
+    /////////////////////////////////////
+
+    kotlinVersion = "1.4.30"
+    coreKtx = "1.3.2"
+
+    /////////////////////////////////////
+    // Test section
+    /////////////////////////////////////
+
+    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    junitVersion ="4.13.1"
+    apacheCommonsIoVersion = "1.3.2"
+    eclipsesourceMinimalJsonVersion = "0.9.4"
+    xeneiJunitContractsVersion = "0.1.7"
+    mockitoCoreVersion = "3.6.0"
+    testCoreVersion = "1.3.0"
+    testExtJunitVersion = "1.1.2"
+    testRunnerVersion = "1.3.0"
+    testRulesVersion = "1.3.0"
+
+    /////////////////////////////////////
+    // Library section
+    /////////////////////////////////////
+
+    bintrayRepo = "maven"
+
+    publishedGroupId = "me.jahnen"
+    libraryName = "libaums"
+
+    libraryDescription = "Android USB mass storage library with FAT32 support."
+
+    siteUrl = "https://github.com/magnusja/libaums"
+    gitUrl = "https://github.com/magnusja/libaums.git"
+
+    developerId = "magnusja"
+    developerName = "Magnus Jahnen"
+    developerEmail = "github@mgns.tech"
+
+    licenseName = "The Apache Software License, Version 2.0"
+    licenseUrl = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+    allLicenses = ["Apache-2.0"]
+}

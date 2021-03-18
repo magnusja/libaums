@@ -1,14 +1,15 @@
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'org.jetbrains.dokka'
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+apply plugin: "kotlin-android-extensions"
+apply plugin: "org.jetbrains.dokka"
+apply from: "../constants.gradle"
 
-project.archivesBaseName = 'libaums-httpserver'
+project.archivesBaseName = "libaums-httpserver"
 
 ext {
-    artifact = 'libaums-httpserver'
-    bintrayName = 'libaums-httpserver'
-    libraryVersion = '0.5.3'
+    artifact = "libaums-httpserver"
+    bintrayName = "libaums-httpserver"
+    libraryVersion = "0.5.3"
 }
 
 configurations {
@@ -16,19 +17,19 @@ configurations {
 }
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion '30.0.3'
+    compileSdkVersion project.ext.compileSdkVersion
+    buildToolsVersion project.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion project.ext.minSdkVersion
+        targetSdkVersion project.ext.targetSdkVersion
+        versionCode project.ext.versionCode
+        versionName project.ext.versionName
     }
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
     lintOptions {
@@ -36,25 +37,16 @@ android {
     }
 }
 
-
 dependencies {
-    api 'org.nanohttpd:nanohttpd:2.+'
-    javadocDeps 'org.nanohttpd:nanohttpd:2.+'
-
-    api 'com.koushikdutta.async:androidasync:2.+'
-
-    api fileTree(include: ['*.jar'], dir: 'libs')
-    api 'androidx.annotation:annotation:1.1.0'
-    api 'androidx.core:core:1.2.0-rc01'
-    api project(':libaums')
-    api "androidx.core:core-ktx:1.1.0"
-    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    javadocDeps "org.nanohttpd:nanohttpd:$nanohttpdVersion"
+    api "org.nanohttpd:nanohttpd:$nanohttpdVersion"
+    api "com.koushikdutta.async:androidasync:$koushikduttaAsyncVersion"
+    api "androidx.core:core-ktx:$coreKtx"
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+    api project(":libaums")
 }
 
 task bintray {
-    apply from: '../install.gradle'
-    apply from: '../bintray.gradle'
-}
-repositories {
-    mavenCentral()
+    apply from: "../install.gradle"
+    apply from: "../bintray.gradle"
 }
