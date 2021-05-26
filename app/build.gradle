@@ -34,5 +34,5 @@ dependencies {
     api project(':httpserver')
     api project(':storageprovider')
     api project(':javafs')
-    api project(':libusbcommunication')
+    //api project(':libusbcommunication')
 }
