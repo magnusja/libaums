@@ -135,7 +135,10 @@ internal constructor(startCluster: Long, private val blockDevice: BlockDeviceDri
             val size = Math.min(length, (clusterSize - clusterOffset).toInt())
             dest.limit(dest.position() + size)
 
-            blockDevice.read(getFileSystemOffset(chain[chainIndex], clusterOffset), dest)
+            val tmpBuffer = ByteBuffer.allocate(size)
+            blockDevice.read(getFileSystemOffset(chain[chainIndex], clusterOffset), tmpBuffer)
+            tmpBuffer.flip()
+            dest.put(tmpBuffer)
 
             // round up to next cluster in the chain
             chainIndex++
@@ -151,7 +154,10 @@ internal constructor(startCluster: Long, private val blockDevice: BlockDeviceDri
             val size = Math.min(clusterSize, length.toLong()).toInt()
             dest.limit(dest.position() + size)
 
-            blockDevice.read(getFileSystemOffset(chain[chainIndex], 0), dest)
+            val tmpBuffer = ByteBuffer.allocate(size)
+            blockDevice.read(getFileSystemOffset(chain[chainIndex], 0), tmpBuffer)
+            tmpBuffer.flip()
+            dest.put(tmpBuffer)
 
             chainIndex++
             length -= size
