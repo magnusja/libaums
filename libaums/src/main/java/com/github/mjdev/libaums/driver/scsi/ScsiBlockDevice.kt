@@ -255,18 +255,18 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
         }
 
         var transferLength = command.dCbwDataTransferLength
-        inBuffer.clear()
-        inBuffer.limit(transferLength)
 
         var read = 0
         if (transferLength > 0) {
 
             if (command.direction == Direction.IN) {
+                val tmpBuffer = ByteBuffer.allocate(transferLength)
+
                 do {
-                    read += usbCommunication.bulkInTransfer(inBuffer)
+                    read += usbCommunication.bulkInTransfer(tmpBuffer)
                     if (command.bCbwDynamicSize) {
-                        transferLength = command.dynamicSizeFromPartialResponse(inBuffer)
-                        inBuffer.limit(transferLength)
+                        transferLength = command.dynamicSizeFromPartialResponse(tmpBuffer)
+                        tmpBuffer.limit(transferLength)
                     }
                 } while (read < transferLength)
 
@@ -274,6 +274,10 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
                     throw IOException("Unexpected command size (" + read + ") on response to "
                             + command)
                 }
+
+                tmpBuffer.flip()
+                inBuffer.limit(inBuffer.position() + transferLength)
+                inBuffer.put(tmpBuffer)
             } else {
                 written = 0
                 do {
