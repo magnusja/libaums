@@ -60,7 +60,7 @@ class UsbFileInputStream(private val file: UsbFile) : InputStream() {
 
     @Throws(IOException::class)
     override fun close() {
-        file.close()
+        // don't need to flush to the disk after reading a file
     }
 
     @Throws(IOException::class)
