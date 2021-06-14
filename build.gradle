@@ -35,7 +35,6 @@ buildscript {
 
 allprojects {
     repositories {
-        maven { url 'https://dl.bintray.com/magnusja/maven' }
         maven {
             url 'https://maven.google.com/'
             name 'Google'
