@@ -5,10 +5,12 @@ apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'com.hiya.jacoco-android'
 
 ext {
-    artifact = 'libaums'
-    bintrayName = 'libaums'
-    libraryVersion = '0.7.6'
+    PUBLISH_GROUP_ID = 'me.jahnen'
+    PUBLISH_VERSION = '0.8.0'
+    PUBLISH_ARTIFACT_ID = 'libaums'
 }
+
+apply from: "${rootProject.projectDir}/scripts/publish-module.gradle"
 
 configurations {
     javadocDeps
@@ -76,10 +78,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
-task bintray {
-    apply from: '../install.gradle'
-    apply from: '../bintray.gradle'
-}
 repositories {
     mavenCentral()
 }
