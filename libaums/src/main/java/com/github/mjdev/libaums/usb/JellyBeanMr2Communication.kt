@@ -52,7 +52,10 @@ internal class JellyBeanMr2Communication(
         if (result == -1) {
             when (ErrNo.errno) {
                 EPIPE -> throw PipeException()
-                else -> throw IOException("Could not read from device, result == -1 errno " + ErrNo.errno + " " + ErrNo.errstr)
+                else -> {
+                    this.clearFeatureHalt(inEndpoint)
+                    throw IOException("Could not read from device, result == -1 errno " + ErrNo.errno + " " + ErrNo.errstr)
+                }
             }
         }
 

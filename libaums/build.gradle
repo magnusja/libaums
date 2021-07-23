@@ -2,7 +2,6 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'org.jetbrains.dokka'
-apply plugin: "com.vanniktech.android.junit.jacoco"
 
 ext {
     artifact = 'libaums'
@@ -12,10 +11,6 @@ ext {
 
 configurations {
     javadocDeps
-}
-
-junitJacoco {
-    jacocoVersion = "0.8.6"
 }
 
 android {
@@ -59,7 +54,7 @@ android {
             path "CMakeLists.txt"
         }
     }
-    ndkVersion '22.0.70260617'
+    ndkVersion '22.0.7026061'
 }
 
 dependencies {
