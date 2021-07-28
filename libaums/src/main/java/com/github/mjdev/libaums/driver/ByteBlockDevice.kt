@@ -48,7 +48,8 @@ open class ByteBlockDevice @JvmOverloads constructor(private val targetBlockDevi
                 buffer = ByteBuffer.allocate(rounded)
                 buffer.limit(rounded)
             } else {
-                buffer = dest
+                buffer = ByteBuffer.allocate(dest.remaining())
+                buffer.limit(dest.remaining())
             }
 
             targetBlockDevice.read(devOffset, buffer)
