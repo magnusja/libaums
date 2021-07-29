@@ -54,9 +54,7 @@ open class ByteBlockDevice @JvmOverloads constructor(private val targetBlockDevi
 
             targetBlockDevice.read(devOffset, buffer)
 
-            if (dest.remaining() % blockSize != 0) {
-                System.arraycopy(buffer.array(), 0, dest.array(), dest.position(), dest.remaining())
-            }
+            System.arraycopy(buffer.array(), 0, dest.array(), dest.position(), dest.remaining())
 
             dest.position(dest.limit())
         }
