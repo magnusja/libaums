@@ -813,10 +813,10 @@ public class UsbFileTest {
             root.createFile("" + i);
         }
 
-        assertEquals(128 + current, root.list().length);
+        assertEquals(129 + current, root.list().length);
 
         newInstance();
-        assertEquals(128 + current, root.list().length);
+        assertEquals(129 + current, root.list().length);
     }
 
     @ContractTest
