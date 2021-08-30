@@ -805,6 +805,23 @@ public class UsbFileTest {
         }
     }
 
+
+    @ContractTest
+    public void testIssue298() throws IOException {
+        UsbFile file = root.createDirectory("testIssue298");
+
+        for(int i = 0; i < 256; i++) {
+            file.createFile("" + i);
+        }
+
+        root.search("testIssue298");
+        assertEquals(root.list().length, 256);
+
+        newInstance();
+        root.search("testIssue298");
+        assertEquals(root.list().length, 256);
+    }
+
     @ContractTest
     public void testIssue187() throws IOException {
         UsbFile file = root.createFile("testissue187");
