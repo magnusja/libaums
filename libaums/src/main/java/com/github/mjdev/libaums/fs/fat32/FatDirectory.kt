@@ -255,8 +255,8 @@ internal constructor(
             ShortNameGenerator.generateShortName(newName, shortNameMap.keys)
         } else {
             ShortName(
-                newName.substringBefore(".").uppercase(),
-                newName.substringAfter(".", "").uppercase()
+                newName.substringBefore(".").toUpperCase(Locale.ROOT),
+                newName.substringAfter(".", "").toUpperCase(Locale.ROOT)
             )
         }
 
@@ -325,8 +325,8 @@ internal constructor(
             entry = FatLfnDirectoryEntry(name, shortName)
         } else {
             shortName = ShortName(
-                name.substringBefore(".").uppercase(),
-                name.substringAfter(".", "").uppercase()
+                name.substringBefore(".").toUpperCase(Locale.ROOT),
+                name.substringAfter(".", "").toUpperCase(Locale.ROOT)
             )
             entry = FatLfnDirectoryEntry(if (name == shortName.string) null else name, shortName)
         }
@@ -364,8 +364,8 @@ internal constructor(
         } else {
             // ShortFileName
             shortName = ShortName(
-                name.substringBefore(".").uppercase(),
-                name.substringAfter(".", "").uppercase()
+                name.substringBefore(".").toUpperCase(Locale.ROOT),
+                name.substringAfter(".", "").toUpperCase(Locale.ROOT)
             )
             entry = FatLfnDirectoryEntry(if (name == shortName.string) null else name, shortName)
         }
