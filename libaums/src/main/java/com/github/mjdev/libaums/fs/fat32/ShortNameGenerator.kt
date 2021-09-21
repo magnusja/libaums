@@ -40,7 +40,7 @@ internal object ShortNameGenerator {
     private fun isValidChar(c: Char): Boolean {
         if (c in '0'..'9')
             return true
-        return if (c in 'A'..'Z') true else c == '$' || c == '%' || c == '\'' || c == '-' || c == '_' || c == '@' || c == '~'
+        return if ((c in 'A'..'Z') || (c in 'a'..'z')) true else c == '$' || c == '%' || c == '\'' || c == '-' || c == '_' || c == '@' || c == '~'
                 || c == '`' || c == '!' || c == '(' || c == ')' || c == '{' || c == '}' || c == '^'
                 || c == '#' || c == '&'
 
@@ -197,6 +197,15 @@ internal object ShortNameGenerator {
         }
 
         return result
+    }
+
+    fun filenameIsLfn(filename: String): Boolean {
+
+        val namePart = filename.substringBefore(".")
+        val extPart = filename.substringAfter(".", "")
+
+        return namePart.length > 8 || extPart.length > 3 || containsInvalidChars(namePart) || containsInvalidChars(extPart)
+
     }
 
     private fun containShortName(shortNames: Collection<ShortName>, shortName: ShortName): Boolean {

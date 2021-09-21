@@ -249,8 +249,18 @@ internal constructor(
             return
 
         removeEntry(lfnEntry)
-        lfnEntry.setName(newName,
-                ShortNameGenerator.generateShortName(newName, shortNameMap.keys))
+
+        val isLfn = ShortNameGenerator.filenameIsLfn(newName)
+        val shortName: ShortName = if (isLfn) {
+            ShortNameGenerator.generateShortName(newName, shortNameMap.keys)
+        } else {
+            ShortName(
+                newName.substringBefore(".").uppercase(),
+                newName.substringAfter(".", "").uppercase()
+            )
+        }
+
+        lfnEntry.setName(newName, shortName)
         addEntry(lfnEntry, lfnEntry.actualEntry)
         write()
     }
@@ -306,9 +316,21 @@ internal constructor(
 
         init() // initialise the directory before creating files
 
-        val shortName = ShortNameGenerator.generateShortName(name, shortNameMap.keys)
 
-        val entry = FatLfnDirectoryEntry(name, shortName)
+        val isLfn = ShortNameGenerator.filenameIsLfn(name)
+        val entry: FatLfnDirectoryEntry
+        val shortName: ShortName
+        if (isLfn) {
+            shortName = ShortNameGenerator.generateShortName(name, shortNameMap.keys)
+            entry = FatLfnDirectoryEntry(name, shortName)
+        } else {
+            shortName = ShortName(
+                name.substringBefore(".").uppercase(),
+                name.substringAfter(".", "").uppercase()
+            )
+            entry = FatLfnDirectoryEntry(if (name == shortName.string) null else name, shortName)
+        }
+
         // alloc completely new chain
         val newStartCluster = fat.alloc(arrayOf(), 1)[0]
         entry.startCluster = newStartCluster
@@ -330,9 +352,24 @@ internal constructor(
 
         init() // initialise the directory before creating files
 
-        val shortName = ShortNameGenerator.generateShortName(name, shortNameMap.keys)
+        val isLfn = ShortNameGenerator.filenameIsLfn(name)
 
-        val entry = FatLfnDirectoryEntry(name, shortName)
+        val entry: FatLfnDirectoryEntry
+        val shortName: ShortName
+
+        if (isLfn) {
+            // LongFileName
+            shortName = ShortNameGenerator.generateShortName(name, shortNameMap.keys)
+            entry = FatLfnDirectoryEntry(name, shortName)
+        } else {
+            // ShortFileName
+            shortName = ShortName(
+                name.substringBefore(".").uppercase(),
+                name.substringAfter(".", "").uppercase()
+            )
+            entry = FatLfnDirectoryEntry(if (name == shortName.string) null else name, shortName)
+        }
+
         entry.setDirectory()
         // alloc completely new chain
         val newStartCluster = fat.alloc(arrayOf(), 1)[0]
