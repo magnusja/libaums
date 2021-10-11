@@ -7,5 +7,4 @@ import java.nio.ByteBuffer
 
 class GPTCreator: PartitionTableFactory.PartitionTableCreator {
     override fun read(blockDevice: BlockDeviceDriver): PartitionTable? = GPT.read(blockDevice)
-
 }
