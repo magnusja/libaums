@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 30
+        targetSdkVersion 32
         versionCode 80
         versionName "0.8.0"
 
