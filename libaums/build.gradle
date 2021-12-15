@@ -18,7 +18,7 @@ junitJacoco {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 32
     buildToolsVersion '30.0.3'
 
     defaultConfig {
