@@ -18,6 +18,6 @@ jobs:
     - name: write local properties
       run: echo "libusb.dir=$GITHUB_WORKSPACE/libusb-1.0.24" > $GITHUB_WORKSPACE/local.properties
     - name: Build & test with Gradle
-      run: ./gradlew build -x bintray jacocoTestReportDebug --stacktrace
+      run: ./gradlew build -x bintray testDebugUnitTest --stacktrace
     - name: codecov
       run: bash <(curl -s https://codecov.io/bash)
