@@ -1,6 +1,5 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-
 buildscript {
     ext.kotlin_version = '1.6.10'
     repositories {
@@ -62,3 +61,14 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
+subprojects {
+    configurations.all {
+        resolutionStrategy {
+            eachDependency { details ->
+                if ('org.jacoco' == details.requested.group) {
+                    details.useVersion "0.8.7"
+                }
+            }
+        }
+    }
+}

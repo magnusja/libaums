@@ -3,8 +3,6 @@ apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.dokka'
 apply plugin: 'jacoco'
 
-jacoco.toolVersion = "0.8.7"
-
 ext {
     artifact = 'libaums'
     bintrayName = 'libaums'
