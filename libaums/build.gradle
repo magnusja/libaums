@@ -82,7 +82,7 @@ repositories {
 
 // https://about.codecov.io/blog/code-coverage-for-android-development-using-kotlin-jacoco-github-actions-and-codecov/
 task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
-
+    jacoco.toolVersion = "0.8.7"
     reports {
         xml.enabled = true
         html.enabled = true
@@ -99,3 +99,4 @@ task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'crea
             "outputs/code-coverage/connected/*coverage.ec"
     ]))
 }
+
