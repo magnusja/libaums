@@ -63,7 +63,3 @@ dependencies {
     api project(':libaums')
 }
 
-task bintray {
-    apply from: '../install.gradle'
-    apply from: '../bintray.gradle'
-}

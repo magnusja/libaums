@@ -50,10 +50,6 @@ dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
-task bintray {
-    apply from: '../install.gradle'
-    apply from: '../bintray.gradle'
-}
 repositories {
     mavenCentral()
 }
