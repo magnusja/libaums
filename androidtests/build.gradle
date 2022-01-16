@@ -6,10 +6,9 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
+        testInstrumentationRunnerArguments
         minSdkVersion 15
         targetSdkVersion 32
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments.package = 'me.jahnen.libaums.androidtests'
