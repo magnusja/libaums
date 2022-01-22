@@ -1,6 +1,6 @@
 package com.github.magnusja.libaums.javafs.wrapper.device;
 
-import com.github.mjdev.libaums.driver.BlockDeviceDriver;
+import me.jahnen.libaums.driver.BlockDeviceDriver;
 
 import org.jnode.driver.block.FSBlockDeviceAPI;
 import org.jnode.partitions.PartitionTable;
@@ -17,9 +17,9 @@ public class FSBlockDeviceWrapper implements FSBlockDeviceAPI {
 
     private static final String TAG = FSBlockDeviceWrapper.class.getSimpleName();
     private BlockDeviceDriver blockDevice;
-    private com.github.mjdev.libaums.partition.PartitionTableEntry partitionTableEntry;
+    private me.jahnen.libaums.partition.PartitionTableEntry partitionTableEntry;
 
-    public FSBlockDeviceWrapper(BlockDeviceDriver blockDevice, com.github.mjdev.libaums.partition.PartitionTableEntry partitionTableEntry) {
+    public FSBlockDeviceWrapper(BlockDeviceDriver blockDevice, me.jahnen.libaums.partition.PartitionTableEntry partitionTableEntry) {
         this.blockDevice = blockDevice;
         this.partitionTableEntry = partitionTableEntry;
     }

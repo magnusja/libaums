@@ -2,8 +2,8 @@ package com.github.magnusja.libaums.javafs.wrapper.fs;
 
 import android.util.Log;
 
-import com.github.mjdev.libaums.fs.FileSystem;
-import com.github.mjdev.libaums.fs.UsbFile;
+import me.jahnen.libaums.fs.FileSystem;
+import me.jahnen.libaums.fs.UsbFile;
 
 import org.jnode.driver.ApiNotFoundException;
 import org.jnode.driver.block.FSBlockDeviceAPI;

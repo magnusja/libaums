@@ -2,11 +2,11 @@ package me.jahnen.libaums.libusbcommunication
 
 import android.hardware.usb.*
 import android.util.Log
-import com.github.mjdev.libaums.ErrNo
-import com.github.mjdev.libaums.usb.PipeException
-import com.github.mjdev.libaums.usb.UsbCommunication
-import com.github.mjdev.libaums.usb.UsbCommunication.Companion.TRANSFER_TIMEOUT
-import com.github.mjdev.libaums.usb.UsbCommunicationCreator
+import me.jahnen.libaums.ErrNo
+import me.jahnen.libaums.usb.PipeException
+import me.jahnen.libaums.usb.UsbCommunication
+import me.jahnen.libaums.usb.UsbCommunication.Companion.TRANSFER_TIMEOUT
+import me.jahnen.libaums.usb.UsbCommunicationCreator
 import java.io.IOException
 import java.nio.ByteBuffer
 

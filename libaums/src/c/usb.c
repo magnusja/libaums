@@ -8,7 +8,7 @@
 #define TAG "native_usb_ioctl"
 
 JNIEXPORT jboolean JNICALL
-Java_com_github_mjdev_libaums_usb_AndroidUsbCommunication_resetUsbDeviceNative(JNIEnv *env, jobject thiz, jint fd) {
+Java_me_jahnen_libaums_usb_AndroidUsbCommunication_resetUsbDeviceNative(JNIEnv *env, jobject thiz, jint fd) {
     int ret = ioctl(fd, USBDEVFS_RESET);
     if(ret < 0) {
         LOG_E(TAG, "ioctl USBDEVFS_RESET error %d, %s", errno, strerror(errno));
@@ -18,7 +18,7 @@ Java_com_github_mjdev_libaums_usb_AndroidUsbCommunication_resetUsbDeviceNative(J
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_github_mjdev_libaums_usb_AndroidUsbCommunication_clearHaltNative(JNIEnv *env, jobject thiz, jint fd, jint endpoint) {
+Java_me_jahnen_libaums_usb_AndroidUsbCommunication_clearHaltNative(JNIEnv *env, jobject thiz, jint fd, jint endpoint) {
     int ret = ioctl(fd, USBDEVFS_CLEAR_HALT, &endpoint);
     if(ret < 0) {
         LOG_E(TAG, "ioctl USBDEVFS_CLEAR_HALT error %d, %s", errno, strerror(errno));

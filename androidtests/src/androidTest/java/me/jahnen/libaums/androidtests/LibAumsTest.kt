@@ -10,12 +10,12 @@ import android.util.Log
 import androidx.test.InstrumentationRegistry
 import androidx.test.filters.LargeTest
 import com.github.magnusja.libaums.javafs.JavaFsFileSystemCreator
-import com.github.mjdev.libaums.UsbMassStorageDevice
-import com.github.mjdev.libaums.UsbMassStorageDevice.Companion.getMassStorageDevices
-import com.github.mjdev.libaums.fs.FileSystem
-import com.github.mjdev.libaums.fs.FileSystemFactory
-import com.github.mjdev.libaums.fs.UsbFile
-import com.github.mjdev.libaums.usb.UsbCommunicationFactory
+import me.jahnen.libaums.UsbMassStorageDevice
+import me.jahnen.libaums.UsbMassStorageDevice.Companion.getMassStorageDevices
+import me.jahnen.libaums.fs.FileSystem
+import me.jahnen.libaums.fs.FileSystemFactory
+import me.jahnen.libaums.fs.UsbFile
+import me.jahnen.libaums.usb.UsbCommunicationFactory
 import junit.framework.Assert
 import junit.framework.TestCase
 import me.jahnen.libaums.libusbcommunication.LibusbCommunicationCreator
@@ -43,7 +43,7 @@ open class LibAumsTest(
     /**
      * Action string to request the permission to communicate with an UsbDevice.
      */
-    private val ACTION_USB_PERMISSION = "com.github.mjdev.libaums.USB_PERMISSION"
+    private val ACTION_USB_PERMISSION = "me.jahnen.libaums.USB_PERMISSION"
 
     private lateinit var device: UsbMassStorageDevice
     private lateinit var fs: FileSystem

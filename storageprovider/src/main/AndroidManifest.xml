@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.github.mjdev.libaums.storageprovider">
+    package="me.jahnen.libaums.storageprovider">
 
     <uses-feature
         android:name="android.hardware.usb.host"
@@ -8,8 +8,8 @@
     <application>
 
         <provider
-            android:name="com.github.mjdev.libaums.storageprovider.UsbDocumentProvider"
-            android:authorities="com.github.mjdev.libaums.storageprovider.documents"
+            android:name="me.jahnen.libaums.storageprovider.UsbDocumentProvider"
+            android:authorities="me.jahnen.libaums.storageprovider.documents"
             android:exported="true"
             android:grantUriPermissions="true"
             android:permission="android.permission.MANAGE_DOCUMENTS"

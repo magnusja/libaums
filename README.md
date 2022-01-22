@@ -302,8 +302,8 @@ To integrate this module in your app the only thing you have to do is add the de
 
 ```xml
 <provider
-    android:name="com.github.mjdev.libaums.storageprovider.UsbDocumentProvider"
-    android:authorities="com.github.mjdev.libaums.storageprovider.documents"
+    android:name="me.jahnen.libaums.storageprovider.UsbDocumentProvider"
+    android:authorities="me.jahnen.libaums.storageprovider.documents"
     android:exported="true"
     android:grantUriPermissions="true"
     android:permission="android.permission.MANAGE_DOCUMENTS"
