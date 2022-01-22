@@ -1,10 +1,10 @@
-package com.github.magnusja.libaums.javafs;
+package me.jahnen.libaums.javafs;
 
 import android.util.Log;
 
-import com.github.magnusja.libaums.javafs.wrapper.device.DeviceWrapper;
-import com.github.magnusja.libaums.javafs.wrapper.device.FSBlockDeviceWrapper;
-import com.github.magnusja.libaums.javafs.wrapper.fs.FileSystemWrapper;
+import me.jahnen.libaums.javafs.wrapper.device.DeviceWrapper;
+import me.jahnen.libaums.javafs.wrapper.device.FSBlockDeviceWrapper;
+import me.jahnen.libaums.javafs.wrapper.fs.FileSystemWrapper;
 import me.jahnen.libaums.driver.BlockDeviceDriver;
 import me.jahnen.libaums.fs.FileSystem;
 import me.jahnen.libaums.fs.FileSystemCreator;

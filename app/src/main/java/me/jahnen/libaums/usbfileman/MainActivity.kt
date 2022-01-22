@@ -39,7 +39,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
 import androidx.drawerlayout.widget.DrawerLayout
-import com.github.magnusja.libaums.javafs.JavaFsFileSystemCreator
+import me.jahnen.libaums.javafs.JavaFsFileSystemCreator
 import me.jahnen.libaums.UsbMassStorageDevice
 import me.jahnen.libaums.UsbMassStorageDevice.Companion.getMassStorageDevices
 import me.jahnen.libaums.fs.FileSystem

@@ -9,7 +9,7 @@ import android.hardware.usb.UsbManager
 import android.util.Log
 import androidx.test.InstrumentationRegistry
 import androidx.test.filters.LargeTest
-import com.github.magnusja.libaums.javafs.JavaFsFileSystemCreator
+import me.jahnen.libaums.javafs.JavaFsFileSystemCreator
 import me.jahnen.libaums.UsbMassStorageDevice
 import me.jahnen.libaums.UsbMassStorageDevice.Companion.getMassStorageDevices
 import me.jahnen.libaums.fs.FileSystem

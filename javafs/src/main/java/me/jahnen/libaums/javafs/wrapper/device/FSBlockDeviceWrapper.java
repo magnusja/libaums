@@ -1,4 +1,4 @@
-package com.github.magnusja.libaums.javafs.wrapper.device;
+package me.jahnen.libaums.javafs.wrapper.device;
 
 import me.jahnen.libaums.driver.BlockDeviceDriver;
 
