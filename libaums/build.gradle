@@ -1,7 +1,11 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'org.jetbrains.dokka'
-apply plugin: 'jacoco'
+apply plugin: 'com.dicedmelon.gradle.jacoco-android'
+
+jacoco {
+  toolVersion = "0.8.7"
+}
 
 ext {
     artifact = 'libaums'
@@ -20,8 +24,6 @@ android {
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 32
-        versionCode 80
-        versionName "0.8.0"
 
         externalNativeBuild {
             cmake {
@@ -50,6 +52,8 @@ android {
         unitTests.all {
             jacoco {
                 includeNoLocationClasses = true
+                // https://github.com/arturdm/jacoco-android-gradle-plugin/issues/91
+                excludes = ['jdk.internal.*'] // Allows it to run on Java 11
             }
         }
         unitTests.returnDefaultValues = true
@@ -81,23 +85,23 @@ dependencies {
 repositories {
     mavenCentral()
 }
+//
+//// https://about.codecov.io/blog/code-coverage-for-android-development-using-kotlin-jacoco-github-actions-and-codecov/
+//task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
+//    reports {
+//        xml.enabled = true
+//        html.enabled = true
+//    }
+//
+//    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*']
+//    def debugTree = fileTree(dir: "${buildDir}/intermediates/classes/debug", excludes: fileFilter)
+//    def mainSrc = "${project.projectDir}/src/main/java"
+//
+//    sourceDirectories.setFrom(files([mainSrc]))
+//    classDirectories.setFrom(files([debugTree]))
+//    executionData.setFrom(fileTree(dir: "$buildDir", includes: [
+//            "jacoco/testDebugUnitTest.exec",
+//            "outputs/code-coverage/connected/*coverage.ec"
+//    ]))
+//}
 
-// https://about.codecov.io/blog/code-coverage-for-android-development-using-kotlin-jacoco-github-actions-and-codecov/
-task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
-
-    reports {
-        xml.enabled = true
-        html.enabled = true
-    }
-
-    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*']
-    def debugTree = fileTree(dir: "${buildDir}/intermediates/classes/debug", excludes: fileFilter)
-    def mainSrc = "${project.projectDir}/src/main/java"
-
-    sourceDirectories.setFrom(files([mainSrc]))
-    classDirectories.setFrom(files([debugTree]))
-    executionData.setFrom(fileTree(dir: "$buildDir", includes: [
-            "jacoco/testDebugUnitTest.exec",
-            "outputs/code-coverage/connected/*coverage.ec"
-    ]))
-}
