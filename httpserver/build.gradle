@@ -5,10 +5,12 @@ apply plugin: 'org.jetbrains.dokka'
 project.archivesBaseName = 'libaums-httpserver'
 
 ext {
-    artifact = 'libaums-httpserver'
-    bintrayName = 'libaums-httpserver'
-    libraryVersion = '0.5.3'
+    PUBLISH_GROUP_ID = 'me.jahnen.libaums'
+    PUBLISH_VERSION = '0.6.0'
+    PUBLISH_ARTIFACT_ID = 'httpserver'
 }
+
+apply from: "${rootProject.projectDir}/publish-module.gradle"
 
 configurations {
     javadocDeps
@@ -35,10 +37,10 @@ android {
 
 
 dependencies {
-    api 'org.nanohttpd:nanohttpd:2.+'
-    javadocDeps 'org.nanohttpd:nanohttpd:2.+'
+    api 'org.nanohttpd:nanohttpd:2.3.1'
+    javadocDeps 'org.nanohttpd:nanohttpd:2.3.1'
 
-    api 'com.koushikdutta.async:androidasync:2.+'
+    api 'com.koushikdutta.async:androidasync:2.2.1'
 
     api fileTree(include: ['*.jar'], dir: 'libs')
     api 'androidx.annotation:annotation:1.1.0'
