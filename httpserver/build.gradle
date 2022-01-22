@@ -1,29 +1,28 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'org.jetbrains.dokka'
 
 project.archivesBaseName = 'libaums-httpserver'
 
 ext {
-    artifact = 'libaums-httpserver'
-    bintrayName = 'libaums-httpserver'
-    libraryVersion = '0.5.3'
+    PUBLISH_GROUP_ID = 'me.jahnen.libaums'
+    PUBLISH_VERSION = '0.6.2'
+    PUBLISH_ARTIFACT_ID = 'httpserver'
 }
+
+apply from: "${rootProject.projectDir}/publish-module.gradle"
 
 configurations {
     javadocDeps
 }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 32
+    buildToolsVersion '30.0.3'
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        targetSdkVersion 32
     }
     buildTypes {
         release {
@@ -36,16 +35,12 @@ android {
     }
 }
 
-dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/docs/javadoc"
-}
 
 dependencies {
-    api 'org.nanohttpd:nanohttpd:2.+'
-    javadocDeps 'org.nanohttpd:nanohttpd:2.+'
+    api 'org.nanohttpd:nanohttpd:2.3.1'
+    javadocDeps 'org.nanohttpd:nanohttpd:2.3.1'
 
-    api 'com.koushikdutta.async:androidasync:2.+'
+    api 'com.koushikdutta.async:androidasync:2.2.1'
 
     api fileTree(include: ['*.jar'], dir: 'libs')
     api 'androidx.annotation:annotation:1.1.0'
@@ -55,10 +50,6 @@ dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
-task bintray {
-    apply from: '../install.gradle'
-    apply from: '../bintray.gradle'
-}
 repositories {
     mavenCentral()
 }

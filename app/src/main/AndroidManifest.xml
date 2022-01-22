@@ -18,7 +18,7 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.github.mjdev.libaums.usbfileman" >
+    package="me.jahnen.libaums.core.usbfileman" >
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -31,9 +31,10 @@
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
         <activity
-            android:name="com.github.mjdev.libaums.usbfileman.MainActivity"
+            android:name="me.jahnen.libaums.core.usbfileman.MainActivity"
             android:label="@string/app_name"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait"
+                android:exported="true">
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
                 <action android:name="android.intent.action.MAIN" />
@@ -47,8 +48,8 @@
         </activity>
 
         <provider
-            android:name="com.github.mjdev.libaums.storageprovider.UsbDocumentProvider"
-            android:authorities="com.github.mjdev.libaums.storageprovider.documents"
+            android:name="me.jahnen.libaums.storageprovider.UsbDocumentProvider"
+            android:authorities="me.jahnen.libaums.storageprovider.documents"
             android:exported="true"
             android:grantUriPermissions="true"
             android:permission="android.permission.MANAGE_DOCUMENTS"

@@ -3,24 +3,25 @@ apply plugin: 'com.android.library'
 project.archivesBaseName = 'libaums-storageprovider'
 
 ext {
-    artifact = 'libaums-storageprovider'
-    bintrayName = 'libaums-storageprovider'
-    libraryVersion = '0.5.1'
+    PUBLISH_GROUP_ID = 'me.jahnen.libaums'
+    PUBLISH_VERSION = '0.6.2'
+    PUBLISH_ARTIFACT_ID = 'storageprovider'
 }
+
+apply from: "${rootProject.projectDir}/publish-module.gradle"
+
 
 configurations {
     javadocDeps
 }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 32
+    buildToolsVersion '30.0.3'
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        targetSdkVersion 32
     }
     buildTypes {
         release {
@@ -37,10 +38,4 @@ dependencies {
     api fileTree(include: ['*.jar'], dir: 'libs')
     api 'org.apache.commons:commons-io:1.3.2'
     api project(':libaums')
-}
-
-
-task bintray {
-    apply from: '../install.gradle'
-    apply from: '../bintray.gradle'
 }

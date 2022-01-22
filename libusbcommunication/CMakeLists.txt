@@ -17,7 +17,7 @@ add_library( libusb
              ${LIBUSB_SRC}/io.c
              ${LIBUSB_SRC}/sync.c
              ${LIBUSB_SRC}/os/linux_usbfs.c
-             ${LIBUSB_SRC}/os/poll_posix.c
+             ${LIBUSB_SRC}/os/events_posix.c
              ${LIBUSB_SRC}/os/threads_posix.c
              ${LIBUSB_SRC}/os/linux_netlink.c)
 target_link_libraries(libusb log)

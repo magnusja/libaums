@@ -1,6 +1,5 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'org.jetbrains.dokka'
 
 Properties props = new Properties()
@@ -8,19 +7,19 @@ props.load(new FileInputStream(project.rootProject.file('local.properties')))
 String libusbDir = props['libusb.dir']
 
 ext {
-    artifact = 'libaums-libusbcommunication'
-    bintrayName = 'libaums-libusbcommunication'
-    libraryVersion = '0.1'
+    PUBLISH_GROUP_ID = 'me.jahnen.libaums'
+    PUBLISH_VERSION = '0.2.2'
+    PUBLISH_ARTIFACT_ID = 'libusbcommunication'
 }
 
+apply from: "${rootProject.projectDir}/publish-module.gradle"
+
 android {
-    compileSdkVersion 29
+    compileSdkVersion 32
 
     defaultConfig {
         minSdkVersion 15
-        targetSdkVersion 29
-        versionCode 1
-        versionName "0.1"
+        targetSdkVersion 32
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
@@ -30,6 +29,7 @@ android {
                 arguments "-DLIBUSB_PATH=" + libusbDir
                 abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'
             }
+            ndkVersion '23.1.7779620'
         }
     }
 
@@ -48,15 +48,11 @@ android {
 
 }
 
-dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/docs/javadoc"
-}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.1.0'
+    implementation 'androidx.core:core-ktx:1.7.0'
 
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.apache.commons:commons-io:1.3.2'
@@ -67,7 +63,3 @@ dependencies {
     api project(':libaums')
 }
 
-task bintray {
-    apply from: '../install.gradle'
-    apply from: '../bintray.gradle'
-}
