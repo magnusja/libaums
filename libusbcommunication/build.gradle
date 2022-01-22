@@ -7,10 +7,12 @@ props.load(new FileInputStream(project.rootProject.file('local.properties')))
 String libusbDir = props['libusb.dir']
 
 ext {
-    artifact = 'libaums-libusbcommunication'
-    bintrayName = 'libaums-libusbcommunication'
-    libraryVersion = '0.2'
+    PUBLISH_GROUP_ID = 'me.jahnen.libaums'
+    PUBLISH_VERSION = '0.2.0'
+    PUBLISH_ARTIFACT_ID = 'libusbcommunication'
 }
+
+apply from: "${rootProject.projectDir}/publish-module.gradle"
 
 android {
     compileSdkVersion 32

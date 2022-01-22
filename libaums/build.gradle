@@ -9,7 +9,7 @@ jacoco {
 
 ext {
     PUBLISH_GROUP_ID = 'me.jahnen'
-    PUBLISH_VERSION = '0.8.0'
+    PUBLISH_VERSION = '0.9.0'
     PUBLISH_ARTIFACT_ID = 'libaums'
 }
 

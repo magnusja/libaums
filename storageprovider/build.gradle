@@ -3,10 +3,13 @@ apply plugin: 'com.android.library'
 project.archivesBaseName = 'libaums-storageprovider'
 
 ext {
-    artifact = 'libaums-storageprovider'
-    bintrayName = 'libaums-storageprovider'
-    libraryVersion = '0.5.1'
+    PUBLISH_GROUP_ID = 'me.jahnen.libaums'
+    PUBLISH_VERSION = '0.6.0'
+    PUBLISH_ARTIFACT_ID = 'storageprovider'
 }
+
+apply from: "${rootProject.projectDir}/publish-module.gradle"
+
 
 configurations {
     javadocDeps
