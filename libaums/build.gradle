@@ -52,6 +52,8 @@ android {
         unitTests.all {
             jacoco {
                 includeNoLocationClasses = true
+                // https://github.com/arturdm/jacoco-android-gradle-plugin/issues/91
+                excludes = ['jdk.internal.*'] // Allows it to run on Java 11
             }
         }
         unitTests.returnDefaultValues = true
