@@ -8,10 +8,12 @@ jacoco {
 }
 
 ext {
-    artifact = 'libaums'
-    bintrayName = 'libaums'
-    libraryVersion = '0.8.0'
+    PUBLISH_GROUP_ID = 'me.jahnen'
+    PUBLISH_VERSION = '0.8.0'
+    PUBLISH_ARTIFACT_ID = 'libaums'
 }
+
+apply from: "${rootProject.projectDir}/publish-module.gradle"
 
 configurations {
     javadocDeps
