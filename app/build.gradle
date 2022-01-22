@@ -1,13 +1,14 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 32
+    buildToolsVersion '30.0.3'
 
     defaultConfig {
         applicationId "com.github.mjdev.usbfileman"
         minSdkVersion 16
-        targetSdkVersion 29
+        targetSdkVersion 32
         versionCode 1
         versionName "1.0"
     }
@@ -25,9 +26,9 @@ android {
 
 dependencies {
     api fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'junit:junit:4.12'
-    api 'androidx.appcompat:appcompat:1.0.0-beta01'
-    api 'com.google.android.material:material:1.0.0-beta01'
+    implementation 'junit:junit:4.13'
+    api 'androidx.appcompat:appcompat:1.4.0'
+    api 'com.google.android.material:material:1.6.0-alpha01'
     api project(':libaums')
     api project(':httpserver')
     api project(':storageprovider')

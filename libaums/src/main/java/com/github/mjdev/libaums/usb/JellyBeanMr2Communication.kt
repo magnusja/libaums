@@ -7,6 +7,7 @@ package com.github.mjdev.libaums.usb
 import android.annotation.TargetApi
 import android.hardware.usb.*
 import android.os.Build
+import android.system.OsConstants.EPIPE
 import com.github.mjdev.libaums.ErrNo
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -33,7 +34,10 @@ internal class JellyBeanMr2Communication(
                 src.array(), src.position(), src.remaining(), UsbCommunication.TRANSFER_TIMEOUT)
 
         if (result == -1) {
-            throw IOException("Could not write to device, result == -1 errno " + ErrNo.errno + " " + ErrNo.errstr)
+            when (ErrNo.errno) {
+                EPIPE -> throw PipeException()
+                else -> throw IOException("Could not read from device, result == -1 errno " + ErrNo.errno + " " + ErrNo.errstr)
+            }
         }
 
         src.position(src.position() + result)
@@ -46,7 +50,10 @@ internal class JellyBeanMr2Communication(
                 dest.array(), dest.position(), dest.remaining(), UsbCommunication.TRANSFER_TIMEOUT)
 
         if (result == -1) {
-            throw IOException("Could not read from device, result == -1 errno " + ErrNo.errno + " " + ErrNo.errstr)
+            when (ErrNo.errno) {
+                EPIPE -> throw PipeException()
+                else -> throw IOException("Could not read from device, result == -1 errno " + ErrNo.errno + " " + ErrNo.errstr)
+            }
         }
 
         dest.position(dest.position() + result)

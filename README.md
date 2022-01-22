@@ -1,7 +1,7 @@
 libaums
 =======
 [![Javadocs](https://www.javadoc.io/badge/me.jahnen/libaums.svg)](https://www.javadoc.io/doc/me.jahnen/libaums)
-[ ![Build Status](https://travis-ci.org/magnusja/libaums.svg?branch=develop)](https://travis-ci.org/magnusja/libaums)[ ![codecov](https://codecov.io/gh/magnusja/libaums/branch/develop/graph/badge.svg)](https://codecov.io/gh/magnusja/libaums)[ ![Codacy Badge](https://api.codacy.com/project/badge/Grade/31124a2747de41b49c040b9f7979c2a6)](https://www.codacy.com/manual/magnusja/libaums?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=magnusja/libaums&amp;utm_campaign=Badge_Grade)[ ![Download](https://api.bintray.com/packages/magnusja/maven/libaums/images/download.svg) ](https://bintray.com/magnusja/maven/libaums/_latestVersion)
+[ ![Build Status](https://travis-ci.org/magnusja/libaums.svg?branch=develop)](https://travis-ci.org/magnusja/libaums)[ ![codecov](https://codecov.io/gh/magnusja/libaums/branch/develop/graph/badge.svg)](https://codecov.io/gh/magnusja/libaums)[ ![Codacy Badge](https://api.codacy.com/project/badge/Grade/31124a2747de41b49c040b9f7979c2a6)](https://www.codacy.com/manual/magnusja/libaums?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=magnusja/libaums&amp;utm_campaign=Badge_Grade)
 [ ![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/libaums)
 
 A library to access USB mass storage devices (pen drives, external HDDs, card readers) using the Android USB Host API. Currently it supports the SCSI command set and the FAT32 file system.
@@ -13,7 +13,7 @@ A library to access USB mass storage devices (pen drives, external HDDs, card re
 The library can be included into your project like this:
 
 ```ruby
-implementation 'me.jahnen:libaums:0.7.6'
+implementation 'me.jahnen:libaums:0.8.0'
 ```
 
 If you need the HTTP or the storage provider module:
@@ -326,7 +326,7 @@ After that apps using the Storage Access Framework will be able to access the fi
 
 ##### Thesis
 
-The library was developed by Mr. Jahnen as part of his bachelor's thesis in 2014. It's a sub-topic of the research topic "Secure Copy Protection for Mobile Apps" by Mr. Kannengießer. The full thesis document can be downloaded [here](https://www.os.in.tum.de/fileadmin/w00bdp/www/Lehre/Abschlussarbeiten/Jahnen-thesis.pdf).
+The library was developed by Mr. Jahnen as part of his bachelor's thesis in 2014. It's a sub-topic of the research topic "Secure Copy Protection for Mobile Apps" by Mr. Kannengießer. The full thesis document can be downloaded [here](https://www.in.tum.de/fileadmin/w00bws/os/Lehre/Abschlussarbeiten/Jahnen-thesis.pdf).
 
 
 Libaums - Library to access USB Mass Storage Devices  

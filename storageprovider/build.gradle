@@ -13,14 +13,12 @@ configurations {
 }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 32
+    buildToolsVersion '30.0.3'
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        targetSdkVersion 32
     }
     buildTypes {
         release {
@@ -37,10 +35,4 @@ dependencies {
     api fileTree(include: ['*.jar'], dir: 'libs')
     api 'org.apache.commons:commons-io:1.3.2'
     api project(':libaums')
-}
-
-
-task bintray {
-    apply from: '../install.gradle'
-    apply from: '../bintray.gradle'
 }

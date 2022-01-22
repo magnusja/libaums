@@ -1,6 +1,5 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'org.jetbrains.dokka'
 
 project.archivesBaseName = 'libaums-httpserver'
@@ -16,14 +15,12 @@ configurations {
 }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 32
+    buildToolsVersion '30.0.3'
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        targetSdkVersion 32
     }
     buildTypes {
         release {
@@ -36,10 +33,6 @@ android {
     }
 }
 
-dokka {
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/docs/javadoc"
-}
 
 dependencies {
     api 'org.nanohttpd:nanohttpd:2.+'
@@ -55,10 +48,6 @@ dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
-task bintray {
-    apply from: '../install.gradle'
-    apply from: '../bintray.gradle'
-}
 repositories {
     mavenCentral()
 }
