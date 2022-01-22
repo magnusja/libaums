@@ -1,6 +1,6 @@
 libaums
 =======
-[![Javadocs](https://www.javadoc.io/badge/me.jahnen/libaums.svg)](https://www.javadoc.io/doc/me.jahnen/libaums)
+[![Javadocs](https://www.javadoc.io/badge/me.jahnen.libaums/core.svg)](https://www.javadoc.io/doc/me.jahnen.libaums/core)
 [ ![Build Status](https://travis-ci.org/magnusja/libaums.svg?branch=develop)](https://travis-ci.org/magnusja/libaums)[ ![codecov](https://codecov.io/gh/magnusja/libaums/branch/develop/graph/badge.svg)](https://codecov.io/gh/magnusja/libaums)[ ![Codacy Badge](https://api.codacy.com/project/badge/Grade/31124a2747de41b49c040b9f7979c2a6)](https://www.codacy.com/manual/magnusja/libaums?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=magnusja/libaums&amp;utm_campaign=Badge_Grade)
 [ ![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/libaums)
 
@@ -13,14 +13,14 @@ A library to access USB mass storage devices (pen drives, external HDDs, card re
 The library can be included into your project like this:
 
 ```ruby
-implementation 'me.jahnen:libaums:0.9.0'
+implementation 'me.jahnen:libaums:0.9.1'
 ```
 
 If you need the HTTP or the storage provider module:
 
 ```ruby
-implementation 'me.jahnen.libaums:httpserver:0.6.0'
-implementation 'me.jahnen.libaums:storageprovider:0.6.0'
+implementation 'me.jahnen.libaums:httpserver:0.6.2'
+implementation 'me.jahnen.libaums:storageprovider:0.6.2'
 ```
 
 ### Basics
@@ -175,7 +175,7 @@ Usually third party apps do not have access to the files on a mass storage devic
 
 
 ### HTTP server
-[![Javadocs](https://www.javadoc.io/badge/com.github.mjdev/libaums-httpserver.svg)](https://www.javadoc.io/doc/com.github.mjdev/libaums-httpserver)
+[![Javadocs](https://www.javadoc.io/badge/me.jahnen.libaums/httpserver.svg)](https://www.javadoc.io/doc/me.jahnen.libaums/httpserver)
 
 libaums currently supports two different HTTP server libraries.
 
@@ -294,7 +294,7 @@ See the example app for additional details on that.
 
 
 ### Storage Access Framework
-[![Javadocs](https://www.javadoc.io/badge/com.github.mjdev/libaums-storageprovider.svg)](https://www.javadoc.io/doc/com.github.mjdev/libaums-storageprovider)
+[![Javadocs](https://www.javadoc.io/badge/me.jahnen.libaums/storageprovider.svg)](https://www.javadoc.io/doc/me.jahnen.libaums/storageprovider)
 
 To learn more about this visit: https://developer.android.com/guide/topics/providers/document-provider.html
 

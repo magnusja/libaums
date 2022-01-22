@@ -1,6 +1,6 @@
 package me.jahnen.libaums.server.http
 
-import me.jahnen.libaums.fs.UsbFile
+import me.jahnen.libaums.core.fs.UsbFile
 
 import java.io.IOException
 

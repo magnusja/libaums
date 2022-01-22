@@ -1,7 +1,7 @@
 package me.jahnen.libaums.javafs.wrapper.device;
 
-import me.jahnen.libaums.driver.BlockDeviceDriver;
-import me.jahnen.libaums.partition.PartitionTableEntry;
+import me.jahnen.libaums.core.driver.BlockDeviceDriver;
+import me.jahnen.libaums.core.partition.PartitionTableEntry;
 
 import org.jnode.driver.Device;
 import org.jnode.driver.block.BlockDeviceAPI;

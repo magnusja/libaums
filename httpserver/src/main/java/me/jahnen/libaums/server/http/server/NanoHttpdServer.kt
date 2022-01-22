@@ -1,8 +1,8 @@
 package me.jahnen.libaums.server.http.server
 
 import android.util.Log
-import me.jahnen.libaums.fs.UsbFile
-import me.jahnen.libaums.fs.UsbFileInputStream
+import me.jahnen.libaums.core.fs.UsbFile
+import me.jahnen.libaums.core.fs.UsbFileInputStream
 import me.jahnen.libaums.server.http.UsbFileProvider
 import me.jahnen.libaums.server.http.exception.NotAFileException
 import fi.iki.elonen.NanoHTTPD

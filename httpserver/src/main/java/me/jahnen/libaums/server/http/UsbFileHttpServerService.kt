@@ -30,7 +30,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import me.jahnen.libaums.fs.UsbFile
+import me.jahnen.libaums.core.fs.UsbFile
 import me.jahnen.libaums.server.http.server.HttpServer
 import java.io.IOException
 

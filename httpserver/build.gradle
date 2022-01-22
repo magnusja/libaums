@@ -6,7 +6,7 @@ project.archivesBaseName = 'libaums-httpserver'
 
 ext {
     PUBLISH_GROUP_ID = 'me.jahnen.libaums'
-    PUBLISH_VERSION = '0.6.0'
+    PUBLISH_VERSION = '0.6.2'
     PUBLISH_ARTIFACT_ID = 'httpserver'
 }
 

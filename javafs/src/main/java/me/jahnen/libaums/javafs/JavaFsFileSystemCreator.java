@@ -5,10 +5,10 @@ import android.util.Log;
 import me.jahnen.libaums.javafs.wrapper.device.DeviceWrapper;
 import me.jahnen.libaums.javafs.wrapper.device.FSBlockDeviceWrapper;
 import me.jahnen.libaums.javafs.wrapper.fs.FileSystemWrapper;
-import me.jahnen.libaums.driver.BlockDeviceDriver;
-import me.jahnen.libaums.fs.FileSystem;
-import me.jahnen.libaums.fs.FileSystemCreator;
-import me.jahnen.libaums.partition.PartitionTableEntry;
+import me.jahnen.libaums.core.driver.BlockDeviceDriver;
+import me.jahnen.libaums.core.fs.FileSystem;
+import me.jahnen.libaums.core.fs.FileSystemCreator;
+import me.jahnen.libaums.core.partition.PartitionTableEntry;
 
 import org.apache.log4j.Logger;
 import org.jnode.fs.FileSystemException;

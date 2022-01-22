@@ -35,12 +35,12 @@ import android.util.Log;
 import android.util.LruCache;
 import android.webkit.MimeTypeMap;
 
-import me.jahnen.libaums.UsbMassStorageDevice;
-import me.jahnen.libaums.fs.FileSystem;
-import me.jahnen.libaums.fs.UsbFile;
-import me.jahnen.libaums.fs.UsbFileInputStream;
-import me.jahnen.libaums.fs.UsbFileOutputStream;
-import me.jahnen.libaums.partition.Partition;
+import me.jahnen.libaums.core.UsbMassStorageDevice;
+import me.jahnen.libaums.core.fs.FileSystem;
+import me.jahnen.libaums.core.fs.UsbFile;
+import me.jahnen.libaums.core.fs.UsbFileInputStream;
+import me.jahnen.libaums.core.fs.UsbFileOutputStream;
+import me.jahnen.libaums.core.partition.Partition;
 import me.jahnen.libaums.storageprovider.util.ParcelFileDescriptorUtil;
 
 import java.io.FileNotFoundException;

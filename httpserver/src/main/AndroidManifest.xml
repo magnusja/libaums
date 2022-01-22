@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="me.jahnen.libaums.httpserver">
+    package="me.jahnen.libaums.core.httpserver">
 
     <uses-permission android:name="android.permission.INTERNET" />
 

@@ -2,8 +2,8 @@ package me.jahnen.libaums.javafs.wrapper.fs;
 
 import android.util.Log;
 
-import me.jahnen.libaums.fs.AbstractUsbFile;
-import me.jahnen.libaums.fs.UsbFile;
+import me.jahnen.libaums.core.fs.AbstractUsbFile;
+import me.jahnen.libaums.core.fs.UsbFile;
 
 import org.jnode.fs.FSDirectory;
 import org.jnode.fs.FSEntry;
