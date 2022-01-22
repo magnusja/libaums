@@ -13,7 +13,7 @@ ext {
     PUBLISH_ARTIFACT_ID = 'libaums'
 }
 
-apply from: "${rootProject.projectDir}/scripts/publish-module.gradle"
+apply from: "${rootProject.projectDir}/publish-module.gradle"
 
 configurations {
     javadocDeps
