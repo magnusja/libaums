@@ -44,13 +44,13 @@ object FileSystemFactory {
 
     class UnsupportedFileSystemException : IOException()
 
-    init {
-        registerFileSystem(Fat32FileSystemCreator())
-    }
-
     @Throws(IOException::class, FileSystemFactory.UnsupportedFileSystemException::class)
     fun createFileSystem(entry: PartitionTableEntry,
                          blockDevice: BlockDeviceDriver): FileSystem {
+        if(fileSystems.isEmpty()) {
+            registerFileSystem(Fat32FileSystemCreator())
+        }
+
         for (creator in fileSystems) {
             val fs = creator.read(entry, blockDevice)
             if (fs != null) {
