@@ -9,7 +9,13 @@
 JNIEXPORT jboolean JNICALL
 Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeInit(JNIEnv *env, jobject thiz, jint fd, jlongArray handle) {
     LOG_D(TAG, "init native libusb");
-    int ret = libusb_init(NULL);
+    int ret = libusb_set_option(NULL, LIBUSB_OPTION_NO_DEVICE_DISCOVERY, NULL);
+    if (ret != 0) {
+        LOG_E(TAG, "libusb_set_option returned %d, %s", ret, libusb_strerror(ret));
+        return (jboolean) JNI_FALSE;
+    }
+
+    ret = libusb_init(NULL);
     if (ret != 0) {
         LOG_E(TAG, "libusb_init returned %d, %s", ret, libusb_strerror(ret));
         return (jboolean) JNI_FALSE;
