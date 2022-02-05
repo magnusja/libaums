@@ -31,8 +31,19 @@ import java.util.*
  * @author mjahnen
  */
 object FileSystemFactory {
+    private data class PrioritizedFileSystemCreator(val priority: Int, val count: Int, val creator: FileSystemCreator)
 
-    private val fileSystems = ArrayList<FileSystemCreator>()
+    private var count = 0;
+    private val comparator = compareBy<PrioritizedFileSystemCreator> { it.priority }.thenBy { it.count }
+    private val fileSystems = ArrayList<PrioritizedFileSystemCreator>()
+
+    /**
+     * The default priority of a creator registered with the file system.  Creators will be evaluated
+     * in order from lowest priority number to highest priority number.  If two creators are
+     * registered with the same priority then the one inserted first will be evaluated first.
+     */
+    const val DEFAULT_PRIORITY = 0
+
     /**
      * Set the timezone a file system should use to decode timestamps, if the file system only stores
      * local date and time and has no reference which zone these timestamp correspond to. (True for
@@ -44,15 +55,16 @@ object FileSystemFactory {
 
     class UnsupportedFileSystemException : IOException()
 
+    init {
+        registerFileSystem(Fat32FileSystemCreator(), DEFAULT_PRIORITY + 1)
+    }
+
+    @Synchronized
     @Throws(IOException::class, FileSystemFactory.UnsupportedFileSystemException::class)
     fun createFileSystem(entry: PartitionTableEntry,
                          blockDevice: BlockDeviceDriver): FileSystem {
-        if(fileSystems.isEmpty()) {
-            registerFileSystem(Fat32FileSystemCreator())
-        }
-
-        for (creator in fileSystems) {
-            val fs = creator.read(entry, blockDevice)
+        fileSystems.sortedWith(comparator).forEach {
+            val fs = it.creator.read(entry, blockDevice)
             if (fs != null) {
                 return fs
             }
@@ -62,7 +74,7 @@ object FileSystemFactory {
     }
 
     /**
-     * Register a new file system.
+     * Register a new file system at the default priority.
      * @param creator The creator which is able to check if a [BlockDeviceDriver] is holding
      * the correct type of file system and is able to instantiate a [FileSystem]
      * instance.
@@ -70,6 +82,32 @@ object FileSystemFactory {
     @Synchronized
     @JvmStatic
     fun registerFileSystem(creator: FileSystemCreator) {
-        fileSystems.add(creator)
+        registerFileSystem(creator, DEFAULT_PRIORITY)
     }
+
+    /**
+     * Register a new file system with the given priority.
+     * @param creator The creator which is able to check if a [BlockDeviceDriver] is holding
+     * the correct type of file system and is able to instantiate a [FileSystem]
+     * instance.
+     *
+     * @param priority The priority this file system creator has when attempting to
+     * create a file system.
+     */
+    @Synchronized
+    @JvmStatic
+    fun registerFileSystem(creator: FileSystemCreator, priority: Int) {
+        fileSystems.add(PrioritizedFileSystemCreator(priority, count++, creator))
+    }
+
+
+    /**
+     * Removes all registered file systems.
+     */
+    @Synchronized
+    @JvmStatic
+    fun clearFileSystems() {
+        fileSystems.clear()
+    }
+
 }
