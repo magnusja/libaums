@@ -33,9 +33,10 @@ import java.util.*
 object FileSystemFactory {
     private data class PrioritizedFileSystemCreator(val priority: Int, val count: Int, val creator: FileSystemCreator)
 
-    private var count = 0;
-    private val comparator = compareBy<PrioritizedFileSystemCreator> { it.priority }.thenBy { it.count }
-    private val fileSystems = ArrayList<PrioritizedFileSystemCreator>()
+    private var count = 0
+    private val fileSystems = TreeSet(
+        compareBy<PrioritizedFileSystemCreator> { it.priority }.thenBy { it.count }
+    )
 
     /**
      * The default priority of a creator registered with the file system.  Creators will be evaluated
@@ -63,7 +64,7 @@ object FileSystemFactory {
     @Throws(IOException::class, FileSystemFactory.UnsupportedFileSystemException::class)
     fun createFileSystem(entry: PartitionTableEntry,
                          blockDevice: BlockDeviceDriver): FileSystem {
-        fileSystems.sortedWith(comparator).forEach {
+        fileSystems.forEach {
             val fs = it.creator.read(entry, blockDevice)
             if (fs != null) {
                 return fs
