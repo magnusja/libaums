@@ -11,6 +11,9 @@ Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeInit(JNIEnv
     LOG_D(TAG, "init native libusb");
     int ret;
 
+// see https://github.com/magnusja/libaums/pull/335/files
+// for 1.0.25 LIBUSB_OPTION_NO_DEVICE_DISCOVERY is same as LIBUSB_OPTION_WEAK_AUTHORITY
+// essentially avoids enumerating USB devices which might cause trouble on non rooted devices
 #if defined(LIBUSB_API_VERSION) && (LIBUSB_API_VERSION >= 0x01000108)
     ret = libusb_set_option(NULL, LIBUSB_OPTION_WEAK_AUTHORITY);
     if (ret != 0) {
