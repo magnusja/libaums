@@ -1,3 +1,7 @@
+Building via "make project" will not generate the aar files needed by Varo.
+
+Run ./gradlew assemble from the command line to generate these files
+
 libusb module
 =======
 

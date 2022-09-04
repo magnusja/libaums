@@ -26,6 +26,7 @@ android {
 
         externalNativeBuild {
             cmake {
+                version "3.4.1"
                 arguments "-DLIBUSB_PATH=" + libusbDir
                 abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'
             }
