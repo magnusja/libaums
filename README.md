@@ -93,7 +93,7 @@ UsbFile root = currentFs.getRootDirectory();
 UsbFile[] files = root.listFiles();
 for(UsbFile file: files) {
     Log.d(TAG, file.getName());
-    if(file.isDirectory()) {
+    if(!file.isDirectory()) {
         Log.d(TAG, file.getLength());
     }
 }
