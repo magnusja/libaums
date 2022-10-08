@@ -44,9 +44,6 @@ android {
         }
     }
 
-    lintOptions {
-        abortOnError false
-    }
 
     // TODO remove this?
     testOptions {
@@ -67,6 +64,9 @@ android {
         }
 
         ndkVersion '23.1.7779620'
+    }
+    lint {
+        abortOnError false
     }
 }
 
