@@ -21,6 +21,7 @@ android {
     lint {
         abortOnError false
     }
+    namespace 'me.jahnen.libaums.core.usbfileman'
 
 }
 

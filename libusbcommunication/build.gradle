@@ -45,6 +45,7 @@ android {
             path "CMakeLists.txt"
         }
     }
+    namespace 'me.jahnen.libaums.libusbcommunication'
 
 }
 

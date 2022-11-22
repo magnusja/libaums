@@ -20,6 +20,7 @@ android {
     lint {
         abortOnError false
     }
+    namespace 'me.jahnen.libaums.javafs'
 }
 
 dependencies {
