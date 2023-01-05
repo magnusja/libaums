@@ -56,7 +56,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
      *
      * @return The block device size in blocks
      */
-    override val blocks: Long = lastBlockAddress.toLong()
+    override val blocks: Long get() = lastBlockAddress.toLong()
 
     /**
      * Issues a SCSI Inquiry to determine the connected device. After that it is
