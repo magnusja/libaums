@@ -6,7 +6,7 @@
 
 #define TAG "native_libusbcom"
 
-JNIEXPORT jboolean JNICALL
+JNIEXPORT jint JNICALL
 Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeInit(JNIEnv *env, jobject thiz, jint fd, jlongArray handle) {
     LOG_D(TAG, "init native libusb");
     int ret;
@@ -18,25 +18,25 @@ Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeInit(JNIEnv
     ret = libusb_set_option(NULL, LIBUSB_OPTION_WEAK_AUTHORITY);
     if (ret != 0) {
         LOG_E(TAG, "libusb_set_option returned %d, %s", ret, libusb_strerror(ret));
-        return (jboolean) JNI_FALSE;
+        return ret;
     }
 #endif
 
     ret = libusb_init(NULL);
     if (ret != 0) {
         LOG_E(TAG, "libusb_init returned %d, %s", ret, libusb_strerror(ret));
-        return (jboolean) JNI_FALSE;
+        return ret;
     }
 
     libusb_device_handle *devh = NULL;
     ret = libusb_wrap_sys_device(NULL, fd, &devh);
     if (ret != 0) {
         LOG_E(TAG, "libusb_wrap_sys_device returned %d, %s", ret, libusb_strerror(ret));
-        return (jboolean) JNI_FALSE;
+        return ret;
     }
     if (devh == NULL) {
         LOG_E(TAG, "libusb_wrap_sys_device device handle, %s NULL", libusb_strerror(ret));
-        return (jboolean) JNI_FALSE;
+        return LIBUSB_ERROR_OTHER;
     }
 
     jlong *body = (*env)->GetLongArrayElements(env, handle, NULL);
@@ -44,7 +44,7 @@ Java_me_jahnen_libaums_libusbcommunication_LibusbCommunication_nativeInit(JNIEnv
     body[0] = (jlong)devh;
     (*env)->ReleaseLongArrayElements(env, handle, body, NULL);
 
-    return (jboolean) JNI_TRUE;
+    return 0;
 }
 
 JNIEXPORT void JNICALL
