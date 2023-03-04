@@ -344,7 +344,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
     }
 
     companion object {
-        private const val MAX_RECOVERY_ATTEMPTS = 20
+        private const val MAX_RECOVERY_ATTEMPTS = 5
         private val TAG = ScsiBlockDevice::class.java.simpleName
     }
 }
