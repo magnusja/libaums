@@ -17,7 +17,7 @@ internal abstract class AndroidUsbCommunication(
 
     private var isNativeInited: Boolean = false
     var deviceConnection: UsbDeviceConnection? = null
-    private var isClosed = false
+    protected var isClosed = false
 
     init {
         initNativeLibrary()
@@ -49,10 +49,14 @@ internal abstract class AndroidUsbCommunication(
     }
 
     override fun controlTransfer(requestType: Int, request: Int, value: Int, index: Int, buffer: ByteArray, length: Int): Int {
+        require(!isClosed) { "device is closed" }
+
         return deviceConnection!!.controlTransfer(requestType, request, value, index, buffer, length, TRANSFER_TIMEOUT)
     }
 
     override fun resetDevice() {
+        require(!isClosed) { "device is closed" }
+
         Log.d(TAG, "Performing native reset")
 
         if (!deviceConnection!!.releaseInterface(usbInterface)) {
@@ -70,6 +74,8 @@ internal abstract class AndroidUsbCommunication(
     }
 
     override fun clearFeatureHalt(endpoint: UsbEndpoint) {
+        require(!isClosed) { "device is closed" }
+
         Log.w(TAG, "Clearing halt on endpoint $endpoint (direction ${endpoint.direction})")
         val result = clearHaltNative(deviceConnection!!.fileDescriptor, endpoint.address)
         if (!result) {
@@ -90,6 +96,8 @@ internal abstract class AndroidUsbCommunication(
     }
 
     override fun close() {
+        require(!isClosed) { "device is already closed" }
+
         Log.d(TAG, "close device")
         closeUsbConnection()
         isClosed = true
