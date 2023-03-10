@@ -31,7 +31,7 @@ class GPT private constructor(): PartitionTable {
                 blockDevice.read(1024L + (result.partitions.size * 128), buffer)
                 while (buffer[0].toInt() != 0) {
                     val offset = 1024 + (result.partitions.size * 128)
-                    val entry = PartitionTableEntry(0,
+                    val entry = PartitionTableEntry(-1, // Unknown
                         buffer.getInt(offset + 32), buffer.getInt(offset + 40))
 
                     result.partitions.add(entry)

@@ -28,7 +28,7 @@ class PartitionTableEntry
  * Construct a new PartitionTableEntry with the given information.
  *
  * @param partitionType
- * The file system type of the partition (eg. FAT32).
+ * The file system type of the partition (eg. FAT32). -1 if unknown
  * @param logicalBlockAddress
  * The logical block address on the device where this partition
  * starts.
