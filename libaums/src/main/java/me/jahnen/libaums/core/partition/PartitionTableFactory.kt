@@ -17,6 +17,7 @@
 
 package me.jahnen.libaums.core.partition
 
+import com.github.mjdev.libaums.partition.gpt.GPTCreator
 import me.jahnen.libaums.core.driver.BlockDeviceDriver
 import me.jahnen.libaums.core.partition.fs.FileSystemPartitionTableCreator
 import me.jahnen.libaums.core.partition.mbr.MasterBootRecordCreator
@@ -41,6 +42,7 @@ object PartitionTableFactory {
 
     init {
         registerPartitionTable(FileSystemPartitionTableCreator())
+        registerPartitionTable(GPTCreator())
         registerPartitionTable(MasterBootRecordCreator())
     }
 

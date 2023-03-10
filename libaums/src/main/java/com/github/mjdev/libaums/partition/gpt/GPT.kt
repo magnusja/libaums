@@ -38,7 +38,7 @@ class GPT private constructor(): PartitionTable {
                     blockDevice.read(offset + 128L, buffer)
                 }
             } else {
-                throw IOException("not a valid GPT")
+                return null
             }
 
             return result
