@@ -8,7 +8,7 @@ String libusbDir = props['libusb.dir']
 
 ext {
     PUBLISH_GROUP_ID = 'me.jahnen.libaums'
-    PUBLISH_VERSION = '0.2.2'
+    PUBLISH_VERSION = '0.2.3'
     PUBLISH_ARTIFACT_ID = 'libusbcommunication'
 }
 
