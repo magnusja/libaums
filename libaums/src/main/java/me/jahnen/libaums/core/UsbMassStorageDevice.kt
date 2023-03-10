@@ -168,8 +168,10 @@ private constructor(private val usbManager: UsbManager,
      * or write from or to the partitions returned by [.getPartitions].
      */
     fun close() {
-        usbCommunication.close()
-        inited = false
+        if (inited) {
+            usbCommunication.close()
+            inited = false
+        }
     }
 
     companion object {

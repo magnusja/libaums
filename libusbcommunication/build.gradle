@@ -8,7 +8,7 @@ String libusbDir = props['libusb.dir']
 
 ext {
     PUBLISH_GROUP_ID = 'me.jahnen.libaums'
-    PUBLISH_VERSION = '0.2.2'
+    PUBLISH_VERSION = '0.2.3'
     PUBLISH_ARTIFACT_ID = 'libusbcommunication'
 }
 
@@ -29,7 +29,7 @@ android {
                 arguments "-DLIBUSB_PATH=" + libusbDir
                 abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'
             }
-            ndkVersion '23.1.7779620'
+            ndkVersion '25.2.9519653'
         }
     }
 
@@ -45,6 +45,7 @@ android {
             path "CMakeLists.txt"
         }
     }
+    namespace 'me.jahnen.libaums.libusbcommunication'
 
 }
 
