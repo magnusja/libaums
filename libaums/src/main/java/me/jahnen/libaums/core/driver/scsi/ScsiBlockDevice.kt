@@ -267,8 +267,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
         }
 
         var transferLength = command.dCbwDataTransferLength
-        inBuffer.clear()
-        inBuffer.limit(transferLength)
+        inBuffer.limit(inBuffer.position() + transferLength)
 
         var read = 0
         if (transferLength > 0) {
@@ -278,7 +277,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
                     read += usbCommunication.bulkInTransfer(inBuffer)
                     if (command.bCbwDynamicSize) {
                         transferLength = command.dynamicSizeFromPartialResponse(inBuffer)
-                        inBuffer.limit(transferLength)
+                        inBuffer.limit(inBuffer.position() + transferLength)
                     }
                 } while (read < transferLength)
 
