@@ -9,7 +9,7 @@ import java.nio.ByteBuffer
  * and [ByteBlockDevice.read]. Uses [BlockDeviceDriver.getBlockSize]
  * to calculate device offsets.
  */
-open class ByteBlockDevice @JvmOverloads constructor(private val targetBlockDevice: BlockDeviceDriver, private val logicalOffsetToAdd: Int = 0) : BlockDeviceDriver {
+open class ByteBlockDevice @JvmOverloads constructor(private val targetBlockDevice: BlockDeviceDriver, private val logicalOffsetToAdd: Long = 0) : BlockDeviceDriver {
     override val blockSize: Int
         get() = targetBlockDevice.blockSize
 

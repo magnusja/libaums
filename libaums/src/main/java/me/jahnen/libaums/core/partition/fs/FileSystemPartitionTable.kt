@@ -24,7 +24,7 @@ class FileSystemPartitionTable(blockDevice: BlockDeviceDriver, fs: FileSystem) :
 
     init {
         Log.i(TAG, "Found a device without partition table, yay!")
-        val totalNumberOfSectors = fs.capacity.toInt() / blockDevice.blockSize
+        val totalNumberOfSectors = fs.capacity / blockDevice.blockSize
         if (fs.capacity % blockDevice.blockSize != 0L) {
             Log.w(TAG, "fs capacity is not multiple of block size")
         }

@@ -52,9 +52,10 @@ class GPT private constructor(): PartitionTable {
             var entry_offset = 1024
 
             while (buffer[entry_offset].toInt() != 0) {
+                val firstLba = buffer.getLong(entry_offset + FIRST_LBA_OFFSET)
                 val entry = PartitionTableEntry(-1, // Unknown
-                    buffer.getLong(entry_offset + FIRST_LBA_OFFSET).toInt(),
-                    buffer.getLong(entry_offset + LAST_LBA_OFFSET).toInt())
+                    firstLba,
+                    buffer.getLong(entry_offset + LAST_LBA_OFFSET) - firstLba)
 
                 result.partitions.add(entry)
 
