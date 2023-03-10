@@ -1,8 +1,8 @@
 package com.github.mjdev.libaums.partition.gpt
 
-import com.github.mjdev.libaums.driver.BlockDeviceDriver
-import com.github.mjdev.libaums.partition.PartitionTable
-import com.github.mjdev.libaums.partition.PartitionTableEntry
+import me.jahnen.libaums.core.driver.BlockDeviceDriver
+import me.jahnen.libaums.core.partition.PartitionTable
+import me.jahnen.libaums.core.partition.PartitionTableEntry
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.util.ArrayList
