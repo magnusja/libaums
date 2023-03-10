@@ -25,7 +25,6 @@ import me.jahnen.libaums.core.driver.scsi.commands.sense.*
 import me.jahnen.libaums.core.usb.PipeException
 import me.jahnen.libaums.core.usb.UsbCommunication
 import java.io.IOException
-import java.lang.IllegalStateException
 import java.nio.ByteBuffer
 import java.util.*
 
@@ -78,19 +77,25 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
      */
     @Throws(IOException::class)
     override fun init() {
+        var lastException: Exception? = null
         for(i in 0..MAX_RECOVERY_ATTEMPTS) {
             try {
                 initAttempt()
                 return
-            } catch(e: InitRequired) {
+            } catch (e: InitRequired) {
                 Log.i(TAG, e.message ?: "Reinitializing device")
+                lastException = e
             } catch (e: NotReadyTryAgain) {
                 Log.i(TAG, e.message ?: "Reinitializing device")
+                lastException = e
             }
             Thread.sleep(100)
         }
 
-        throw IOException("MAX_RECOVERY_ATTEMPTS Exceeded while trying to init communication with USB device, please reattach device and try again")
+        throw IOException(
+            "MAX_RECOVERY_ATTEMPTS Exceeded while trying to init communication with USB device, please reattach device and try again",
+            lastException
+        )
     }
 
     @Throws(IOException::class)
@@ -143,6 +148,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
      */
     @Throws(IOException::class)
     private fun transferCommand(command: CommandBlockWrapper, inBuffer: ByteBuffer) {
+        var lastException: Exception? = null
         for(i in 0..MAX_RECOVERY_ATTEMPTS) {
             try {
                 val result = transferOneCommand(command, inBuffer)
@@ -167,18 +173,24 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
                     is NotReadyTryAgain -> {} // try again
                     else -> throw e
                 }
+                lastException = e
             } catch(e: PipeException) {
                 Log.w(TAG, (e.message ?: "PipeException") + ", try bulk storage reset and retry")
                 bulkOnlyMassStorageReset()
+                lastException = e
             } catch (e: IOException) {
                 // Retry
                 Log.w(TAG, (e.message ?: "IOException") + ", retrying...")
+                lastException = e
             }
 
             Thread.sleep(100)
         }
 
-        throw IOException("MAX_RECOVERY_ATTEMPTS Exceeded while trying to transfer command to device, please reattach device and try again")
+        throw IOException(
+            "MAX_RECOVERY_ATTEMPTS Exceeded while trying to transfer command to device, please reattach device and try again",
+            lastException
+        )
     }
 
     @Throws(IOException::class)
@@ -344,7 +356,7 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
     }
 
     companion object {
-        private const val MAX_RECOVERY_ATTEMPTS = 20
+        private const val MAX_RECOVERY_ATTEMPTS = 5
         private val TAG = ScsiBlockDevice::class.java.simpleName
     }
 }
