@@ -32,7 +32,7 @@ import java.util.*
  * @author mjahnen
  */
 object PartitionTableFactory {
-    private val TAG = MasterBootRecord::class.java.simpleName
+    private val TAG = PartitionTableFactory::class.java.simpleName
 
     private val partitionTables = ArrayList<PartitionTableCreator>()
 
