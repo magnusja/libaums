@@ -30,6 +30,8 @@ internal class JellyBeanMr2Communication(
 
     @Throws(IOException::class)
     override fun bulkOutTransfer(src: ByteBuffer): Int {
+        require(!isClosed) { "device is closed" }
+
         val result = deviceConnection!!.bulkTransfer(outEndpoint,
                 src.array(), src.position(), src.remaining(), UsbCommunication.TRANSFER_TIMEOUT)
 
@@ -46,6 +48,8 @@ internal class JellyBeanMr2Communication(
 
     @Throws(IOException::class)
     override fun bulkInTransfer(dest: ByteBuffer): Int {
+        require(!isClosed) { "device is closed" }
+
         val result = deviceConnection!!.bulkTransfer(inEndpoint,
                 dest.array(), dest.position(), dest.remaining(), UsbCommunication.TRANSFER_TIMEOUT)
 

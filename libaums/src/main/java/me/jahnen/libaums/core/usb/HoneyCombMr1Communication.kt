@@ -25,6 +25,8 @@ internal class HoneyCombMr1Communication(
 
     @Throws(IOException::class)
     override fun bulkOutTransfer(src: ByteBuffer): Int {
+        require(!isClosed) { "device is closed" }
+
         val offset = src.position()
 
         if (offset == 0) {
@@ -54,6 +56,8 @@ internal class HoneyCombMr1Communication(
 
     @Throws(IOException::class)
     override fun bulkInTransfer(dest: ByteBuffer): Int {
+        require(!isClosed) { "device is closed" }
+
         val offset = dest.position()
 
         if (offset == 0) {

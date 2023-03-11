@@ -28,6 +28,7 @@ class LibusbCommunication(
     private val libUsbHandle: Long
         get() = libUsbHandleArray[0]
     private var deviceConnection: UsbDeviceConnection?
+    private var closed = false
 
     init {
         System.loadLibrary("libusbcom")
@@ -59,6 +60,8 @@ class LibusbCommunication(
     private external fun nativeControlTransfer(handle: Long, requestType: Int, request: Int, value: Int, index: Int, buffer: ByteArray, length: Int, timeout: Int): Int
 
     override fun bulkOutTransfer(src: ByteBuffer): Int {
+        require(!closed) { "device is closed" }
+
         val transferred = nativeBulkTransfer(
             libUsbHandle, outEndpoint.address, src.array(), src.position(), src.remaining(),
             TRANSFER_TIMEOUT
@@ -74,6 +77,8 @@ class LibusbCommunication(
     }
 
     override fun bulkInTransfer(dest: ByteBuffer): Int {
+        require(!closed) { "device is closed" }
+
         val transferred = nativeBulkTransfer(
             libUsbHandle, inEndpoint.address, dest.array(), dest.position(), dest.remaining(),
             TRANSFER_TIMEOUT
@@ -89,6 +94,8 @@ class LibusbCommunication(
     }
 
     override fun controlTransfer(requestType: Int, request: Int, value: Int, index: Int, buffer: ByteArray, length: Int): Int {
+        require(!closed) { "device is closed" }
+
         val ret = nativeControlTransfer(libUsbHandle, requestType, request, value, index, buffer, length, TRANSFER_TIMEOUT)
         if (ret < 0) {
             throw LibusbException("libusb control transfer failed", LibusbError.fromCode(ret))
@@ -97,6 +104,8 @@ class LibusbCommunication(
     }
 
     override fun resetDevice() {
+        require(!closed) { "device is closed" }
+
         if (!deviceConnection!!.releaseInterface(usbInterface)) {
             Log.w(TAG, "Failed to release interface, errno: ${ErrNo.errno} ${ErrNo.errstr}")
         }
@@ -118,14 +127,22 @@ class LibusbCommunication(
     }
 
     override fun clearFeatureHalt(endpoint: UsbEndpoint) {
+        require(!closed) { "device is closed" }
+
         val ret = nativeClearHalt(libUsbHandle, endpoint.address)
         Log.d(TAG, "libusb clearFeatureHalt returned $ret: ${LibusbError.fromCode(ret).message}")
     }
 
     override fun close() {
-        deviceConnection!!.releaseInterface(usbInterface)
-        nativeClose(libUsbHandle, usbInterface.id)
-        deviceConnection!!.close()
+        require(!closed) { "device is already closed" }
+
+        try {
+            deviceConnection!!.releaseInterface(usbInterface)
+            nativeClose(libUsbHandle, usbInterface.id)
+            deviceConnection!!.close()
+        } finally {
+            closed = true
+        }
     }
 
     companion object {
