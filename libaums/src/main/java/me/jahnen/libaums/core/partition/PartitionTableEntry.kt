@@ -28,14 +28,14 @@ class PartitionTableEntry
  * Construct a new PartitionTableEntry with the given information.
  *
  * @param partitionType
- * The file system type of the partition (eg. FAT32).
+ * The file system type of the partition (eg. FAT32). -1 if unknown
  * @param logicalBlockAddress
  * The logical block address on the device where this partition
  * starts.
  * @param totalNumberOfSectors
  * The total numbers of sectors occupied by the partition.
  */
-(partitionType: Int, logicalBlockAddress: Int, totalNumberOfSectors: Int) {
+(partitionType: Int, logicalBlockAddress: Long, totalNumberOfSectors: Long) {
 
     /**
      *
@@ -48,7 +48,7 @@ class PartitionTableEntry
      * @return The logical block address where this partitions starts on the
      * device.
      */
-    var logicalBlockAddress: Int = 0
+    var logicalBlockAddress: Long = 0
         internal set
     /**
      *
@@ -56,7 +56,7 @@ class PartitionTableEntry
      * value is often unused because the same information is also stored
      * in the specific file system.
      */
-    var totalNumberOfSectors: Int = 0
+    var totalNumberOfSectors: Long = 0
         internal set
 
     init {

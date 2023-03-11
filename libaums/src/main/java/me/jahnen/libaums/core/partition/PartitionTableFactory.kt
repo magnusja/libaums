@@ -17,8 +17,11 @@
 
 package me.jahnen.libaums.core.partition
 
+import android.util.Log
+import com.github.mjdev.libaums.partition.gpt.GPTCreator
 import me.jahnen.libaums.core.driver.BlockDeviceDriver
 import me.jahnen.libaums.core.partition.fs.FileSystemPartitionTableCreator
+import me.jahnen.libaums.core.partition.mbr.MasterBootRecord
 import me.jahnen.libaums.core.partition.mbr.MasterBootRecordCreator
 import java.io.IOException
 import java.util.*
@@ -29,6 +32,7 @@ import java.util.*
  * @author mjahnen
  */
 object PartitionTableFactory {
+    private val TAG = PartitionTableFactory::class.java.simpleName
 
     private val partitionTables = ArrayList<PartitionTableCreator>()
 
@@ -41,6 +45,7 @@ object PartitionTableFactory {
 
     init {
         registerPartitionTable(FileSystemPartitionTableCreator())
+        registerPartitionTable(GPTCreator())
         registerPartitionTable(MasterBootRecordCreator())
     }
 
@@ -60,8 +65,10 @@ object PartitionTableFactory {
         for (creator in partitionTables) {
             val table = creator.read(blockDevice)
             if (table != null) {
+                Log.d(TAG, "Found partition table ${creator::class.java.simpleName}")
                 return table
             }
+            Log.d(TAG, "${creator::class.java.simpleName} returned null")
         }
 
         throw UnsupportedPartitionTableException()

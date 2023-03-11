@@ -111,7 +111,7 @@ class MasterBootRecord private constructor() : PartitionTable {
                 }
 
                 val entry = PartitionTableEntry(type,
-                        buffer.getInt(offset + 8), buffer.getInt(offset + 12))
+                        buffer.getInt(offset + 8).toLong(), buffer.getInt(offset + 12).toLong())
 
                 result.partitions.add(entry)
             }
