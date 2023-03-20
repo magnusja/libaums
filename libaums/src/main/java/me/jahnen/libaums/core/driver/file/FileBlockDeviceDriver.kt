@@ -22,7 +22,7 @@ class FileBlockDeviceDriver : BlockDeviceDriver {
     @Throws(FileNotFoundException::class)
     @JvmOverloads
     constructor(file: File, byteOffset: Int = 0, blockSize: Int = 512) {
-        this.file = RandomAccessFile(file, "rw")
+        this.file = RandomAccessFile(file, "rws")
         this.blockSize = blockSize
         this.byteOffset = byteOffset
     }
@@ -37,7 +37,7 @@ class FileBlockDeviceDriver : BlockDeviceDriver {
         val fos = FileOutputStream(tempFile)
         fos.channel.transferFrom(rbc, 0, java.lang.Long.MAX_VALUE)
 
-        this.file = RandomAccessFile(tempFile, "rw")
+        this.file = RandomAccessFile(tempFile, "rws")
         this.blockSize = blockSize
     }
 
