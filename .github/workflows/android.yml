@@ -4,6 +4,7 @@ on: [push]
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     steps:
@@ -13,6 +14,7 @@ jobs:
       with:
         distribution: 'oracle'
         java-version: '21'
+    - run: touch "$GITHUB_WORKSPACE/local.properties"
     - name: Build & test with Gradle
       run: ./gradlew jacocoTestReport --stacktrace
     - name: codecov
