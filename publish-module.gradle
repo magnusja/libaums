@@ -30,6 +30,10 @@ artifacts {
     archives androidSourcesJar
 }
 
+tasks.withType(GenerateModuleMetadata).configureEach {
+    dependsOn(tasks.named('androidSourcesJar'), tasks.named('javadocJar'))
+}
+
 group = PUBLISH_GROUP_ID
 version = PUBLISH_VERSION
 
