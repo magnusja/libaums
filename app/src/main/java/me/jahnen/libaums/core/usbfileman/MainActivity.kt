@@ -595,8 +595,10 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             setupDevice()
         } else {
             // first request permission from user to communicate with the underlying UsbDevice
+            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                PendingIntent.FLAG_IMMUTABLE else 0
             val permissionIntent = PendingIntent.getBroadcast(this, 0, Intent(
-                    ACTION_USB_PERMISSION), 0)
+                    ACTION_USB_PERMISSION), flags)
             usbManager.requestPermission(massStorageDevices[currentDevice].usbDevice, permissionIntent)
         }
     }
