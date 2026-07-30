@@ -34,7 +34,7 @@ internal class UsbRequestCommunication(
 
         val request = deviceConnection!!.requestWait()
         if (request === outRequest) {
-            return workaroundBuffer.position() - oldPosition
+            return src.position() - oldPosition
         }
 
         throw IOException("requestWait failed! Request: $request")
@@ -106,8 +106,8 @@ internal class UsbRequestCommunication(
         }
 
         val request = deviceConnection!!.requestWait()
-        if (request === outRequest) {
-            return workaroundBuffer.position() - oldPosition
+        if (request === inRequest) {
+            return dest.position() - oldPosition
         }
 
         throw IOException("requestWait failed! Request: $request")
