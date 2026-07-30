@@ -54,7 +54,6 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
 
     override var blockSize: Int = 0
         private set
-    private var lastBlockAddress: Int = 0
 
     private val writeCommand = ScsiWrite10(lun=lun)
     private val readCommand = ScsiRead10(lun=lun)
@@ -67,7 +66,8 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
      *
      * @return The block device size in blocks
      */
-    override val blocks: Long get() = lastBlockAddress.toLong()
+    override var blocks: Long = 0
+        private set
 
     /**
      * Issues a SCSI Inquiry to determine the connected device. After that it is
@@ -132,10 +132,10 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
         inBuffer.clear()
         val readCapacityResponse = ScsiReadCapacityResponse.read(inBuffer)
         blockSize = readCapacityResponse.blockLength
-        lastBlockAddress = readCapacityResponse.logicalBlockAddress
+        blocks = readCapacityResponse.blockCount
 
         Log.i(TAG, "Block size: $blockSize")
-        Log.i(TAG, "Last block address: $lastBlockAddress")
+        Log.i(TAG, "Block count: $blocks")
     }
 
     /**

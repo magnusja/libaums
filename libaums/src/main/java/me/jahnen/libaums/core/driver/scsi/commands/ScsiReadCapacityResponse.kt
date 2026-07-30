@@ -17,6 +17,7 @@
 
 package me.jahnen.libaums.core.driver.scsi.commands
 
+import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -35,12 +36,28 @@ class ScsiReadCapacityResponse private constructor() {
      * Returns the address of the last accessible block on the block device.
      *
      *
-     * The size of the device is then last accessible block + 0!
+     * The number of blocks on the device is the last accessible block + 1.
      *
      * @return The last block address.
      */
     var logicalBlockAddress: Int = 0
         private set
+
+    /**
+     * Returns the number of addressable blocks represented by this response.
+     *
+     * @throws IOException if the device requires READ CAPACITY(16).
+     */
+    @get:Throws(IOException::class)
+    val blockCount: Long
+        get() {
+            val lastBlockAddress = logicalBlockAddress.toLong() and 0xffff_ffffL
+            if (lastBlockAddress == 0xffff_ffffL) {
+                throw IOException("Device requires SCSI READ CAPACITY(16)")
+            }
+            return lastBlockAddress + 1
+        }
+
     /**
      * Returns the size of each block in the block device.
      *
