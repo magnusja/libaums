@@ -14,10 +14,7 @@ jobs:
       with:
         distribution: 'oracle'
         java-version: '21'
-    - name: install libusb
-      run: wget https://github.com/libusb/libusb/archive/v1.0.26.zip && unzip v1.0.26.zip
-    - name: write local properties
-      run: echo "libusb.dir=$GITHUB_WORKSPACE/libusb-1.0.26" > $GITHUB_WORKSPACE/local.properties
+    - run: touch "$GITHUB_WORKSPACE/local.properties"
     - name: Build & test with Gradle
       run: ./gradlew jacocoTestReport --stacktrace
     - name: codecov
