@@ -45,6 +45,7 @@ import me.jahnen.libaums.storageprovider.util.ParcelFileDescriptorUtil;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -103,6 +104,10 @@ public class UsbDocumentProvider extends DocumentsProvider {
     private static String[] resolveDocumentProjection(String[] projection) {
         return projection != null ? projection : DEFAULT_DOCUMENT_PROJECTION;
     }
+
+    private ArrayList<BroadcastReceiver> broadcastReceivers = new ArrayList<BroadcastReceiver>();
+
+    private final static int receiverFlags = Context.RECEIVER_NOT_EXPORTED;
 
     @Override
     public Cursor queryRoots(String[] projection) throws FileNotFoundException {
@@ -273,6 +278,29 @@ public class UsbDocumentProvider extends DocumentsProvider {
         return "application/octet-stream";
     }
 
+    private void registerBroadcaster(Context ctx, BroadcastReceiver receiverToRegister, IntentFilter receiverFilter) {
+
+        broadcastReceivers.add(receiverToRegister);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            ctx.registerReceiver(receiverToRegister, receiverFilter, receiverFlags);
+        }
+        else {
+            ctx.registerReceiver(receiverToRegister, receiverFilter);
+        }
+    }
+
+    private void unregisterBroadcasters() {
+        Context cts = getContext();
+        for (BroadcastReceiver receiver : broadcastReceivers) {
+            try {
+                cts.unregisterReceiver(receiver);
+            } catch (IllegalArgumentException ilex) {
+                Log.d(TAG, "failed to unregister broadcast receiver");
+            }
+        }
+    }
+    
     @Override
     public boolean onCreate() {
         Log.d(TAG, "onCreate()");
@@ -280,7 +308,7 @@ public class UsbDocumentProvider extends DocumentsProvider {
         Context context = getContext();
         assert context != null;
 
-        context.registerReceiver(new BroadcastReceiver() {
+        registerBroadcaster(context, new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
                 UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                 if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
@@ -288,8 +316,7 @@ public class UsbDocumentProvider extends DocumentsProvider {
                 }
             }
         }, new IntentFilter(ACTION_USB_PERMISSION));
-
-        context.registerReceiver(new BroadcastReceiver() {
+        registerBroadcaster(context, new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
@@ -297,7 +324,7 @@ public class UsbDocumentProvider extends DocumentsProvider {
             }
         }, new IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED));
 
-        context.registerReceiver(new BroadcastReceiver() {
+        registerBroadcaster(context, new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
@@ -311,6 +338,10 @@ public class UsbDocumentProvider extends DocumentsProvider {
         }
 
         return true;
+    }
+
+    public void onDestroy() {
+        unregisterBroadcasters();
     }
 
     private static String getMimeType(UsbFile file) {
