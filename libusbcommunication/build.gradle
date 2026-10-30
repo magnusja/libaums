@@ -4,7 +4,7 @@ apply plugin: 'org.jetbrains.dokka'
 
 Properties props = new Properties()
 props.load(new FileInputStream(project.rootProject.file('local.properties')))
-String libusbDir = props['libusb.dir']
+String libusbDir = props.get('libusb.dir', project.rootProject.file("vendor/libusb").absolutePath)
 
 ext {
     PUBLISH_GROUP_ID = 'me.jahnen.libaums'

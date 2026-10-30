@@ -160,8 +160,11 @@ class ScsiBlockDevice(private val usbCommunication: UsbCommunication, private va
      */
     @Throws(IOException::class)
     private fun transferCommand(command: CommandBlockWrapper, inBuffer: ByteBuffer) {
+        val initialPosition = inBuffer.position()
         var lastException: Exception? = null
         for(i in 0..MAX_RECOVERY_ATTEMPTS) {
+            // A failed attempt may have moved the buffer; restart the data phase from the beginning
+            inBuffer.position(initialPosition)
             try {
                 val result = transferOneCommand(command, inBuffer)
                 val senseWasNotIssued = handleCommandResult(result)
