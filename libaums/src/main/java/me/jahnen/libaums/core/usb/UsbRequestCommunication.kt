@@ -6,6 +6,7 @@ import androidx.annotation.RequiresApi
 
 import java.io.IOException
 import java.nio.ByteBuffer
+import java.util.concurrent.TimeoutException
 
 /**
  * Created by magnusja on 21/12/16.
@@ -23,6 +24,27 @@ internal class UsbRequestCommunication(
     private val inRequest = UsbRequest().apply { initialize(deviceConnection, inEndpoint) }
     private val workaroundBuffer = ByteBuffer.allocate(1024 * 32 * 4)
 
+    /** The no-arg `UsbDeviceConnection.requestWait()` this class used to call at every site below
+     *  blocks forever if the hardware never delivers a completion event for the queued request —
+     *  confirmed on real hardware (2026-11-23/24): the very first SCSI command over this
+     *  transport hung indefinitely, with no exception and no way for any caller's own timeout to
+     *  help, since the hang is inside this blocking call itself. The timed overload (available
+     *  since the same API level — O — this class already requires) throws [TimeoutException]
+     *  instead of blocking forever, so a stalled transfer becomes a normal, catchable I/O failure
+     *  the rest of the app's retry logic can react to, same as every other transport here. */
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun waitFor(request: UsbRequest): UsbRequest {
+        val completed = try {
+            deviceConnection!!.requestWait(UsbCommunication.TRANSFER_TIMEOUT.toLong())
+        } catch (e: TimeoutException) {
+            throw IOException("requestWait timed out after ${UsbCommunication.TRANSFER_TIMEOUT}ms", e)
+        }
+        if (completed !== request) {
+            throw IOException("requestWait failed! Request: $completed")
+        }
+        return completed
+    }
+
 
     @Throws(IOException::class)
     @RequiresApi(Build.VERSION_CODES.O)
@@ -32,12 +54,8 @@ internal class UsbRequestCommunication(
             throw IOException("Error queueing request.")
         }
 
-        val request = deviceConnection!!.requestWait()
-        if (request === outRequest) {
-            return src.position() - oldPosition
-        }
-
-        throw IOException("requestWait failed! Request: $request")
+        waitFor(outRequest)
+        return src.position() - oldPosition
     }
 
 
@@ -54,13 +72,9 @@ internal class UsbRequestCommunication(
             throw IOException("Error queueing request.")
         }
 
-        val request = deviceConnection!!.requestWait()
-        if (request === outRequest) {
-            src.position(oldPosition + workaroundBuffer.position())
-            return workaroundBuffer.position()
-        }
-
-        throw IOException("requestWait failed! Request: $request")
+        waitFor(outRequest)
+        src.position(oldPosition + workaroundBuffer.position())
+        return workaroundBuffer.position()
     }
 
     
@@ -87,14 +101,10 @@ internal class UsbRequestCommunication(
             throw IOException("Error queueing request.")
         }
 
-        val request = deviceConnection!!.requestWait()
-        if (request === inRequest) {
-            workaroundBuffer.flip()
-            dest.put(workaroundBuffer)
-            return workaroundBuffer.limit()
-        }
-
-        throw IOException("requestWait failed! Request: $request")
+        waitFor(inRequest)
+        workaroundBuffer.flip()
+        dest.put(workaroundBuffer)
+        return workaroundBuffer.limit()
     }
 
     @Throws(IOException::class)
@@ -105,12 +115,8 @@ internal class UsbRequestCommunication(
             throw IOException("Error queueing request.")
         }
 
-        val request = deviceConnection!!.requestWait()
-        if (request === inRequest) {
-            return dest.position() - oldPosition
-        }
-
-        throw IOException("requestWait failed! Request: $request")
+        waitFor(inRequest)
+        return dest.position() - oldPosition
     }
 
     @Synchronized
